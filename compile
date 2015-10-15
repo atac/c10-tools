@@ -4,6 +4,7 @@
 
 from glob import glob
 import os
+import sys
 
 import chapter10
 c10_path = os.path.dirname(os.path.dirname(chapter10.__file__))
@@ -12,7 +13,8 @@ c10_path = os.path.dirname(os.path.dirname(chapter10.__file__))
 def main():
 
     # Ensure PyInstaller is available.
-    if os.system('which pyinstaller'):
+    command = 'where' if sys.platform == 'win32' else 'which'
+    if os.system('%s pyinstaller' % command):
         print 'PyInstaller not found. Try: pip install pyinstaller and run \
 again.'
         return
