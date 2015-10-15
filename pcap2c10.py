@@ -10,6 +10,10 @@ from array import array
 from cStringIO import StringIO
 import struct
 
+# Suppress scapy import warnings.
+import logging
+logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
+
 from chapter10 import C10
 from docopt import docopt
 from scapy.all import rdpcap
