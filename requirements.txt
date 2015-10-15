@@ -1,0 +1,9 @@
+Chapter10==0.1
+dnet==1.12
+docopt==0.6.2
+dpkt==1.8
+pcapy==0.10.9
+pylibpcap==0.6.4
+python-dateutil==2.2
+scapy-real==2.2.0-dev
+scapy==2.3.1
