@@ -4,14 +4,21 @@
 
 from glob import glob
 import os
+import shutil
 import sys
 
 import chapter10
 c10_path = os.path.dirname(os.path.dirname(chapter10.__file__))
 
 
-def main():
+def clean():
+    for f in glob('*.spec'):
+        os.remove(f)
+    shutil.rmtree('dist', True)
+    shutil.rmtree('build', True)
 
+
+def compile():
     # Ensure PyInstaller is available.
     command = 'where' if sys.platform == 'win32' else 'which'
     if os.system('%s pyinstaller' % command):
@@ -21,6 +28,13 @@ again.'
 
     for script in glob('c10-*.py') + ['pcap2c10.py']:
         os.system('pyinstaller -p "%s" -F %s' % (c10_path, script))
+
+
+def main():
+    if sys.argv[-1] == 'clean':
+        clean()
+    else:
+        compile()
 
 
 if __name__ == "__main__":
