@@ -22,7 +22,15 @@ Dependencies
 Building and Running
 --------------------
 
-If the dependencies are installed you can run each sample from the commandline using python (eg: python stat.py) and commandline help will show you how to use each one.
+If the dependencies are installed you can run each sample from the commandline
+using python (eg: python stat.py) and commandline help will show you how to use
+each one.
 
 .. _PyChapter10: https://bitbucket.org/mcferrill/pychapter10
 .. _Python: http://python.org
+
+To Do
+-----
+
+* Update timefix to use docopt for nicer commandline interface
+* Suppress scapy warnings on import in pcap2c10
