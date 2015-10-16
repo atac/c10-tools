@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-  stat.py - Display some basic information about the channels within a
+  c10-stat.py - Display some basic information about the channels within a
     Chapter 10 file.
 
  Copyright (c) 2015 Micah Ferrill

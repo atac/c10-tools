@@ -1,11 +1,48 @@
 #!/usr/bin/env python
 
+"""
+  c10-timefix.py - Copy a chapter 10 file and rebuild time packets if needed.
+
+ Copyright (c) 2015 Micah Ferrill
+
+ All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are
+ met:
+
+   * Redistributions of source code must retain the above copyright
+     notice, this list of conditions and the following disclaimer.
+
+   * Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in the
+     documentation and/or other materials provided with the distribution.
+
+   * Neither the name Irig106.org nor the names of its contributors may
+     be used to endorse or promote products derived from this software
+     without specific prior written permission.
+
+ This software is provided by the copyright holders and contributors
+ "as is" and any express or implied warranties, including, but not
+ limited to, the implied warranties of merchantability and fitness for
+ a particular purpose are disclaimed. In no event shall the copyright
+ owner or contributors be liable for any direct, indirect, incidental,
+ special, exemplary, or consequential damages (including, but not
+ limited to, procurement of substitute goods or services; loss of use,
+ data, or profits; or business interruption) however caused and on any
+ theory of liability, whether in contract, strict liability, or tort
+ (including negligence or otherwise) arising in any way out of the use
+ of this software, even if advised of the possibility of such damage.
+"""
+
+__doc__ = 'usage: timefix <input_file> <output_file>'
+
 from datetime import timedelta
 import struct
-import sys
 
 from chapter10 import C10
 from chapter10.datatypes import Time
+from docopt import docopt
 
 
 def valid(timestamp, previous):
@@ -27,12 +64,11 @@ def valid(timestamp, previous):
 
 def main():
 
-    if len(sys.argv) < 2:
-        print 'usage: timefix <input_file> <output_file>'
+    args = docopt(__doc__)
 
     prev = None
-    with open(sys.argv[-1], 'wb') as out_f:
-        for packet in C10(sys.argv[-2]):
+    with open(args['<output_file>'], 'wb') as out_f:
+        for packet in C10(args['<input_file>']):
             if isinstance(packet.body, Time):
                 if valid(packet.body.time, prev):
                     out_f.write(bytes(packet))

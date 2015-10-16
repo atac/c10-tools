@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-  copy.py - Copy all or part of a Chapter 10 file based on data types,
+  c10-copy.py - Copy all or part of a Chapter 10 file based on data types,
     channels, etc.
 
  Copyright (c) 2015 Micah Ferrill

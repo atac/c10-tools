@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-  dump.py - Export channel data based on channel ID or data type.
+  c10-dump.py - Export channel data based on channel ID or data type.
 
  Copyright (c) 2015 Micah Ferrill
 

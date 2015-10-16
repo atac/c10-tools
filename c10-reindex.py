@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 """
-  reindex.py - Strip and (optionally) rebuild index packets for a Chapter 10
-    file.
+  c10-reindex.py - Strip and (optionally) rebuild index packets for a Chapter
+    10 file.
 
  Copyright (c) 2015 Micah Ferrill
 
