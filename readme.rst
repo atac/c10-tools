@@ -16,7 +16,7 @@ Included Tools
 Dependencies
 ------------
 
-* Python_ 2.7 or later (also tested with 3.5)
+* Python_ 2.7 or later
 * PyChapter10_
 
 Building and Running
