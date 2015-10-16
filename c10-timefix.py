@@ -118,8 +118,6 @@ def main():
 
                     out_f.write(struct.pack('H' * len(data), *data))
 
-                print prev
-
             else:
                 # Write packet to file
                 out_f.write(bytes(packet))

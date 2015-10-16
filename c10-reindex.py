@@ -55,7 +55,7 @@ from walk import walk_packets
 def gen_node(packets, seq=0):
     """Generate an index node packet."""
 
-    print 'Index node for %s packets' % len(packets)
+    print ('Index node for %s packets' % len(packets))
 
     packet = bytes()
 
@@ -99,7 +99,7 @@ def gen_node(packets, seq=0):
 def gen_root(nodes, last, seq, last_packet):
     """Generate a root index packet."""
 
-    print 'Root index for: %s nodes' % len(nodes)
+    print ('Root index for: %s nodes' % len(nodes))
 
     packet = bytes()
 
