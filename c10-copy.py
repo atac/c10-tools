@@ -36,7 +36,7 @@
  of this software, even if advised of the possibility of such damage.
 """
 
-__doc__ = """usage: copy.py <src> <dst> [options]
+__doc__ = """usage: c10-copy <src> <dst> [options]
 
 Options:
     -c CHANNEL..., --channel CHANNEL...  Specify channels to include (csv).

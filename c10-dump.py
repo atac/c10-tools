@@ -35,7 +35,7 @@
  of this software, even if advised of the possibility of such damage.
 """
 
-__doc__ = """usage: dump.py <file> [options]
+__doc__ = """usage: c10-dump <file> [options]
 
 Options:
     -o OUT, --output OUT                 The directory to place files \

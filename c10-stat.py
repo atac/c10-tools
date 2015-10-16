@@ -36,7 +36,7 @@
  of this software, even if advised of the possibility of such damage.
 """
 
-__doc__ = """usage: stat.py <file> [options]
+__doc__ = """usage: c10-stat <file> [options]
 
 Options:
     -c CHANNEL..., --channel CHANNEL...  Specify channels to include(csv).

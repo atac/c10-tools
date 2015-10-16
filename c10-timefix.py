@@ -35,7 +35,7 @@
  of this software, even if advised of the possibility of such damage.
 """
 
-__doc__ = 'usage: timefix <input_file> <output_file>'
+__doc__ = 'usage: c10-timefix <input_file> <output_file>'
 
 from datetime import timedelta
 import struct
