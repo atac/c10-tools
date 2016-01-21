@@ -38,7 +38,7 @@ def main(args):
                 except UnicodeEncodeError:
                     progress.ascii = True
 
-    for label in ('Channel ID', 'Format', 'Length', 'Sync', 'Word', 'Total'):
+    for label in ('Channel ID', 'Length', 'Sync', 'Word', 'Total'):
         print label.rjust(10),
     print
     print '-' * 80
@@ -48,7 +48,7 @@ def main(args):
         print str(sum(v)).rjust(10)
     print '-' * 80
     print 'Totals:'.rjust(10),
-    for i in range(4):
+    for i in range(len(error_keys)):
         print str(sum([chan[i] for chan in chan_errors.values()])).rjust(10),
     print str(errcount).rjust(10)
 
