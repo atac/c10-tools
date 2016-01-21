@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-from pprint import pprint
 import os
 
 from chapter10 import C10
@@ -45,7 +44,7 @@ def main(args):
             print str(cell).rjust(10),
         print str(sum(v)).rjust(10)
     print '-' * 80
-    print 'Totals:   ',
+    print 'Totals:'.rjust(10),
     for i in range(4):
         print str(sum([chan[i] for chan in chan_errors.values()])).rjust(10),
     print str(errcount).rjust(10)
