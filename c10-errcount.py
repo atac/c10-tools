@@ -33,7 +33,10 @@ def main(args):
                         except KeyError:
                             chan_errors[packet.channel_id] = errors
             if not args['-q']:
-                progress.update(packet.packet_length)
+                try:
+                    progress.update(packet.packet_length)
+                except UnicodeEncodeError:
+                    progress.ascii = True
 
     for label in ('Channel ID', 'Format', 'Length', 'Sync', 'Word', 'Total'):
         print label.rjust(10),
