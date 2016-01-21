@@ -9,7 +9,7 @@ from docopt import docopt
 from tqdm import tqdm
 
 
-error_keys = ('fe', 'le', 'se', 'we')
+error_keys = ('le', 'se', 'we')
 
 
 def main(args):
