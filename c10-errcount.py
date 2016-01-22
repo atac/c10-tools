@@ -14,6 +14,7 @@ error_keys = ('le', 'se', 'we')
 def main(args):
     errcount = 0
     chan_errors = {}
+    chan_count = {}
     file_size = os.stat(args['<file>']).st_size
     with tqdm(total=file_size, dynamic_ncols=True,
               unit='bytes', unit_scale=True, leave=True) as progress:
@@ -21,6 +22,10 @@ def main(args):
             progress.close()
         for packet in C10(args['<file>']):
             if isinstance(packet.body, MS1553) and packet.body.format == 1:
+                try:
+                    chan_count[packet.channel_id] += 1
+                except:
+                    chan_count[packet.channel_id] = 1
                 for msg in packet:
                     errors = [getattr(msg, k) for k in error_keys]
                     count = sum(errors)
@@ -38,19 +43,21 @@ def main(args):
                 except UnicodeEncodeError:
                     progress.ascii = True
 
-    for label in ('Channel ID', 'Length', 'Sync', 'Word', 'Total'):
+    for label in ('Channel ID', 'Length', 'Sync', 'Word', 'Total', 'Packets'):
         print label.rjust(10),
     print
     print '-' * 80
-    for k, v in chan_errors.items():
+    for k, v in sorted(chan_errors.items()):
         for cell in [k] + v:
             print str(cell).rjust(10),
-        print str(sum(v)).rjust(10)
+        print str(sum(v)).rjust(10),
+        print str(chan_count[k]).rjust(10)
     print '-' * 80
     print 'Totals:'.rjust(10),
     for i in range(len(error_keys)):
         print str(sum([chan[i] for chan in chan_errors.values()])).rjust(10),
-    print str(errcount).rjust(10)
+    print str(errcount).rjust(10),
+    print str(sum(chan_count.values())).rjust(10)
 
 
 if __name__ == "__main__":
