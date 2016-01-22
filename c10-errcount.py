@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import sys
 import os
 
 from chapter10 import C10
@@ -11,7 +12,15 @@ from tqdm import tqdm
 error_keys = ('le', 'se', 'we')
 
 
+def print_summary_labels(out=sys.stdout):
+    for label in ('Channel ID', 'Length', 'Sync', 'Word', 'Total', 'Packets'):
+        out.write(label.rjust(10) + ' ')
+    out.write('\n')
+
+
 def main(args):
+
+    # Parse file.
     errcount = 0
     chan_errors = {}
     chan_count = {}
@@ -19,6 +28,7 @@ def main(args):
     with tqdm(total=file_size, dynamic_ncols=True,
               unit='bytes', unit_scale=True, leave=True) as progress:
         if args['-q']:
+            progress.leave = False
             progress.close()
         for packet in C10(args['<file>']):
             if isinstance(packet.body, MS1553) and packet.body.format == 1:
@@ -26,10 +36,12 @@ def main(args):
                     chan_count[packet.channel_id] += 1
                 except:
                     chan_count[packet.channel_id] = 1
+                valid = True
                 for msg in packet:
                     errors = [getattr(msg, k) for k in error_keys]
                     count = sum(errors)
                     if count:
+                        valid = False
                         errcount += count
 
                         try:
@@ -37,15 +49,31 @@ def main(args):
                                 chan_errors[packet.channel_id][i] += err
                         except KeyError:
                             chan_errors[packet.channel_id] = errors
+                if args['-l'] and not valid:
+                    # Log to file
+                    with open(args['<logfile>'], 'ab') as logfile:
+                        for k in packet.HEADER_KEYS:
+                            attr = '_'.join(k.split()).lower()
+                            logfile.write('%s: %s\n'
+                                          % (k, getattr(packet, attr)))
+                        for label in ('Length', 'Sync', 'Word', 'Total'):
+                            logfile.write(label.rjust(10) + ' ')
+                        logfile.write('\n')
+                        logfile.write('-' * 80)
+                        logfile.write('\n')
+                        for e in chan_errors[packet.channel_id]:
+                            logfile.write(str(e).rjust(10) + ' ')
+                        logfile.write(str(sum(
+                            chan_errors[packet.channel_id])).rjust(10))
+                        logfile.write('\n\n')
             if not args['-q']:
                 try:
                     progress.update(packet.packet_length)
                 except UnicodeEncodeError:
                     progress.ascii = True
 
-    for label in ('Channel ID', 'Length', 'Sync', 'Word', 'Total', 'Packets'):
-        print label.rjust(10),
-    print
+    # Print summary.
+    print_summary_labels()
     print '-' * 80
     for k, v in sorted(chan_errors.items()):
         for cell in [k] + v:
@@ -62,5 +90,5 @@ def main(args):
 
 if __name__ == "__main__":
     args = docopt('''Counts error flags in 1553 format 1 packets
-usage: c10-errcount <file> [-q]''')
+usage: c10-errcount <file> [-q] [-l <logfile>]''')
     main(args)
