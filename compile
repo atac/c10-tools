@@ -46,11 +46,21 @@ again.'
             print 'done'
 
 
+def install():
+    home_bin = os.path.join(os.environ['HOME'], 'bin')
+    if os.path.exists(home_bin):
+        for script in os.listdir('dist'):
+            shutil.copy(os.path.join('dist', script),
+                        os.path.join(home_bin, script[:-3]))
+
+
 def main():
     if '-h' in sys.argv or '--help' in sys.argv:
         print 'usage: compile [clean] [-q | -v]'
     elif sys.argv[-1] == 'clean':
         clean()
+    elif sys.argv[-1] == 'install':
+        install()
     else:
         compile()
 
