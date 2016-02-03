@@ -96,7 +96,7 @@ if __name__ == '__main__':
         if t == 8:
             data = b''.join([p.data for p in packet.body.mpeg])
         else:
-            data = packet.body.data
+            data = str(packet.body)
 
         # Write out raw packet body.
         out[filename].write(data)
