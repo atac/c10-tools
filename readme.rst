@@ -33,4 +33,9 @@ To Do
 -----
 
 * Suppress scapy warnings on import in pcap2c10
-* Verbosity settings for compile script
+* Integrate tqdm (progress bar)
+* Make sure usage options consistent
+* Expand errcount to read more than 1553 packets
+* Tests for sample release (cross platform)
+* Update to use new declarative format to generate packets (pending pychapter10
+  updates)
