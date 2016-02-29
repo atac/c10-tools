@@ -2,4 +2,3 @@
 *.spec
 build
 dist
-.DS_Store
