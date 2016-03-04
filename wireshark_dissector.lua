@@ -6,6 +6,9 @@
 -- Windows: Add to <USER_DIR>\AppData\Roaming\Wireshark\plugins
 -- OSX: Add to <USER_DIR>/.wireshark/plugins
 
+-- Port to listen for
+target_port = 2000
+
 -- Convert a data type value to a type and format string.
 data_types = {
     'Computer Generated',
@@ -76,6 +79,6 @@ function chapter10_proto.dissector(buffer, pinfo, tree)
     -- subtree:add(buffer(3,1),"The 4th byte: " .. buffer(3,1):uint())
 end
 
--- Register our protocol to handle udp port 8000
+-- Register our protocol to handle an arbitrary udp port
 udp_table = DissectorTable.get("udp.port")
-udp_table:add(10000, chapter10_proto)
+udp_table:add(target_port, chapter10_proto)
