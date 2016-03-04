@@ -7,14 +7,12 @@ Optionally insert a TMATS packet from <tmats_file> at the beginning.
 '''
 
 from array import array
-from cStringIO import StringIO
 import struct
 
 # Suppress scapy import warnings.
 import logging
 logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
 
-from chapter10 import C10
 from docopt import docopt
 from scapy.all import rdpcap
 from scapy.layers.inet import UDP
@@ -57,13 +55,13 @@ def main():
             out.write(tmats_body)
 
         # Loop over the packets and parse into C10.Packet objects if possible.
-        for eth in packets:
+        for i, eth in enumerate(packets):
             if not hasattr(eth, 'payload'):
                 continue
             if isinstance(eth.payload.payload, UDP):
-                eth_packet = str(eth.load[4:])
-                for p in C10(StringIO(eth_packet)):
-                    out.write(bytes(p))
+                data = str(eth.load[4:])
+                if '\x25\xeb' in data:
+                    data = out.write(data[data.find('\x25\xeb'):])
 
 if __name__ == '__main__':
     main()
