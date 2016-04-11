@@ -60,7 +60,7 @@ if __name__ == '__main__':
     channels, packets, size = ([], 0, 0)
 
     # Open the source file.
-    src = C10(args['<file>'])
+    src = C10(args['<file>'], True)
 
     # Iterate over selected packets (based on args).
     for packet in walk_packets(src, args):
@@ -90,7 +90,7 @@ if __name__ == '__main__':
     # Print details for each channel.
     print('Channel ID     Data Type' + 'Packets'.rjust(46))
     print('-' * 80)
-    for channel in channels:
+    for channel in sorted(channels):
         print (''.join((('Channel %s' % channel['id']).ljust(15),
                        ('%s - %s' % (hex(channel['type']),
                                      get_label(channel['type']))).ljust(35),

@@ -30,7 +30,7 @@ def main(args):
         if args['-q']:
             progress.leave = False
             progress.close()
-        for packet in C10(args['<file>']):
+        for packet in C10(args['<file>'], True):
             if isinstance(packet.body, MS1553) and packet.body.format == 1:
                 try:
                     chan_count[packet.channel_id] += 1
