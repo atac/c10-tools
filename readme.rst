@@ -12,6 +12,7 @@ Included Tools
 * c10-copy - Copy a chapter 10 file optionally filtering on channel id or data type
 * c10-reindex - Strip and optionally rebuild index packets for a .c10 file
 * c10-timefix - Correct time values in a .c10 file
+* c10-recovery - Recover viable data from a corrupt .c10 file.
 
 Dependencies
 ------------
