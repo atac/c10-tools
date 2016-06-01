@@ -28,7 +28,7 @@ def main():
     with tqdm(total=file_size, dynamic_ncols=True,
               unit='bytes', unit_scale=True, leave=True) as progress, open(
                   args['<file>'], 'rb') as f:
-        if args['-q']:
+        if args['-q'] or args['-v']:
             progress.leave = False
             progress.close()
         run = True
@@ -37,7 +37,7 @@ def main():
             if len(read) < BUF_SIZE:
                 run = False
             buf += read
-            if not args['-q']:
+            if not (args['-q'] or args['-v']):
                 progress.update(len(read))
 
             sync = buf.find('\x25\xeb')
