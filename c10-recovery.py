@@ -68,7 +68,7 @@ Data Type: %(data_type)s
 RTC: %(rtc)s
 Header Checksum: %(header_checksum)s
 ''' % packet.__dict__
-                except (NotImplementedError, struct.error):
+                except (NotImplementedError, struct.error, OverflowError):
                     invalid += 1
 
             buf = buf[-BUF_SIZE:]
