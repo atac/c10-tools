@@ -34,7 +34,6 @@ To Do
 -----
 
 * Cross platform build process
-* Suppress scapy warnings on import in pcap2c10
 * Integrate tqdm (progress bar)
 * Make sure usage options consistent
 * Expand errcount to read more than 1553 packets

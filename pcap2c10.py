@@ -7,23 +7,52 @@ Optionally insert a TMATS packet from <tmats_file> at the beginning.
 '''
 
 from array import array
+import os
 import struct
 
-# Suppress scapy import warnings.
-import logging
-logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
-
+from chapter10 import Packet
 from docopt import docopt
-from scapy.all import rdpcap
-from scapy.layers.inet import UDP
+from tqdm import tqdm
+import dpkt
+
+
+BUF_SIZE = 100000
+buf = ''
+
+
+def parse(data, out_file):
+    """Take a string of bytes and attempt to parse chapter 10 data into db."""
+
+    global buf
+
+    packets_added = 0
+
+    # Limit the buffer size and add new data to the buffer.
+    buf = buf[-BUF_SIZE:] + data
+
+    for i in range(buf.count('\x25\xeb')):
+
+        sync = buf.find('\x25\xeb')
+        if sync < 0:
+            break
+
+        try:
+            packet = Packet.from_string(buf[sync:], True)
+        except (EOFError, OverflowError):
+            break
+
+        if len(bytes(packet)) == packet.packet_length and packet.check():
+            packets_added += 1
+            buf = buf[sync + packet.packet_length:]
+            out_file.write(bytes(packet))
+
+    return packets_added
 
 
 def main():
     """Parse a pcap file into chapter 10 format."""
 
     args = docopt(__doc__)
-
-    packets = rdpcap(args['<infile>'])
 
     with open(args['<outfile>'], 'wb') as out:
 
@@ -55,13 +84,31 @@ def main():
             out.write(tmats_body)
 
         # Loop over the packets and parse into C10.Packet objects if possible.
-        for i, eth in enumerate(packets):
-            if not hasattr(eth, 'payload'):
-                continue
-            if isinstance(eth.payload.payload, UDP):
-                data = str(eth.load[4:])
-                if '\x25\xeb' in data:
-                    data = out.write(data[data.find('\x25\xeb'):])
+        packets, added = 0, 0
+
+        last = 0
+        progress = tqdm(
+            dynamic_ncols=True,
+            total=os.stat(args['<infile>']).st_size,
+            unit='bytes',
+            unit_scale=True)
+
+        with open(args['<infile>'], 'rb') as f:
+            for packet in dpkt.pcap.Reader(f):
+                ip = dpkt.ethernet.Ethernet(packet[1]).data
+                if hasattr(ip, 'data') and isinstance(
+                        ip.data, dpkt.udp.UDP):
+                    data = ip.data.data[4:]
+                    packets += 1
+                    added += parse(data, out)
+
+                    # Update progress bar.
+                    pos = f.tell()
+                    progress.update(pos - last)
+                    last = pos
+
+        print 'Parsed %s Chapter 10 packets from %s network packets' % (
+            added, packets)
 
 if __name__ == '__main__':
     main()
