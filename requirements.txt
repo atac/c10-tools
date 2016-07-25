@@ -1,3 +1,4 @@
 dpkt==1.8.7
 docopt==0.6.2
--e git+git@bitbucket.org:atac-bham/pychapter10.git@31a251defde6d5ad875880c860ddfc7f8cc6fed0#egg=Chapter10
+tqdm==4.8.1
+-e git+git@bitbucket.org:atac-bham/pychapter10.git@51c585e9be573f8ac8cc0d6eb9d5a713dfe7c14e#egg=Chapter10
