@@ -27,7 +27,7 @@ if __name__ == '__main__':
 
     # Iterate over selected packets (based on args).
     for packet in walk_packets(C10(args['<file>'], True), args):
-        key = '%s-%s' % (packet.channel_id, packet.data_type)
+        key = (packet.channel_id, packet.data_type)
         if key not in channels:
             channels[key] = {'packets': 0,
                              'size': 0,
