@@ -9,43 +9,42 @@ Options:
 -v       Print header details for every individual packet."""
 
 
-import os
 import struct
 
 from chapter10 import Packet
 from docopt import docopt
-from tqdm import tqdm
+
+from common import FileProgress, fmt_number
 
 BUF_SIZE = 100000
+buf = ''
 
 
 def main():
+
+    global buf
+
     args = docopt(__doc__)
 
     valid, invalid = 0, 0
-    buf = ''
-    file_size = os.stat(args['<file>']).st_size
-    with tqdm(total=file_size, dynamic_ncols=True,
-              unit='bytes', unit_scale=True, leave=True) as progress, open(
-                  args['<file>'], 'rb') as f:
-        if args['-q'] or args['-v']:
-            progress.leave = False
-            progress.close()
-        run = True
-        while run:
-            read = f.read(BUF_SIZE)
-            if len(read) < BUF_SIZE:
-                run = False
-            buf += read
-            if not (args['-q'] or args['-v']):
-                progress.update(len(read))
+    with open(args['<file>'], 'rb') as f, \
+            FileProgress(args['<file>']) as progress:
 
-            sync = buf.find('\x25\xeb')
-            if sync > -1:
-                buf = buf[sync:]
+        while True:
+            data = f.read(BUF_SIZE)
+            progress.update(BUF_SIZE)
+            if not data:
+                break
+
+            buf = buf[-BUF_SIZE:] + data
+            for i in range(buf.count('\x25\xeb')):
+
+                sync = buf.find('\x25\xeb')
+                if sync < 0:
+                    break
+
                 try:
-                    packet = Packet.from_string(buf)
-                    buf = buf[packet.packet_length:]
+                    packet = Packet.from_string(buf[sync:], True)
                     if packet.check():
                         valid += 1
 
@@ -71,10 +70,8 @@ Header Checksum: %(header_checksum)s
                 except (NotImplementedError, struct.error, OverflowError):
                     invalid += 1
 
-            buf = buf[-BUF_SIZE:]
-
     print 'Found %s valid and %s invalid packets (total %s)' % (
-        valid, invalid, valid + invalid)
+        fmt_number(valid), fmt_number(invalid), fmt_number(valid + invalid))
 
 
 if __name__ == '__main__':
