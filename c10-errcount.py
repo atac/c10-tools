@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+"""Counts error flags in 1553 format 1 packets
+usage: c10-errcount <file> [-q] [-l <logfile>]
+"""
+
 import sys
 import os
 
@@ -89,6 +93,5 @@ def main(args):
 
 
 if __name__ == "__main__":
-    args = docopt('''Counts error flags in 1553 format 1 packets
-usage: c10-errcount <file> [-q] [-l <logfile>]''')
+    args = docopt(__doc__)
     main(args)

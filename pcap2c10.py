@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
-'''usage: pcap2c10 <infile> <outfile> [-t <tmats_file>]
+"""usage: pcap2c10 <infile> <outfile> [-t <tmats_file>]
 
 Parse a pcap file and print chapter10 data found within to stdout.
 Optionally insert a TMATS packet from <tmats_file> at the beginning.
-'''
+"""
 
 from array import array
 import struct

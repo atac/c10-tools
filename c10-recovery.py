@@ -4,9 +4,10 @@
 """usage: c10-recovery <file> [-q | -v] [options]
 
 Options:
--o FILE  Write valid data to a new file.
--q       Don't show progress bar.
--v       Print header details for every individual packet."""
+    -o FILE  Write valid data to a new file.
+    -q       Don't show progress bar.
+    -v       Print header details for every individual packet.
+"""
 
 
 import struct
