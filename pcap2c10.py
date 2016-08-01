@@ -7,13 +7,13 @@ Optionally insert a TMATS packet from <tmats_file> at the beginning.
 '''
 
 from array import array
-import os
 import struct
 
 from chapter10 import Packet
 from docopt import docopt
-from tqdm import tqdm
 import dpkt
+
+from common import FileProgress
 
 
 BUF_SIZE = 100000
@@ -86,14 +86,8 @@ def main():
         # Loop over the packets and parse into C10.Packet objects if possible.
         packets, added = 0, 0
 
-        last = 0
-        progress = tqdm(
-            dynamic_ncols=True,
-            total=os.stat(args['<infile>']).st_size,
-            unit='bytes',
-            unit_scale=True)
-
-        with open(args['<infile>'], 'rb') as f:
+        with open(args['<infile>'], 'rb') as f, \
+                FileProgress(args['<infile>']) as progress:
             for packet in dpkt.pcap.Reader(f):
                 ip = dpkt.ethernet.Ethernet(packet[1]).data
                 if hasattr(ip, 'data') and isinstance(
@@ -103,9 +97,7 @@ def main():
                     added += parse(data, out)
 
                     # Update progress bar.
-                    pos = f.tell()
-                    progress.update(pos - last)
-                    last = pos
+                    progress.update_from_tell(f.tell())
 
         print 'Parsed %s Chapter 10 packets from %s network packets' % (
             added, packets)

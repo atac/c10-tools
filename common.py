@@ -1,6 +1,10 @@
 
 import functools
 import locale
+import os
+
+
+from tqdm import tqdm
 
 
 locale.setlocale(locale.LC_ALL, 'en_US')
@@ -48,3 +52,18 @@ def walk_packets(c10, args={}):
                 continue
 
         yield packet
+
+
+class FileProgress(tqdm):
+    """Extend tqdm to show progress reading over a file based on f.tell()."""
+
+    def __init__(self, filename):
+        tqdm.__init__(self, dynamic_ncols=True,
+                      total=os.stat(filename).st_size,
+                      unit='bytes',
+                      unit_scale=True)
+        self.last_tell = 0
+
+    def update_from_tell(self, tell):
+        self.update(tell - self.last_tell)
+        self.last_tell = tell
