@@ -1,4 +1,26 @@
 
+import functools
+import locale
+
+
+locale.setlocale(locale.LC_ALL, 'en_US')
+
+
+# Format a number nicely with commas for thousands, etc.
+fmt_number = functools.partial(locale.format, '%d', grouping=True)
+
+
+def fmt_size(size):
+    """Convert byte size to a more readable format (mb, etc.)."""
+
+    units = ['gb', 'mb', 'kb']
+    unit = 'b'
+    while size > 1024 and units:
+        size /= 1024.0
+        unit = units.pop()
+
+    return '%s %s' % (round(size, 2), unit)
+
 
 def walk_packets(c10, args={}):
     """Walk a chapter 10 file based on sys.argv (type, channel, etc.)."""
@@ -16,8 +38,7 @@ def walk_packets(c10, args={}):
     channels = [c.strip() for c in args['--channel'].split(',') if c.strip()]
     exclude = [e.strip() for e in args['--exclude'].split(',') if e.strip()]
 
-    i = 0
-    for packet in c10:
+    for i, packet in enumerate(c10):
         if i > 0:
             if channels and str(packet.channel_id) not in channels:
                 continue
@@ -25,6 +46,5 @@ def walk_packets(c10, args={}):
                 continue
             elif types and packet.data_type not in types:
                 continue
-        i += 1
 
         yield packet
