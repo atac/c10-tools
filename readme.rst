@@ -34,8 +34,9 @@ To Do
 -----
 
 * Cross platform build process
+* Utilize index packets to optimize performance
 * Integrate tqdm (progress bar)
-* Make sure usage options consistent
+* Make sure usage options are consistent
 * Expand errcount to read more than 1553 packets
 * Tests for sample release (cross platform)
 * Update to use new declarative format to generate packets (pending pychapter10
