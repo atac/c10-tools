@@ -34,10 +34,11 @@ To Do
 -----
 
 * Cross platform build process
-* Utilize index packets to optimize performance
+* Utilize index packets to optimize performance where practical
 * Integrate tqdm (progress bar)
 * Make sure usage options are consistent
 * Expand errcount to read more than 1553 packets
-* Tests for sample release (cross platform)
+* Recover Python 3 compatibility
+* Automated tests (cross platform)
 * Update to use new declarative format to generate packets (pending pychapter10
   updates)
