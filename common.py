@@ -58,8 +58,10 @@ class FileProgress(tqdm):
     """Extend tqdm to show progress reading over a file based on f.tell()."""
 
     def __init__(self, filename):
-        tqdm.__init__(self, dynamic_ncols=True,
+        tqdm.__init__(self,
+                      dynamic_ncols=True,
                       total=os.stat(filename).st_size,
+                      leave=False,
                       unit='bytes',
                       unit_scale=True)
         self.last_tell = 0
