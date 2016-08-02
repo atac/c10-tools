@@ -16,27 +16,30 @@ from docopt import docopt
 from chapter10 import C10
 from chapter10.datatypes import get_label
 
-from common import walk_packets, fmt_number, fmt_size
+from common import walk_packets, fmt_number, fmt_size, FileProgress
 
 
-if __name__ == '__main__':
+def main():
 
     # Get commandline args.
     args = docopt(__doc__)
 
     channels = {}
 
-    # Iterate over selected packets (based on args).
-    for packet in walk_packets(C10(args['<file>'], True), args):
-        key = (packet.channel_id, packet.data_type)
-        if key not in channels:
-            channels[key] = {'packets': 0,
-                             'size': 0,
-                             'type': packet.data_type,
-                             'id': packet.channel_id}
+    with FileProgress(args['<file>']) as progress:
+        # Iterate over selected packets (based on args).
+        for packet in walk_packets(C10(args['<file>'], True), args):
+            key = (packet.channel_id, packet.data_type)
+            if key not in channels:
+                channels[key] = {'packets': 0,
+                                 'size': 0,
+                                 'type': packet.data_type,
+                                 'id': packet.channel_id}
 
-        channels[key]['packets'] += 1
-        channels[key]['size'] += packet.packet_length
+            channels[key]['packets'] += 1
+            channels[key]['size'] += packet.packet_length
+
+            progress.update(packet.packet_length)
 
     # Print details for each channel.
     print('Channel ID     Data Type' + 'Packets'.rjust(39), 'Size'.rjust(16))
@@ -57,3 +60,10 @@ if __name__ == '__main__':
     print('    Channels: %s' % len(channels))
     print('    Packets: %s' % fmt_number(packets))
     print('    Size: %s' % fmt_size(size))
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except KeyboardInterrupt:
+        print('Interrupted')
