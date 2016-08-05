@@ -1,19 +1,24 @@
 #!/usr/bin/env python
 
-"""usage: pcap2c10 <infile> <outfile> [-t <tmats_file>]
+"""Parse a pcap file and print chapter10 data found within to stdout.
 
-Parse a pcap file and print chapter10 data found within to stdout.
-Optionally insert a TMATS packet from <tmats_file> at the beginning.
+usage: pcap2c10 <infile> <outfile> [options]
+
+Options:
+    -q               Don't display progress bar.
+    -f               Overwrite existing output file.
+    -t <tmats_file>  Insert an existing TMATS record at the beginning of the output file.
 """
 
 from array import array
 import struct
+import os
 
 from chapter10 import Packet
 from docopt import docopt
 import dpkt
 
-from common import FileProgress
+from common import FileProgress, fmt_number
 
 
 BUF_SIZE = 100000
@@ -54,6 +59,10 @@ def main():
 
     args = docopt(__doc__)
 
+    if os.path.exists(args['<outfile>']) and not args['-f']:
+        print('Output file exists. Use -f to overwrite.')
+        return
+
     with open(args['<outfile>'], 'wb') as out:
 
         # Write TMATS.
@@ -88,6 +97,10 @@ def main():
 
         with open(args['<infile>'], 'rb') as f, \
                 FileProgress(args['<infile>']) as progress:
+
+            if args['-q']:
+                progress.close()
+
             for packet in dpkt.pcap.Reader(f):
                 ip = dpkt.ethernet.Ethernet(packet[1]).data
                 if hasattr(ip, 'data') and isinstance(
@@ -96,11 +109,12 @@ def main():
                     packets += 1
                     added += parse(data, out)
 
-                    # Update progress bar.
-                    progress.update_from_tell(f.tell())
+                # Update progress bar.
+                progress.update_from_tell(f.tell())
 
-        print 'Parsed %s Chapter 10 packets from %s network packets' % (
-            added, packets)
+        if not args['-q']:
+            print('Parsed %s Chapter 10 packets from %s network packets' % (
+                fmt_number(added), fmt_number(packets)))
 
 if __name__ == '__main__':
     main()
