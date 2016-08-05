@@ -1,17 +1,12 @@
 
 import functools
-import locale
 import os
-
 
 from tqdm import tqdm
 
 
-locale.setlocale(locale.LC_ALL, 'en_US')
-
-
 # Format a number nicely with commas for thousands, etc.
-fmt_number = functools.partial(locale.format, '%d', grouping=True)
+fmt_number = '{0:,}'.format
 
 
 def fmt_size(size):
