@@ -27,7 +27,7 @@ def clean():
 
 def install():
     for f in glob('dist/*'):
-        shutil.copy(f, '~/bin')
+        shutil.copy(f, os.path.join(os.environ.get('HOME'), 'bin'))
 
     print 'Installed to ~/bin'
 
@@ -36,5 +36,7 @@ if __name__ == '__main__':
     command = sys.argv[1:]
     if not command:
         build()
+    elif command == ['install']:
+        install()
     elif command == ['clean']:
         clean()
