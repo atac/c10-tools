@@ -14,7 +14,7 @@ import os
 from chapter10 import C10
 from docopt import docopt
 
-from walk import walk_packets
+from common import walk_packets, FileProgress
 
 
 if __name__ == '__main__':
@@ -28,11 +28,15 @@ if __name__ == '__main__':
         raise SystemExit
 
     # Open input and output files.
-    with open(args['<dst>'], 'wb') as out:
+    with open(args['<dst>'], 'wb') as out, FileProgress(args['<src>']) \
+            as progress:
+
         src = C10(args['<src>'])
 
         # Iterate over packets based on args.
         for packet in walk_packets(src, args):
+
+            progress.update(packet.packet_length)
 
             # Copy packet to new file.
             raw = bytes(packet)
