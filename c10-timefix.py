@@ -9,6 +9,8 @@ from chapter10 import C10
 from chapter10.datatypes import Time
 from docopt import docopt
 
+from common import FileProgress
+
 
 def valid(timestamp, previous):
     """Validate a timestamp based on previous recorded one
@@ -18,13 +20,8 @@ def valid(timestamp, previous):
     if previous is None:
         return True
 
-    if timestamp > previous:
-        diff = timestamp - previous
-    else:
-        diff = previous - timestamp
-    if diff > timedelta(seconds=5):
-        return False
-    return True
+    diff = max(timestamp, previous) - min(timestamp, previous)
+    return diff < timedelta(seconds=5)
 
 
 def main():
@@ -32,8 +29,10 @@ def main():
     args = docopt(__doc__)
 
     prev = None
-    with open(args['<output_file>'], 'wb') as out_f:
+    with open(args['<output_file>'], 'wb') as out_f, \
+            FileProgress(args['<input_file>']) as progress:
         for packet in C10(args['<input_file>']):
+            progress.update(packet.packet_length)
             if isinstance(packet.body, Time):
                 if valid(packet.body.time, prev):
                     out_f.write(bytes(packet))
