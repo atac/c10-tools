@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 
-"""Parse a pcap file and print chapter10 data found within to stdout.
+"""Extract chapter10 data from a pcap file.
 
-usage: pcap2c10 <infile> <outfile> [options]
+usage: c10-from-pcap <infile> <outfile> [options]
 
 Options:
     -q               Don't display progress bar.
     -f               Overwrite existing output file.
-    -t <tmats_file>  Insert an existing TMATS record at the beginning of the output file.
+    -t <tmats_file>  Insert an existing TMATS record at the beginning of the\
+output file.
 """
 
 from array import array
