@@ -14,7 +14,6 @@ output file.
 from array import array
 import os
 import struct
-import time
 
 from docopt import docopt
 import dpkt
@@ -24,19 +23,19 @@ from common import FileProgress, fmt_number
 start_timestamp, seq = 0, {}
 
 
-def rtc(timestamp):
+def make_rtc(timestamp):
     """Take a timestamp and give an incrementing 10Mhz equivalent time."""
 
     global start_timestamp
 
     if not start_timestamp:
-        start_timestamp = time
+        start_timestamp = timestamp
         offset = 0
     else:
-        offset = time - start_timestamp
+        offset = timestamp - start_timestamp
 
     # Convert seconds to 10Mhz clock
-    return offset / 10000000
+    return int(offset * 10000000)
 
 
 def gen_packet(channel, type, time, body):
@@ -46,7 +45,9 @@ def gen_packet(channel, type, time, body):
     seq[channel] = sequence_number + 1
 
     # Split RTC into high and low components
-    rtc_high, rtc_low = struct.unpack('IHxx', struct.pack('Q', rtc(time)))
+    rtc = make_rtc(time)
+    rtc_low = int((rtc >> 32) & 0xffffffff)
+    rtc_high = int((rtc >> 16) & 0xffff)
 
     header = [
         0xeb25,
@@ -60,12 +61,9 @@ def gen_packet(channel, type, time, body):
         rtc_low,
         rtc_high,
     ]
-    header.append(sum(header))
-    try:
-        header, = struct.pack('HHIIBBBBIHH', *header)
-    except:
-        print header
-        raise
+    header = struct.pack('HHIIBBBBIH', *header)
+    checksum = sum(array('H', header)[:-1]) & 0xffff
+    header += struct.pack('H', checksum)
     return header + body
 
 
@@ -122,7 +120,6 @@ def main():
             first_time, frames, packet = None, 0, ''
 
             for timestamp, ether in dpkt.pcap.Reader(f):
-                timestamp = time.gmtime(timestamp)
                 if first_time is None:
                     first_time = timestamp
                 ether = dpkt.ethernet.Ethernet(ether)
@@ -134,6 +131,8 @@ def main():
                     data = ip.data.data[4:]
 
                     # @TODO: add IPTS
+                    ipts = struct.pack('Q', make_rtc(timestamp))
+                    packet += ipts
 
                     # IPDH
                     first, second = struct.unpack('xhh', ether.src)
@@ -149,16 +148,22 @@ def main():
 
                     frames += 1
                     if len(packet) + 4 > MAX_BODY_SIZE:
-                        csdw = struct.pack('HH', 24, frames)
+                        csdw = struct.pack('HH', frames, 24)
                         out.write(gen_packet(
                             10, 0x69, first_time, csdw + packet))
-                        first_time, frames, packet = None, 0, ''
                         added += 1
+                        first_time, frames, packet = None, 0, ''
 
                     packets += 1
 
                 # Update progress bar.
                 progress.update_from_tell(f.tell())
+
+        if packet:
+                csdw = struct.pack('HH', 24, frames)
+                out.write(gen_packet(
+                    10, 0x69, first_time, csdw + packet))
+                added += 1
 
         if not args['-q']:
             print('Parsed %s Chapter 10 packets from %s network packets' % (
