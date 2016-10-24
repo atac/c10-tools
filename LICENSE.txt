@@ -1,6 +1,6 @@
 C10-Tools
 
-Copyright (c) 2015 Micah Ferrill
+Copyright (c) 2015-2016 Avionics Test & Analysis Corporation
 
 All rights reserved.
 
