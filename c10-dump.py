@@ -61,7 +61,7 @@ if __name__ == '__main__':
         if t == 8:
             data = b''.join([p.data for p in packet.body])
         else:
-            data = str(packet.body)
+            data = str(packet)[24:packet.data_length + 24]
 
         # Write out raw packet body.
         out[filename].write(data)
