@@ -28,7 +28,7 @@ def main():
 
     with FileProgress(args['<file>']) as progress:
         # Iterate over selected packets (based on args).
-        for packet in walk_packets(C10(args['<file>'], True), args):
+        for packet in walk_packets(C10(args['<file>']), args):
             key = (packet.channel_id, packet.data_type)
             if key not in channels:
                 channels[key] = {'packets': 0,
