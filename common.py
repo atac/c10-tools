@@ -1,5 +1,4 @@
 
-import functools
 import os
 
 from tqdm import tqdm
