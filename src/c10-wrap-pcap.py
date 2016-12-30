@@ -169,5 +169,6 @@ def main():
             print('Parsed %s Chapter 10 packets from %s network packets' % (
                 fmt_number(added), fmt_number(packets)))
 
+
 if __name__ == '__main__':
     main()
