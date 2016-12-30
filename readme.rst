@@ -6,13 +6,16 @@ These samples use a pure-python library (PyChapter10_).
 Included Tools
 --------------
 
-* pcap2c10 - Convert a .pcap file into .c10
-* c10-stat - Display packet counts and channel information for a .c10 file
-* c10-dump - Export data from channels within a .c10 file
-* c10-copy - Copy a chapter 10 file optionally filtering on channel id or data type
-* c10-reindex - Strip and optionally rebuild index packets for a .c10 file
-* c10-timefix - Correct time values in a .c10 file
-* c10-recovery - Recover viable data from a corrupt .c10 file.
+* c10-copy - Copy a file optionally filtering on channel id or data type.
+* c10-dump - Export packet data a file.
+* c10-errcount - Count error flags in 1553 format 1 packets.
+* c10-from-pcap - Extract chapter 10 data from a pcap file.
+* c10-recovery - Attempt to recover viable data from a corrupt file.
+* c10-reindex - Strip and optionally rebuild index packets for a file.
+* c10-stat - Display packet counts and channel information for a file.
+* c10-timefix - Correct time values in a file.
+* c10-wrap-pcap - Wrap ethernet data from a pcap file as ethernet packets in a
+  chapter 10 file.
 
 Dependencies
 ------------
