@@ -27,7 +27,8 @@ def main():
     channels = {}
 
     with FileProgress(args['<file>']) as progress:
-        # Iterate over selected packets (based on args).
+
+        # Iterate over selected packets based on args.
         for packet in walk_packets(C10(args['<file>'], True), args):
             key = (packet.channel_id, packet.data_type)
             if key not in channels:
@@ -56,10 +57,11 @@ def main():
 
     # Print file summary.
     print('-' * 80)
-    print('Summary for %s:' % args['<file>'])
-    print('    Channels: %s' % len(channels))
-    print('    Packets: %s' % fmt_number(packets))
-    print('    Size: %s' % fmt_size(size))
+    print('''Summary for %s:
+    Channels: %s
+    Packets: %s
+    Size: %s''' % (
+        args['<file>'], len(channels), fmt_number(packets), fmt_size(size)))
 
 
 if __name__ == '__main__':
