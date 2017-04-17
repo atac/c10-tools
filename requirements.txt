@@ -1,5 +1,5 @@
--e git+git@bitbucket.org:atac-bham/pychapter10.git@85eae3978e37b80e86e39d45403026d9de066704#egg=Chapter10
-PyInstaller==3.2
+-e git+git@bitbucket.org:atac-bham/pychapter10.git@97409387bc753af7894c23efe56fea7f4f3653b4#egg=Chapter10
+PyInstaller==3.2.1
 docopt==0.6.2
-dpkt==1.8.8
-tqdm==4.10.0
+dpkt==1.9.0
+tqdm==4.11.2
