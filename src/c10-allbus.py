@@ -9,6 +9,8 @@ Options:
     -f, --force            Overwrite existing dst file if present.
 """
 
+import os
+
 from docopt import docopt
 from chapter10 import C10
 
@@ -17,6 +19,10 @@ from common import FileProgress
 
 if __name__ == '__main__':
     args = docopt(__doc__)
+
+    if os.path.exists(args['<dst>']) and not args['--force']:
+        print 'Destination file exists. Use --force to overwrite it.'
+        raise SystemExit
 
     with open(args['<dst>'], 'wb') as out, \
             FileProgress(args['<src>']) as progress:
