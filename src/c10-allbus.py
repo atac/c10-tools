@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
-"""usage: c10-allbus <src> <dst> [-b <bus>] [options]
+"""usage: c10-allbus <src> <dst> [-b] [options]
 
 Switch 1553 format 1 messages to indicate the same bus (A or B).
 
 Options:
-    -b <bus>, --bus <bus>  Select which bus to indicate [default: a].
-    -f, --force            Overwrite existing dst file if present.
+    -b           Use the B bus instead of A (default).
+    -f, --force  Overwrite existing dst file if present.
 """
 
 import os
@@ -44,10 +44,7 @@ if __name__ == '__main__':
 
                 # Walk through messages and update bus ID as needed.
                 for msg in packet.body:
-                    if args['--bus'].lower() == 'a':
-                        msg.bus_id = 0
-                    else:
-                        msg.bus_id = 1
+                    msg.bus_id = int(args['-b'])
                     packed = msg.pack(packet.body.iph_format)
                     out.write(packed)
                     offset += len(packed)
