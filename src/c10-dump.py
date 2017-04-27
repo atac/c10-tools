@@ -18,7 +18,7 @@ import os
 from chapter10 import C10, datatypes
 from docopt import docopt
 
-from common import walk_packets
+from common import walk_packets, FileProgress
 
 
 if __name__ == '__main__':
@@ -33,39 +33,42 @@ if __name__ == '__main__':
     out = {}
 
     # Iterate over packets based on args.
-    for packet in walk_packets(C10(args['<file>']), args):
+    with FileProgress(args['<file>']) as progress:
+        for packet in walk_packets(C10(args['<file>']), args):
 
-        # Get filename for this channel based on data type.
-        filename = os.path.join(args['--output'], str(packet.channel_id))
-        t, f = datatypes.format(packet.data_type)
-        if t == 0 and f == 1:
-            filename += packet.body.format == 0 and '.tmats' or '.xml'
-        elif t == 8:
-            filename += '.mpg'
+            progress.update(packet.packet_length)
 
-        # Ensure a file is open (and will close) for a given channel.
-        if filename not in out:
+            # Get filename for this channel based on data type.
+            filename = os.path.join(args['--output'], str(packet.channel_id))
+            t, f = datatypes.format(packet.data_type)
+            if t == 0 and f == 1:
+                filename += packet.body.format == 0 and '.tmats' or '.xml'
+            elif t == 8:
+                filename += '.mpg'
 
-            # Don't overwrite unless explicitly required.
-            if os.path.exists(filename) and not args['--force']:
-                print('%s already exists. Use -f to overwrite.' % filename)
-                break
+            # Ensure a file is open (and will close) for a given channel.
+            if filename not in out:
 
-            out[filename] = open(filename, 'wb')
-            atexit.register(out[filename].close)
+                # Don't overwrite unless explicitly required.
+                if os.path.exists(filename) and not args['--force']:
+                    print('%s already exists. Use -f to overwrite.' % filename)
+                    break
 
-        # Only write TMATS once.
-        elif t == 0 and f == 1:
-            continue
+                out[filename] = open(filename, 'wb')
+                atexit.register(out[filename].close)
 
-        # Handle special case for video data.
-        if t == 8:
-            for ts in packet.body:
-                ts = array('H', ts.data)
-                ts.byteswap()
-                ts.tofile(out[filename])
-        else:
-            data = str(packet)[24:packet.data_length + 24]
+            # Only write TMATS once.
+            elif t == 0 and f == 1:
+                continue
 
-            # Write out raw packet body.
-            out[filename].write(data)
+            # Handle special case for video data.
+            if t == 8:
+                for ts in packet.body:
+                    ts = array('H', ts.data)
+                    ts.byteswap()
+                    ts.tofile(out[filename])
+            else:
+                data = str(packet)[24:packet.data_length + 24]
+
+                # Write out raw packet body.
+                out[filename].write(data)
