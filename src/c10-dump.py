@@ -11,6 +11,7 @@ Options:
  be decimal or hex eg: 0x40)
     -f, --force                          Overwrite existing files."""
 
+from array import array
 import atexit
 import os
 
@@ -59,9 +60,12 @@ if __name__ == '__main__':
 
         # Handle special case for video data.
         if t == 8:
-            data = b''.join([p.data for p in packet.body])
+            for ts in packet.body:
+                ts = array('H', ts.data)
+                ts.byteswap()
+                ts.tofile(out[filename])
         else:
             data = str(packet)[24:packet.data_length + 24]
 
-        # Write out raw packet body.
-        out[filename].write(data)
+            # Write out raw packet body.
+            out[filename].write(data)
