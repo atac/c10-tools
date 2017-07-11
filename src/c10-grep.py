@@ -22,6 +22,8 @@ from docopt import docopt
 
 
 def get_time(rtc, time_packet):
+    """Get a datetime object based on last time packet and an RTC value."""
+
     time_packet.body.parse()
     t = time_packet.body.time
     offset = (rtc - time_packet.rtc) / 10000000
@@ -30,24 +32,7 @@ def get_time(rtc, time_packet):
 
 
 def search(path, args):
-
-    # Validate numerical arguments / options.
-    for opt in ('--channel', '--word-offset'):
-        if args.get(opt):
-            try:
-                args[opt] = int(args[opt])
-            except ValueError:
-                print '%s must be a number' % opt
-                raise SystemExit
-
-    # Validate hex-based arguments / options.
-    for opt in ('--cmd', '<value>', '--mask'):
-        if args.get(opt):
-            try:
-                args[opt] = int(args[opt], 16)
-            except ValueError:
-                print 'Invalid value "%s" for %s' % (args[opt], opt)
-                raise SystemExit
+    """Search file "path" based on parameters from "args"."""
 
     last_time = None
     for packet in C10(path, True):
@@ -86,6 +71,7 @@ def search(path, args):
 if __name__ == '__main__':
     args = docopt(__doc__)
 
+    # Describe the search parameters.
     print 'Searching for %s' % args.get('<value>'),
     if args.get('--channel'):
         print 'in channel #%s' % args.get('--channel'),
@@ -96,6 +82,24 @@ if __name__ == '__main__':
     if args.get('--mask'):
         print 'with mask %s' % args.get('--mask'),
     print
+
+    # Validate numerical arguments / options.
+    for opt in ('--channel', '--word-offset'):
+        if args.get(opt):
+            try:
+                args[opt] = int(args[opt])
+            except ValueError:
+                print '%s must be a number' % opt
+                raise SystemExit
+
+    # Validate hex-based arguments / options.
+    for opt in ('--cmd', '<value>', '--mask'):
+        if args.get(opt):
+            try:
+                args[opt] = int(args[opt], 16)
+            except ValueError:
+                print 'Invalid value "%s" for %s' % (args[opt], opt)
+                raise SystemExit
 
     for path in args.get('<path>'):
         path = os.path.abspath(path)

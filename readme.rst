@@ -10,6 +10,7 @@ Included Tools
 * c10-dump - Export packet data a file.
 * c10-errcount - Count error flags in 1553 format 1 packets.
 * c10-from-pcap - Extract chapter 10 data from a pcap file.
+* c10-grep - Search files/directories for specific data markers
 * c10-recovery - Attempt to recover viable data from a corrupt file.
 * c10-reindex - Strip and optionally rebuild index packets for a file.
 * c10-stat - Display packet counts and channel information for a file.
