@@ -11,13 +11,22 @@ Options:
     -m MASK, --mask=MASK           Value mask
 """
 
+from datetime import timedelta
 import os
 import struct
 
 from chapter10 import C10
 from chapter10.datatypes.base import IterativeBase
-from chapter10.datatypes import MS1553
+from chapter10.datatypes import MS1553, Time
 from docopt import docopt
+
+
+def get_time(rtc, time_packet):
+    time_packet.body.parse()
+    t = time_packet.body.time
+    offset = (rtc - time_packet.rtc) / 10000000
+    t += timedelta(seconds=offset)
+    return str(t)
 
 
 def search(path, args):
@@ -40,7 +49,11 @@ def search(path, args):
                 print 'Invalid value "%s" for %s' % (args[opt], opt)
                 raise SystemExit
 
+    last_time = None
     for packet in C10(path, True):
+
+        if isinstance(packet.body, Time):
+            last_time = packet
 
         # Match channel
         if args.get('--channel') and packet.channel_id != args.get(
@@ -66,10 +79,8 @@ def search(path, args):
                         value &= args.get('--mask')
 
                     if value == args.get('<value>'):
-                        print 'Match!'
-                    else:
-                        print '%s doesn\'t match %s' % (
-                            hex(value), hex(args.get('<value>')))
+                        print '    Found at %s' % get_time(
+                            msg.intra_packet_timestamp, last_time)
 
 
 if __name__ == '__main__':
