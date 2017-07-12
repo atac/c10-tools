@@ -41,8 +41,7 @@ def search(path, args):
             last_time = packet
 
         # Match channel
-        if args.get('--channel') and packet.channel_id != args.get(
-                '--channel'):
+        if (args.get('--channel') or packet.channel_id) != packet.channel_id:
             continue
 
         # Iterate over messages if applicable
@@ -71,46 +70,38 @@ def search(path, args):
 if __name__ == '__main__':
     args = docopt(__doc__)
 
-    # Describe the search parameters.
-    print 'Searching for %s' % args.get('<value>'),
-    if args.get('--channel'):
-        print 'in channel #%s' % args.get('--channel'),
-    if args.get('--cmd'):
-        print 'with command word %s' % args.get('--cmd'),
-    if args.get('--word-offset'):
-        print 'at word %s' % args.get('--word-offset'),
-    if args.get('--mask'):
-        print 'with mask %s' % args.get('--mask'),
-    print
-
-    # Validate numerical arguments / options.
-    for opt in ('--channel', '--word-offset'):
+    # Validate int/hex inputs.
+    for opt in ('--channel', '--word-offset', '--cmd', '<value>', '--mask'):
         if args.get(opt):
             try:
-                args[opt] = int(args[opt])
-            except ValueError:
-                print '%s must be a number' % opt
-                raise SystemExit
-
-    # Validate hex-based arguments / options.
-    for opt in ('--cmd', '<value>', '--mask'):
-        if args.get(opt):
-            try:
-                args[opt] = int(args[opt], 16)
+                if args[opt].lower().startswith('0x'):
+                    args[opt] = int(args[opt], 16)
+                else:
+                    args[opt] = int(args[opt])
             except ValueError:
                 print 'Invalid value "%s" for %s' % (args[opt], opt)
                 raise SystemExit
 
+    # Describe the search parameters.
+    print 'Searching for %s' % hex(args.get('<value>')),
+    if args.get('--channel'):
+        print 'in channel #%s' % args.get('--channel'),
+    if args.get('--cmd'):
+        print 'with command word %s' % hex(args.get('--cmd')),
+    if args.get('--word-offset'):
+        print 'at word %s' % args.get('--word-offset'),
+    if args.get('--mask'):
+        print 'with mask %s' % hex(args.get('--mask')),
+    print
+
     for path in args.get('<path>'):
         path = os.path.abspath(path)
-        basename = os.path.basename(path)
-        prefix = path[:-len(basename)]
         print 'Searching %s...' % path
         if os.path.isdir(path):
             for dirname, dirnames, filenames in os.walk(path):
                 for f in filenames:
-                    if f.lower().endswith('.c10') or f.lower().endswith(
-                            '.ch10'):
+
+                    if os.path.splitext(f)[1] in ('.c10', '.ch10'):
                         f = os.path.join(dirname, f)
                         print '    %s...' % f[len(path) + 1:]
                         search(f, args)
