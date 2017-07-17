@@ -24,6 +24,10 @@ from docopt import docopt
 from tqdm import tqdm
 
 
+def swap_word(word):
+    return struct.unpack('<H', struct.pack('>H', word))[0]
+
+
 def get_time(rtc, time_packet):
     """Get a datetime object based on last time packet and an RTC value."""
 
@@ -100,6 +104,8 @@ if __name__ == '__main__':
             except ValueError:
                 print 'Invalid value "%s" for %s' % (args[opt], opt)
                 raise SystemExit
+            if opt in ('--cmd', '<value>', '--mask'):
+                args[opt] = swap_word(args[opt])
 
     # Describe the search parameters.
     print 'Searching for %s' % hex(args.get('<value>')),
