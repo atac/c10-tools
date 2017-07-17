@@ -9,16 +9,19 @@ Options:
     --cmd CMDWORD                  1553 Command word
     -w WORD, --word-offset WORD    Word offset within message [default: 0]
     -m MASK, --mask=MASK           Value mask
+    -o OUTFILE, --output OUTFILE   Print results to file
 """
 
 from datetime import timedelta
 import os
 import struct
+import sys
 
 from chapter10 import C10
-from chapter10.datatypes.base import IterativeBase
 from chapter10.datatypes import MS1553, Time
+from chapter10.datatypes.base import IterativeBase
 from docopt import docopt
+from tqdm import tqdm
 
 
 def get_time(rtc, time_packet):
@@ -34,37 +37,53 @@ def get_time(rtc, time_packet):
 def search(path, args):
     """Search file "path" based on parameters from "args"."""
 
+    args.get('--output').write(path + '\n')
+
     last_time = None
-    for packet in C10(path, True):
+    with tqdm(
+            total=os.stat(path).st_size,
+            desc='    ' + os.path.basename(path),
+            unit='bytes',
+            unit_scale=True,
+            leave=False) as progress:
 
-        if isinstance(packet.body, Time):
-            last_time = packet
+        if args.get('--output') == sys.stdout:
+            progress.close()
 
-        # Match channel
-        if (args.get('--channel') or packet.channel_id) != packet.channel_id:
-            continue
+        for packet in C10(path, True):
 
-        # Iterate over messages if applicable
-        if isinstance(packet.body, IterativeBase):
-            packet.body.parse()
+            progress.update(packet.packet_length)
 
-            for msg in packet.body:
-                if isinstance(packet.body, MS1553):
-                    cmd, = struct.unpack('=H', msg.data[:2])
+            if isinstance(packet.body, Time):
+                last_time = packet
 
-                    # Match command word
-                    if args.get('--cmd') and args.get('--cmd') != cmd:
-                        continue
+            # Match channel
+            if (args.get('--channel') or packet.channel_id) != \
+                    packet.channel_id:
+                continue
 
-                    offset = args.get('--word-offset')
-                    value, = struct.unpack('=H', msg.data[offset:offset + 2])
+            # Iterate over messages if applicable
+            if isinstance(packet.body, IterativeBase):
+                packet.body.parse()
 
-                    if args.get('--mask') is not None:
-                        value &= args.get('--mask')
+                for msg in packet.body:
+                    if isinstance(packet.body, MS1553):
+                        cmd, = struct.unpack('=H', msg.data[:2])
 
-                    if value == args.get('<value>'):
-                        print '    Found at %s' % get_time(
-                            msg.intra_packet_timestamp, last_time)
+                        # Match command word
+                        if args.get('--cmd') and args.get('--cmd') != cmd:
+                            continue
+
+                        offset = args.get('--word-offset')
+                        value, = struct.unpack('=H', msg.data[
+                            offset:offset + 2])
+
+                        if args.get('--mask') is not None:
+                            value &= args.get('--mask')
+
+                        if value == args.get('<value>'):
+                            args.get('--output').write((' ' * 4) + get_time(
+                                msg.intra_packet_timestamp, last_time) + '\n')
 
 
 if __name__ == '__main__':
@@ -94,16 +113,31 @@ if __name__ == '__main__':
         print 'with mask %s' % hex(args.get('--mask')),
     print
 
+    if args.get('--output'):
+        args['--output'] = open(args.get('--output'), 'w')
+    else:
+        args['--output'] = sys.stdout
+
+    files = []
     for path in args.get('<path>'):
         path = os.path.abspath(path)
-        print 'Searching %s...' % path
         if os.path.isdir(path):
             for dirname, dirnames, filenames in os.walk(path):
                 for f in filenames:
-
                     if os.path.splitext(f)[1] in ('.c10', '.ch10'):
-                        f = os.path.join(dirname, f)
-                        print '    %s...' % f[len(path) + 1:]
-                        search(f, args)
+                        files.append(os.path.join(dirname, f))
         else:
-            search(path, args)
+            files.append(path)
+
+    with tqdm(desc='Searching %i files' % len(files),
+              total=len(files)) as file_progress:
+
+        if args.get('--output') == sys.stout:
+            file_progress.close()
+
+        for f in files:
+            search(f, args)
+            file_progress.update(1)
+
+    if args.get('--output') != sys.stdout:
+        args.get('--output').close()
