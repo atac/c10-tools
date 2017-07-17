@@ -25,8 +25,8 @@ Included Tools
 Dependencies
 ------------
 
-* Python_ 2.7 or later
-* PyChapter10_
+* [Python](http://python.org) 2.7 or later
+* [PyChapter10](https://bitbucket.org/atac-bham/pychapter10)
 
 
 Building and Running
@@ -37,6 +37,3 @@ each sample from the commandline using python (eg: python c10-stat.py) and
 commandline help will show you how to use each one.
 
 The compile.py script can be used to generate native binaries (via PyInstaller)
-
-.. _PyChapter10: https://bitbucket.org/atac-bham/pychapter10
-.. _Python: http://python.org
