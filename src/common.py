@@ -51,13 +51,15 @@ def walk_packets(c10, args={}):
 class FileProgress(tqdm):
     """Extend tqdm to show progress reading over a file based on f.tell()."""
 
-    def __init__(self, filename):
-        tqdm.__init__(self,
-                      dynamic_ncols=True,
-                      total=os.stat(filename).st_size,
-                      leave=False,
-                      unit='bytes',
-                      unit_scale=True)
+    def __init__(self, filename, **kwargs):
+        tqdm_kwargs = dict(
+            dynamic_ncols=True,
+            total=os.stat(filename).st_size,
+            leave=False,
+            unit='bytes',
+            unit_scale=True)
+        tqdm_kwargs.update(kwargs)
+        tqdm.__init__(self, **tqdm_kwargs)
         self.last_tell = 0
 
     def update_from_tell(self, tell):
