@@ -11,7 +11,8 @@ Options:
     -m MASK, --mask=MASK           Value mask
     -o OUTFILE, --output OUTFILE   Print results to file
     -f, --force                    Overwrite existing output file
-    -x                             Utilize multiprocessing via dask
+    -x                             Utilize multiprocessing via dask (works, \
+but progress reporting is a little exciting)
 """
 
 from datetime import timedelta
