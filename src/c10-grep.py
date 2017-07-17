@@ -61,7 +61,7 @@ def search(path, args, i=None):
             ascii=False,
             dynamic_ncols=True,
             position=i,
-            leave=True) as progress:
+            leave=False) as progress:
 
         if outfile == sys.stdout:
             progress.close()
@@ -132,7 +132,6 @@ if __name__ == '__main__':
         print 'at word %s' % args.get('--word-offset'),
     if args.get('--mask'):
         print 'with mask %s' % hex(args.get('--mask')),
-    print
 
     if args.get('--output') and os.path.exists(args.get('--output')):
         if args.get('--force'):
@@ -153,12 +152,21 @@ if __name__ == '__main__':
         else:
             files.append(path)
 
-    print 'Searching %s files...' % len(files)
+    print 'in %s files...' % len(files)
     task = partial(search, args=args)
     if args.get('-x'):
         bag = db.from_delayed([
             delayed(task)(f, i=i) for i, f in enumerate(files)])
         bag.compute()
     else:
-        map(task, files)
-    print 'finished'
+        files = tqdm(
+            files,
+            desc='Overall',
+            unit='files',
+            dynamic_ncols=True,
+            leave=False)
+        if not args.get('--output'):
+            files.close()
+        for f in files:
+            task(f)
+    print '\nfinished'
