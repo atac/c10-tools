@@ -11,6 +11,7 @@ Options:
     -m MASK, --mask=MASK           Value mask
     -o OUTFILE, --output OUTFILE   Print results to file
     -f, --force                    Overwrite existing output file
+    -x                             Utilize multiprocessing via dask
 """
 
 from datetime import timedelta
@@ -28,6 +29,10 @@ from tqdm import tqdm
 import dask.bag as db
 
 
+def swap_word(word):
+    return struct.unpack('<H', struct.pack('>H', word))[0]
+
+
 def get_time(rtc, time_packet):
     """Get a datetime object based on last time packet and an RTC value."""
 
@@ -38,7 +43,7 @@ def get_time(rtc, time_packet):
     return str(t)
 
 
-def search(path, i, args):
+def search(path, args, i=None):
     """Search file "path" based on parameters from "args"."""
 
     outfile = sys.stdout
@@ -114,6 +119,8 @@ if __name__ == '__main__':
             except ValueError:
                 print 'Invalid value "%s" for %s' % (args[opt], opt)
                 raise SystemExit
+            if opt in ('--cmd', '<value>', '--mask'):
+                args[opt] = swap_word(args[opt])
 
     # Describe the search parameters.
     print 'Searching for %s' % hex(args.get('<value>')),
@@ -148,6 +155,10 @@ if __name__ == '__main__':
 
     print 'Searching %s files...' % len(files)
     task = partial(search, args=args)
-    bag = db.from_delayed([delayed(task)(f, i) for i, f in enumerate(files)])
-    bag.compute()
+    if args.get('-x'):
+        bag = db.from_delayed([
+            delayed(task)(f, i=i) for i, f in enumerate(files)])
+        bag.compute()
+    else:
+        map(task, files)
     print 'finished'

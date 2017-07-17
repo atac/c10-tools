@@ -3,6 +3,6 @@ PyInstaller==3.2.1
 cloudpickle==0.3.1
 dask==0.15.1
 docopt==0.6.2
-dpkt==1.9.0
+dpkt==1.9.1
 toolz==0.8.2
-tqdm==4.11.2
+tqdm==4.14.0
