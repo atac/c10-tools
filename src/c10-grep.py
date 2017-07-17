@@ -10,9 +10,11 @@ Options:
     -w WORD, --word-offset WORD    Word offset within message [default: 0]
     -m MASK, --mask=MASK           Value mask
     -o OUTFILE, --output OUTFILE   Print results to file
+    -f, --force                    Overwrite existing output file
 """
 
 from datetime import timedelta
+from functools import partial
 import os
 import struct
 import sys
@@ -20,8 +22,10 @@ import sys
 from chapter10 import C10
 from chapter10.datatypes import MS1553, Time
 from chapter10.datatypes.base import IterativeBase
+from dask.delayed import delayed
 from docopt import docopt
 from tqdm import tqdm
+import dask.bag as db
 
 
 def get_time(rtc, time_packet):
@@ -34,10 +38,14 @@ def get_time(rtc, time_packet):
     return str(t)
 
 
-def search(path, args):
+def search(path, i, args):
     """Search file "path" based on parameters from "args"."""
 
-    args.get('--output').write(path + '\n')
+    outfile = sys.stdout
+    if args.get('--output'):
+        outfile = open(args.get('--output'), 'a')
+
+    outfile.write(path + '\n')
 
     last_time = None
     with tqdm(
@@ -45,9 +53,12 @@ def search(path, args):
             desc='    ' + os.path.basename(path),
             unit='bytes',
             unit_scale=True,
-            leave=False) as progress:
+            ascii=False,
+            dynamic_ncols=True,
+            position=i,
+            leave=True) as progress:
 
-        if args.get('--output') == sys.stdout:
+        if outfile == sys.stdout:
             progress.close()
 
         for packet in C10(path, True):
@@ -82,8 +93,11 @@ def search(path, args):
                             value &= args.get('--mask')
 
                         if value == args.get('<value>'):
-                            args.get('--output').write((' ' * 4) + get_time(
+                            outfile.write((' ' * 4) + get_time(
                                 msg.intra_packet_timestamp, last_time) + '\n')
+
+    if outfile != sys.stdout:
+        outfile.close()
 
 
 if __name__ == '__main__':
@@ -113,10 +127,13 @@ if __name__ == '__main__':
         print 'with mask %s' % hex(args.get('--mask')),
     print
 
-    if args.get('--output'):
-        args['--output'] = open(args.get('--output'), 'w')
-    else:
-        args['--output'] = sys.stdout
+    if args.get('--output') and os.path.exists(args.get('--output')):
+        if args.get('--force'):
+            with open(args.get('--output'), 'w') as f:
+                f.write('')
+        else:
+            print 'File exists, use -f to overwrite.'
+            raise SystemExit
 
     files = []
     for path in args.get('<path>'):
@@ -124,20 +141,13 @@ if __name__ == '__main__':
         if os.path.isdir(path):
             for dirname, dirnames, filenames in os.walk(path):
                 for f in filenames:
-                    if os.path.splitext(f)[1] in ('.c10', '.ch10'):
+                    if os.path.splitext(f)[1].lower() in ('.c10', '.ch10'):
                         files.append(os.path.join(dirname, f))
         else:
             files.append(path)
 
-    with tqdm(desc='Searching %i files' % len(files),
-              total=len(files)) as file_progress:
-
-        if args.get('--output') == sys.stout:
-            file_progress.close()
-
-        for f in files:
-            search(f, args)
-            file_progress.update(1)
-
-    if args.get('--output') != sys.stdout:
-        args.get('--output').close()
+    print 'Searching %s files...' % len(files)
+    task = partial(search, args=args)
+    bag = db.from_delayed([delayed(task)(f, i) for i, f in enumerate(files)])
+    bag.compute()
+    print 'finished'
