@@ -132,7 +132,7 @@ if __name__ == '__main__':
     with tqdm(desc='Searching %i files' % len(files),
               total=len(files)) as file_progress:
 
-        if args.get('--output') == sys.stout:
+        if args.get('--output') == sys.stdout:
             file_progress.close()
 
         for f in files:
