@@ -3,6 +3,7 @@
 """usage: c10-grep <value> <path>... [options]
 
 Search Chapter 10 files/directories for "<value>" based on user input.
+Use "*" for value to see all data at that address.
 
 Options:
     -c CHANNEL, --channel CHANNEL  Channel ID
@@ -98,7 +99,9 @@ def search(path, args, i=None):
                         if args.get('--mask') is not None:
                             value &= args.get('--mask')
 
-                        if value == args.get('<value>'):
+                        if args.get('<value>') == '*':
+                            print hex(value)
+                        elif value == args.get('<value>'):
                             outfile.write((' ' * 4) + get_time(
                                 msg.intra_packet_timestamp, last_time) + '\n')
 
