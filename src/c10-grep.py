@@ -92,7 +92,7 @@ def search(path, args, i=None):
                         if args.get('--cmd') and args.get('--cmd') != cmd:
                             continue
 
-                        offset = args.get('--word-offset')
+                        offset = args.get('--word-offset') * 2
                         value, = struct.unpack('=H', msg.data[
                             offset:offset + 2])
 
@@ -124,6 +124,14 @@ if __name__ == '__main__':
                 print 'Invalid value "%s" for %s' % (args[opt], opt)
                 raise SystemExit
 
+    if args.get('--output') and os.path.exists(args.get('--output')):
+        if args.get('--force'):
+            with open(args.get('--output'), 'w') as f:
+                f.write('')
+        else:
+            print 'Output file exists, use -f to overwrite.'
+            raise SystemExit
+
     # Describe the search parameters.
     print 'Searching for %s' % hex(args.get('<value>')),
     if args.get('--channel'):
@@ -134,14 +142,6 @@ if __name__ == '__main__':
         print 'at word %s' % args.get('--word-offset'),
     if args.get('--mask'):
         print 'with mask %s' % hex(args.get('--mask')),
-
-    if args.get('--output') and os.path.exists(args.get('--output')):
-        if args.get('--force'):
-            with open(args.get('--output'), 'w') as f:
-                f.write('')
-        else:
-            print 'File exists, use -f to overwrite.'
-            raise SystemExit
 
     files = []
     for path in args.get('<path>'):
