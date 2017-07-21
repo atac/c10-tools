@@ -120,8 +120,6 @@ if __name__ == '__main__':
             except ValueError:
                 print 'Invalid value "%s" for %s' % (args[opt], opt)
                 raise SystemExit
-            if opt in ('--cmd', '<value>', '--mask'):
-                args[opt] = swap_word(args[opt])
 
     # Describe the search parameters.
     print 'Searching for %s' % hex(args.get('<value>')),
