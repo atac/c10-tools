@@ -14,13 +14,11 @@ import struct
 from docopt import docopt
 
 from chapter10 import C10
-from common import walk_packets
+from common import walk_packets, FileProgress
 
 
 def gen_node(packets, seq=0):
     """Generate an index node packet."""
-
-    print ('Index node for %s packets' % len(packets))
 
     packet = bytes()
 
@@ -64,8 +62,6 @@ def gen_node(packets, seq=0):
 
 def gen_root(nodes, last, seq, last_packet):
     """Generate a root index packet."""
-
-    print ('Root index for: %s nodes' % len(nodes))
 
     packet = bytes()
 
@@ -124,10 +120,11 @@ if __name__ == '__main__':
 
     # Don't overwrite unless explicitly required.
     if os.path.exists(args['<dst>']) and not args['--force']:
-        print('dst file already exists. Use -f to overwrite.')
+        print('Destination file already exists. Use -f to overwrite.')
         raise SystemExit
 
-    with open(args['<dst>'], 'wb') as out:
+    with open(args['<dst>'], 'wb') as out, \
+            FileProgress(args['<src>']) as progress:
 
         # Packets for indexing.
         packets, nodes = [], []
@@ -136,6 +133,9 @@ if __name__ == '__main__':
         last_packet = None
 
         for packet in walk_packets(C10(args['<src>']), args):
+
+            progress.update(packet.packet_length)
+
             last_packet = packet
             if packet.data_type == 0x03:
                 continue
