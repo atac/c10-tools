@@ -25,10 +25,11 @@ def gen_node(packets, seq=0):
     packet = bytes()
 
     # Header
+    data_len = 4 + 8 + (20 * len(packets))
     values = [0xeb25,
               0,
-              24 + 4 + 8 + (20 * len(packets)),
-              4 + 8 + (20 * len(packets)),
+              24 + data_len,
+              data_len,
               0x06,
               seq,
               0,
@@ -36,26 +37,26 @@ def gen_node(packets, seq=0):
               packets[-1].rtc_low,
               packets[-1].rtc_high]
 
-    sums = struct.pack('HHIIBBBBIH', *values)
+    sums = struct.pack('=HHIIBBBBIH', *values)
     sums = sum(array('H', sums)) & 0xffff
     values.append(sums)
-    packet += struct.pack('HHIIBBBBIHH', *values)
+    packet += struct.pack('=HHIIBBBBIHH', *values)
 
     # CSDW
     csdw = 0x0000
-    csdw &= 1 << 31
-    csdw &= 1 << 30
+    csdw &= (1 << 31)
+    csdw &= (1 << 30)
     csdw += len(packets)
-    packet += struct.pack('I', csdw)
+    packet += struct.pack('=I', csdw)
 
     # File Length (at start of node)
     pos = packets[-1].pos + packets[-1].packet_length
-    packet += struct.pack('Q', pos)
+    packet += struct.pack('=Q', pos)
 
     # Packets
     for p in packets:
-        ipts = struct.pack('HH', p.rtc_low & 0xffff, p.rtc_high & 0xffff)
-        index = struct.pack('xHHQ', p.channel_id, p.data_type, p.pos)
+        ipts = struct.pack('=II', p.rtc_low & 0xffff, p.rtc_high & 0xffff)
+        index = struct.pack('=xBHQ', p.data_type, p.channel_id, p.pos)
         packet += ipts + index
 
     return pos, packet
@@ -80,31 +81,31 @@ def gen_root(nodes, last, seq, last_packet):
               last_packet.rtc_low,
               last_packet.rtc_high]
 
-    sums = struct.pack('HHIIBBBBIH', *values)
+    sums = struct.pack('=HHIIBBBBIH', *values)
     sums = sum(array('H', sums)) & 0xffff
     values.append(sums)
-    packet += struct.pack('HHIIBBBBIHH', *values)
+    packet += struct.pack('=HHIIBBBBIHH', *values)
 
     # CSDW
     csdw = 0x0000
-    csdw &= 1 << 30
+    csdw &= (1 << 30)
     csdw += len(nodes)
     packet += struct.pack('I', csdw)
 
     # File Length (at start of node)
     pos = last_packet.pos + last_packet.packet_length
-    packet += struct.pack('Q', pos)
+    packet += struct.pack('=Q', pos)
 
     # Node Packets
     for node in nodes:
-        ipts = struct.pack('HH', last_packet.rtc_low & 0xffff,
+        ipts = struct.pack('=II', last_packet.rtc_low & 0xffff,
                            last_packet.rtc_high & 0xffff)
-        offset = struct.pack('Q', pos - node)
+        offset = struct.pack('=Q', pos - node)
         packet += ipts + offset
 
     if last is None:
         last = last_packet.pos + last_packet.packet_length
-    packet += struct.pack('Q', last)
+    packet += struct.pack('=Q', last)
 
     return pos, packet
 
