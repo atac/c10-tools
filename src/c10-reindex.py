@@ -74,7 +74,7 @@ def gen_node(packets):
 def gen_root(nodes, last, last_packet):
     """Generate a root index packet."""
 
-    packet = header(20 + (16 * len(packets)),
+    packet = header(20 + (16 * len(nodes)),
                     (last_packet.rtc_low, last_packet.rtc_high))
 
     # CSDW
