@@ -13,7 +13,7 @@ import struct
 
 from docopt import docopt
 
-from chapter10 import C10
+from chapter10 import C10, Packet
 from chapter10.datatypes import Computer
 from common import FileProgress
 
@@ -74,25 +74,27 @@ def gen_node(packets):
 def gen_root(nodes, last, last_packet):
     """Generate a root index packet."""
 
-    packet = header(20 + (16 * len(nodes)),
+    pos = last_packet.pos + last_packet.packet_length
+
+    # Root offset (as last message)
+    if last is None:
+        last = pos
+    nodes.append(last)
+
+    packet = header(12 + (16 * len(nodes)),
                     (last_packet.rtc_low, last_packet.rtc_high))
 
     # CSDW
     packet += struct.pack('=I', int(1 << 30) | len(nodes))
 
     # File Length (at start of node)
-    pos = last_packet.pos + last_packet.packet_length
     packet += struct.pack('=Q', pos)
 
-    # Node Packets
+    # Node Offsets (and a root offset)
     for node in nodes:
         packet += struct.pack('=II', last_packet.rtc_low & 0xffff,
                               last_packet.rtc_high & 0xffff)
         packet += struct.pack('=Q', node)
-
-    if last is None:
-        last = pos
-    packet += struct.pack('=Q', last)
 
     return pos, packet
 
@@ -157,6 +159,8 @@ if __name__ == '__main__':
             offset, raw = gen_node(packets)
             nodes.append(offset)
             out.write(raw)
+            last_packet = Packet.from_string(raw)
+            last_packet.pos = out.tell() - last_packet.packet_length
         if nodes:
             offset, raw = gen_root(nodes, last_root, last_packet)
             out.write(raw)
