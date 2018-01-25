@@ -4,16 +4,16 @@
 usage: c10-errcount <file> [-q] [-l <logfile>]
 """
 
+from __future__ import print_function
 import sys
 import os
 
 from chapter10 import C10
-from chapter10.datatypes import MS1553
 from docopt import docopt
 from tqdm import tqdm
 
 
-error_keys = ('le', 'se', 'we')
+error_keys = ('word_count_error', 'sync_type_error', 'invalid_word_error')
 
 
 def print_summary_labels(out=sys.stdout):
@@ -34,14 +34,14 @@ def main(args):
         if args['-q']:
             progress.leave = False
             progress.close()
-        for packet in C10(args['<file>'], True):
-            if isinstance(packet.body, MS1553) and packet.body.format == 1:
+        for packet in C10(args['<file>']):
+            if packet.data_type == 25:
                 try:
                     chan_count[packet.channel_id] += 1
-                except:
+                except KeyError:
                     chan_count[packet.channel_id] = 1
                 valid = True
-                for msg in packet:
+                for msg in packet.body:
                     errors = [getattr(msg, k) for k in error_keys]
                     count = sum(errors)
                     if count:
@@ -78,18 +78,19 @@ def main(args):
 
     # Print summary.
     print_summary_labels()
-    print '-' * 80
+    print ('-' * 80)
     for k, v in sorted(chan_errors.items()):
         for cell in [k] + v:
-            print str(cell).rjust(10),
-        print str(sum(v)).rjust(10),
-        print str(chan_count[k]).rjust(10)
-    print '-' * 80
-    print 'Totals:'.rjust(10),
+            print (str(cell).rjust(10), end=' ')
+        print (str(sum(v)).rjust(10), end=' ')
+        print (str(chan_count[k]).rjust(10))
+    print ('-' * 80)
+    print ('Totals:'.rjust(10), end=' ')
     for i in range(len(error_keys)):
-        print str(sum([chan[i] for chan in chan_errors.values()])).rjust(10),
-    print str(errcount).rjust(10),
-    print str(sum(chan_count.values())).rjust(10)
+        print (str(sum([chan[i] for chan in chan_errors.values()])).rjust(10),
+               end=' ')
+    print (str(errcount).rjust(10), end=' ')
+    print (str(sum(chan_count.values())).rjust(10))
 
 
 if __name__ == "__main__":

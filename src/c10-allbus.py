@@ -21,7 +21,7 @@ if __name__ == '__main__':
     args = docopt(__doc__)
 
     if os.path.exists(args['<dst>']) and not args['--force']:
-        print 'Destination file exists. Use --force to overwrite it.'
+        print ('Destination file exists. Use --force to overwrite it.')
         raise SystemExit
 
     with open(args['<dst>'], 'wb') as out, \
@@ -51,4 +51,4 @@ if __name__ == '__main__':
 
                 # Write filler.
                 for i in range(packet.packet_length - offset):
-                    out.write('0')
+                    out.write(b'0')
