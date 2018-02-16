@@ -23,7 +23,7 @@ from common import FileProgress, fmt_number
 
 
 BUF_SIZE = 100000
-buf = ''
+buf = b''
 
 
 def parse(data, out_file):
@@ -36,9 +36,9 @@ def parse(data, out_file):
     # Limit the buffer size and add new data to the buffer.
     buf = buf[-BUF_SIZE:] + data
 
-    for i in range(buf.count('\x25\xeb')):
+    for i in range(buf.count(b'\x25\xeb')):
 
-        sync = buf.find('\x25\xeb')
+        sync = buf.find(b'\x25\xeb')
         if sync < 0:
             break
 
