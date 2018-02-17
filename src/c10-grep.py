@@ -17,7 +17,6 @@ but progress reporting is a little exciting)
 """
 
 from __future__ import print_function
-from datetime import timedelta
 from functools import partial
 import os
 import struct
@@ -31,19 +30,11 @@ from docopt import docopt
 from tqdm import tqdm
 import dask.bag as db
 
+from common import get_time
+
 
 def swap_word(word):
     return struct.unpack('<H', struct.pack('>H', word))[0]
-
-
-def get_time(rtc, time_packet):
-    """Get a datetime object based on last time packet and an RTC value."""
-
-    time_packet.body.parse()
-    t = time_packet.body.time
-    offset = (rtc - time_packet.rtc) / 10000000
-    t += timedelta(seconds=offset)
-    return str(t)
 
 
 def search(path, args, i=None):
@@ -103,8 +94,8 @@ def search(path, args, i=None):
                         if args.get('<value>') == '*':
                             print (hex(value))
                         elif value == args.get('<value>'):
-                            outfile.write((' ' * 4) + get_time(
-                                msg.intra_packet_timestamp, last_time) + '\n')
+                            outfile.write((' ' * 4) + str(get_time(
+                                msg.intra_packet_timestamp, last_time)) + '\n')
 
     if outfile != sys.stdout:
         outfile.close()

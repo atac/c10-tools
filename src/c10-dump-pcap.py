@@ -8,13 +8,15 @@ Options:
     -q          Don't display progress bar
     -f --force  Overwrite existing files."""
 
+from time import mktime
 import os
 
 from chapter10 import C10
+from chapter10.datatypes import Time
 from docopt import docopt
 from dpkt.pcap import Writer
 
-from common import walk_packets, FileProgress
+from common import walk_packets, FileProgress, get_time
 
 
 if __name__ == '__main__':
@@ -33,14 +35,21 @@ if __name__ == '__main__':
             as progress:
 
         writer = Writer(out)
+        last_time = None
 
         # Iterate over packets based on args.
         for packet in walk_packets(C10(args['<src>']), args):
 
             progress.update(packet.packet_length)
 
+            # Track time
+            if isinstance(packet.body, Time):
+                last_time = packet
+                continue
+
             if packet.channel_id != args['<channel>']:
                 continue
 
             for msg in packet:
-                writer.writepkt(msg.data)
+                t = get_time(packet.rtc, last_time)
+                writer.writepkt(msg.data, mktime(t.timetuple()))

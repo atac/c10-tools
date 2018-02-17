@@ -1,4 +1,5 @@
 
+from datetime import timedelta
 import os
 
 from tqdm import tqdm
@@ -6,6 +7,16 @@ from tqdm import tqdm
 
 # Format a number nicely with commas for thousands, etc.
 fmt_number = '{0:,}'.format
+
+
+def get_time(rtc, time_packet):
+    """Get a datetime object based on last time packet and an RTC value."""
+
+    time_packet.body.parse()
+    t = time_packet.body.time
+    offset = (rtc - time_packet.rtc) / 10000000.0
+    t += timedelta(seconds=offset)
+    return t
 
 
 def fmt_size(size):
