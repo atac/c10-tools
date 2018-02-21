@@ -61,9 +61,9 @@ def gen_packet(channel, type, time, body):
         rtc_low,
         rtc_high,
     ]
-    header = struct.pack('HHIIBBBBIH', *header)
-    checksum = sum(array('H', header)[:-1]) & 0xffff
-    header += struct.pack('H', checksum)
+    checksum = sum(array('H', struct.pack('=HHIIBBBBIH', *header))) & 0xffff
+    header.append(checksum)
+    header = struct.pack('=HHIIBBBBIHH', *header)
     return header + body
 
 
@@ -83,7 +83,7 @@ def main():
 
         # Write TMATS.
         if args['-t']:
-            with open(args['<tmats_file>'], 'r') as tmats:
+            with open(args['-t'], 'r') as tmats:
                 tmats_body = tmats.read()
 
             header_values = [
@@ -106,7 +106,7 @@ def main():
             sums = sum(array('H', header)) & 0xffff
             out.write(struct.pack('H', sums))
 
-            out.write(tmats_body)
+            out.write(bytes(tmats_body, 'utf8'))
 
         # Loop over the packets and parse into C10.Packet objects if possible.
         packets, added = 0, 0
@@ -117,7 +117,7 @@ def main():
             if args['-q']:
                 progress.close()
 
-            first_time, frames, packet = None, 0, ''
+            first_time, frames, packet = None, 0, b''
 
             for timestamp, ether in dpkt.pcap.Reader(f):
                 if first_time is None:
@@ -150,9 +150,9 @@ def main():
                     if len(packet) + 4 > MAX_BODY_SIZE:
                         csdw = struct.pack('HH', frames, 24)
                         out.write(gen_packet(
-                            10, 0x69, first_time, csdw + packet))
+                            10, 0x40, first_time, csdw + packet))
                         added += 1
-                        first_time, frames, packet = None, 0, ''
+                        first_time, frames, packet = None, 0, b''
 
                     packets += 1
 
