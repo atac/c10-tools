@@ -11,6 +11,9 @@ Options:
 output file.
 """
 
+# @TODO: make channel # and datatype options
+# @TODO: should insert time packets to make a valid file
+
 from array import array
 import os
 import struct
@@ -106,7 +109,7 @@ def main():
             sums = sum(array('H', header)) & 0xffff
             out.write(struct.pack('H', sums))
 
-            out.write(bytes(tmats_body, 'utf8'))
+            out.write(tmats_body.encode('utf8'))
 
         # Loop over the packets and parse into C10.Packet objects if possible.
         packets, added = 0, 0
@@ -130,7 +133,6 @@ def main():
                     # Payload
                     data = ip.data.data[4:]
 
-                    # @TODO: add IPTS
                     ipts = struct.pack('Q', make_rtc(timestamp))
                     packet += ipts
 
@@ -150,7 +152,7 @@ def main():
                     if len(packet) + 4 > MAX_BODY_SIZE:
                         csdw = struct.pack('HH', frames, 24)
                         out.write(gen_packet(
-                            10, 0x40, first_time, csdw + packet))
+                            40, 0x69, first_time, csdw + packet))
                         added += 1
                         first_time, frames, packet = None, 0, b''
 
@@ -162,11 +164,11 @@ def main():
         if packet:
                 csdw = struct.pack('HH', 24, frames)
                 out.write(gen_packet(
-                    10, 0x69, first_time, csdw + packet))
+                    40, 0x69, first_time, csdw + packet))
                 added += 1
 
         if not args['-q']:
-            print('Parsed %s Chapter 10 packets from %s network packets' % (
+            print('Created %s Chapter 10 packets from %s network packets' % (
                 fmt_number(added), fmt_number(packets)))
 
 
