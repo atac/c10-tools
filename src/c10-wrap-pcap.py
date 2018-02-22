@@ -137,22 +137,33 @@ def main():
                     packet += ipts
 
                     # IPDH
-                    first, second = struct.unpack('xhh', ether.src)
-                    virtual_link = int((first << 8) & second)
-                    src_ip, = struct.unpack('I', ip.src)
-                    dst_ip, = struct.unpack('I', ip.dst)
-                    ipdh = struct.pack('HxxxxHIIHH',
-                                       len(data), virtual_link, src_ip, dst_ip,
-                                       ip.data.sport, ip.data.dport)
-                    packet += ipdh
+                    # ethernet
+                    # first, second = struct.unpack('xhh', ether.src)
+                    # virtual_link = int((first << 8) & second)
+                    # src_ip, = struct.unpack('I', ip.src)
+                    # dst_ip, = struct.unpack('I', ip.dst)
+                    # ipdh = struct.pack('HxxxxHIIHH',
+                    #                  len(data), virtual_link, src_ip, dst_ip,
+                    #                    ip.data.sport, ip.data.dport)
 
+                    # message
+                    ipdh = struct.pack('=HH', 99, len(data))
+
+                    packet += ipdh
                     packet += data
 
                     frames += 1
                     if len(packet) + 4 > MAX_BODY_SIZE:
-                        csdw = struct.pack('HH', frames, 24)
+                        # ethernet packets
+                        # csdw = struct.pack('HH', frames, 24)
+                        # out.write(gen_packet(
+                        #     40, 0x69, first_time, csdw + packet))
+
+                        # message packets
+                        csdw = struct.pack('HH', frames, 0)
                         out.write(gen_packet(
-                            40, 0x69, first_time, csdw + packet))
+                            32, 0x30, first_time, csdw + packet))
+
                         added += 1
                         first_time, frames, packet = None, 0, b''
 
@@ -162,9 +173,12 @@ def main():
                 progress.update_from_tell(f.tell())
 
         if packet:
-                csdw = struct.pack('HH', 24, frames)
+                # message packets
+                csdw = struct.pack('HH', 0, frames)
                 out.write(gen_packet(
-                    40, 0x69, first_time, csdw + packet))
+                    32, 0x30, first_time, csdw + packet))
+                added += 1
+                first_time, frames, packet = None, 0, b''
                 added += 1
 
         if not args['-q']:
