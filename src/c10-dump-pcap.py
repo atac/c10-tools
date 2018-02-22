@@ -52,4 +52,5 @@ if __name__ == '__main__':
 
             for msg in packet:
                 t = get_time(packet.rtc, last_time)
-                writer.writepkt(msg.data, mktime(t.timetuple()))
+                t = mktime(t.timetuple()) + (t.microsecond/1000000.0)
+                writer.writepkt(msg.data, t)
