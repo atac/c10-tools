@@ -13,8 +13,7 @@ from __future__ import print_function
 
 from docopt import docopt
 
-from chapter10 import C10
-from chapter10.datatypes import get_label
+from i106 import C10
 
 from common import walk_packets, fmt_number, fmt_size, FileProgress
 
@@ -29,7 +28,7 @@ def main():
     with FileProgress(args['<file>']) as progress:
 
         # Iterate over selected packets based on args.
-        for packet in walk_packets(C10(args['<file>'], True), args):
+        for packet in walk_packets(C10(args['<file>']), args):
             key = (packet.channel_id, packet.data_type)
             if key not in channels:
                 channels[key] = {'packets': 0,
@@ -49,7 +48,7 @@ def main():
     for key, channel in sorted(channels.items()):
         print(('Channel %s' % channel['id']).ljust(15), end='')
         print(('%s - %s' % (hex(channel['type']),
-                            get_label(channel['type']))).ljust(35), end='')
+                            channel['type'])).ljust(35), end='')
         print(fmt_number(channel['packets']).rjust(13), end='')
         print(fmt_size(channel['size']).rjust(17))
         packets += channel['packets']

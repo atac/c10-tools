@@ -1,19 +1,19 @@
 #!/usr/bin/env python
 
 """Counts error flags in 1553 format 1 packets
-usage: c10-errcount <file> [-q] [-l <logfile>]
+usage: 106errcount <file> [-q] [-l <logfile>]
 """
 
 from __future__ import print_function
 import sys
 import os
 
-from chapter10 import C10
+from i106 import C10
 from docopt import docopt
 from tqdm import tqdm
 
 
-error_keys = ('word_count_error', 'sync_type_error', 'invalid_word_error')
+error_keys = ('le', 'se', 'we')
 
 
 def print_summary_labels(out=sys.stdout):
@@ -41,7 +41,7 @@ def main(args):
                 except KeyError:
                     chan_count[packet.channel_id] = 1
                 valid = True
-                for msg in packet.body:
+                for msg in packet:
                     errors = [getattr(msg, k) for k in error_keys]
                     count = sum(errors)
                     if count:

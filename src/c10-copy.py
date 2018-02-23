@@ -11,7 +11,7 @@ Options:
 
 import os
 
-from chapter10 import C10
+from i106 import C10
 from docopt import docopt
 
 from common import walk_packets, FileProgress
