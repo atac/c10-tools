@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""usage: c10-allbus <src> <dst> [-b] [options]
+"""usage: i106-allbus <src> <dst> [-b] [options]
 
 Switch 1553 format 1 messages to indicate the same bus (A or B).
 
@@ -12,7 +12,7 @@ Options:
 import os
 
 from docopt import docopt
-from chapter10 import C10
+from i106 import C10
 
 from common import FileProgress
 
@@ -38,14 +38,14 @@ if __name__ == '__main__':
             else:
                 # Write out packet header secondary if applicable) and CSDW.
                 offset = 28
-                if packet.secondary_header:
-                    offset += 12
+                # if packet.secondary_header:
+                #     offset += 12
                 out.write(raw[:offset])
 
                 # Walk through messages and update bus ID as needed.
-                for msg in packet.body:
-                    msg.bus_id = int(args['-b'])
-                    packed = msg.pack(packet.body.iph_format)
+                for msg in packet:
+                    msg.bus = int(args['-b'])
+                    packed = bytes(msg)
                     out.write(packed)
                     offset += len(packed)
 
