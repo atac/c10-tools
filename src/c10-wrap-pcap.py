@@ -12,9 +12,9 @@ output file.
 """
 
 # @TODO: make channel # and datatype options
-# @TODO: should insert time packets to make a valid file
 
 from array import array
+from datetime import datetime
 import os
 import struct
 
@@ -70,6 +70,31 @@ def gen_packet(channel, type, time, body):
     return header + body
 
 
+def time_packet(t):
+    """Generate and return a complete time packet from a unix timestamp."""
+
+    time = datetime.fromtimestamp(t)
+
+    # Time
+    TSn, Sn = (int(char) for char in str(time.second).zfill(2))
+    Hmn, Tmn = (int(char)
+                for char in str(time.microsecond).zfill(2)[:2])
+    TMn, Mn = (int(char) for char in str(time.minute).zfill(2))
+    THn, Hn = (int(char) for char in str(time.hour).zfill(2))
+
+    # IRIG day
+    day = time.timetuple().tm_yday
+    HDn, TDn, Dn = (int(char) for char in str(day))
+
+    data = [
+        (TSn << 12) + (Sn << 8) + (Hmn << 4) + Tmn,
+        (THn << 12) + (Hn << 8) + (TMn << 4) + Mn,
+        (HDn << 8) + (TDn << 4) + Dn
+    ]
+    body = struct.pack('xxxxH' * len(data), *data)
+    return gen_packet(0, 0x10, t, body)
+
+
 MAX_BODY_SIZE = 500000
 
 
@@ -121,10 +146,14 @@ def main():
                 progress.close()
 
             first_time, frames, packet = None, 0, b''
+            file_start_time = None
 
             for timestamp, ether in dpkt.pcap.Reader(f):
                 if first_time is None:
                     first_time = timestamp
+                if file_start_time is None:
+                    file_start_time = timestamp
+                    out.write(time_packet(timestamp))
                 ether = dpkt.ethernet.Ethernet(ether)
                 ip = ether.data
                 if hasattr(ip, 'data') and isinstance(
