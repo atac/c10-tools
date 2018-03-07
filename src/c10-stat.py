@@ -18,6 +18,26 @@ from i106 import C10
 from common import walk_packets, fmt_number, fmt_size, FileProgress
 
 
+TYPES = (
+    'Computer Generated',
+    'PCM',
+    'Time',
+    'Mil-STD-1553',
+    'Analog',
+    'Discrete',
+    'Message',
+    'ARINC 429',
+    'Video',
+    'Image',
+    'UART',
+    'IEEE-1394',
+    'Parallel',
+    'Ethernet',
+    'TSPI/CTS Data',
+    'Controller Area Network Bus',
+)
+
+
 def main():
 
     # Get commandline args.
@@ -47,8 +67,14 @@ def main():
     packets, size = 0, 0
     for key, channel in sorted(channels.items()):
         print(('Channel %s' % channel['id']).ljust(15), end='')
-        print(('%s - %s' % (hex(channel['type']),
-                            channel['type'])).ljust(35), end='')
+
+        datatype = int(channel['type'] / 8.0)
+        type_label = TYPES[datatype]
+        subtype = channel['type'] - (datatype * 8)
+
+        print(('%s - %s (format %s)' % (hex(channel['type']),
+                                        type_label,
+                                        subtype)).ljust(35), end='')
         print(fmt_number(channel['packets']).rjust(13), end='')
         print(fmt_size(channel['size']).rjust(17))
         packets += channel['packets']
