@@ -12,10 +12,12 @@ output file.
 """
 
 from array import array
-import struct
+from contextlib import suppress
+from datetime import datetime
 import os
+import struct
 
-from chapter10 import Packet
+from i106 import C10
 from docopt import docopt
 import dpkt
 
@@ -37,20 +39,21 @@ def parse(data, out_file):
     buf = buf[-BUF_SIZE:] + data
 
     for i in range(buf.count(b'\x25\xeb')):
-
         sync = buf.find(b'\x25\xeb')
         if sync < 0:
-            break
+            continue
 
-        try:
-            packet = Packet.from_string(buf[sync:], True)
-        except (EOFError, OverflowError):
-            break
+        with suppress(RuntimeError):
+            for packet in C10(buffer=buf[sync:]):
+                raw = bytes(packet)
+                if len(raw) == packet.packet_length:
+                    packets_added += 1
+                    out_file.write(raw)
 
-        if len(bytes(packet)) == packet.packet_length and packet.check():
-            packets_added += 1
-            buf = buf[sync + packet.packet_length:]
-            out_file.write(bytes(packet))
+                # Only read one packet.
+                break
+
+        buf = buf[sync + 2:]
 
     return packets_added
 

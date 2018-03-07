@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Wrap ethernet data in a pcap file in a valid chapter10 file.
+"""Wrap ethernet data in a pcap file in a valid chapter 10 file.
 
 usage: c10-wrap-pcap <infile> <outfile> [options]
 
