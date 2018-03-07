@@ -22,14 +22,14 @@ def clean():
     for f in glob('*.spec'):
         os.remove(f)
 
-    print 'Cleaned build & dist files'
+    print('Cleaned build & dist files')
 
 
 def install():
     for f in glob('dist/*'):
         shutil.copy(f, os.path.join(os.environ.get('HOME'), 'bin'))
 
-    print 'Installed to ~/bin'
+    print('Installed to ~/bin')
 
 
 if __name__ == '__main__':
