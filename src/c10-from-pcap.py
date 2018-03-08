@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Extract chapter10 data from a pcap file.
+"""Extract chapter 10 data from a pcap file.
 
 usage: c10-from-pcap <infile> <outfile> [options]
 
