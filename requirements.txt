@@ -1,5 +1,5 @@
 -e git+git@bitbucket.org:atac-bham/pychapter10.git@b21c2fceb971d3e91b2d882da48b9e083cd32240#egg=Chapter10
--e git+ssh://git@bitbucket.org/mcferrill/libirig106-python.git@cd66208924b3a195c1f5d2ee6fe4982cc089f7a0#egg=i106
+-e git+ssh://git@bitbucket.org/mcferrill/libirig106-python.git@5c9269daf1debaae75b0a0e068d8ccaf5a137dee#egg=i106
 PyInstaller==3.3.1
 altgraph==0.15
 cloudpickle==0.5.2
