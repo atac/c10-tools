@@ -22,15 +22,13 @@ import os
 import struct
 import sys
 
-from chapter10 import C10
-from chapter10.datatypes import MS1553, Time
-from chapter10.datatypes.base import IterativeBase
+from i106 import C10
 from dask.delayed import delayed
 from docopt import docopt
 from tqdm import tqdm
 import dask.bag as db
 
-from common import get_time
+from common import get_time, FileProgress
 
 
 def swap_word(word):
@@ -47,24 +45,20 @@ def search(path, args, i=None):
     outfile.write(path + '\n')
 
     last_time = None
-    with tqdm(
-            total=os.stat(path).st_size,
+    with FileProgress(
+            filename=path,
             desc='    ' + os.path.basename(path),
-            unit='bytes',
-            unit_scale=True,
             ascii=False,
-            dynamic_ncols=True,
-            position=i,
-            leave=False) as progress:
+            position=i) as progress:
 
         if outfile == sys.stdout:
             progress.close()
 
-        for packet in C10(path, True):
+        for packet in C10(path):
 
             progress.update(packet.packet_length)
 
-            if isinstance(packet.body, Time):
+            if packet.data_type == 0x11:
                 last_time = packet
 
             # Match channel
@@ -73,29 +67,24 @@ def search(path, args, i=None):
                 continue
 
             # Iterate over messages if applicable
-            if isinstance(packet.body, IterativeBase):
-                packet.body.parse()
+            for msg in packet:
+                if packet.data_type == 0x19:
+                    cmd = msg[0]
 
-                for msg in packet.body:
-                    if isinstance(packet.body, MS1553):
-                        cmd, = struct.unpack('=H', msg.data[:2])
+                    # Match command word
+                    if args.get('--cmd') and args.get('--cmd') != cmd:
+                        continue
 
-                        # Match command word
-                        if args.get('--cmd') and args.get('--cmd') != cmd:
-                            continue
+                    value = msg[args.get('--word-offset')]
 
-                        offset = args.get('--word-offset') * 2
-                        value, = struct.unpack('=H', msg.data[
-                            offset:offset + 2])
+                    if args.get('--mask') is not None:
+                        value &= args.get('--mask')
 
-                        if args.get('--mask') is not None:
-                            value &= args.get('--mask')
-
-                        if args.get('<value>') == '*':
-                            print (hex(value))
-                        elif value == args.get('<value>'):
-                            outfile.write((' ' * 4) + str(get_time(
-                                msg.intra_packet_timestamp, last_time)) + '\n')
+                    if args.get('<value>') == '*':
+                        print (hex(value))
+                    elif value == args.get('<value>'):
+                        outfile.write((' ' * 4) + str(get_time(
+                            msg.rtc, last_time)) + '\n')
 
     if outfile != sys.stdout:
         outfile.close()
@@ -107,6 +96,8 @@ if __name__ == '__main__':
     # Validate int/hex inputs.
     for opt in ('--channel', '--word-offset', '--cmd', '<value>', '--mask'):
         if args.get(opt):
+            if opt == '<value>' and args[opt] == '*':
+                continue
             try:
                 if args[opt].lower().startswith('0x'):
                     args[opt] = int(args[opt], 16)
@@ -125,7 +116,10 @@ if __name__ == '__main__':
             raise SystemExit
 
     # Describe the search parameters.
-    print ('Searching for %s' % hex(args.get('<value>')), end='')
+    value_repr = args.get('<value>')
+    if isinstance(value_repr, int):
+        value_repr = hex(value_repr)
+    print ('Searching for %s' % value_repr, end='')
     if args.get('--channel'):
         print ('in channel #%s' % args.get('--channel'), end='')
     if args.get('--cmd'):

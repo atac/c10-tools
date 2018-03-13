@@ -12,8 +12,15 @@ fmt_number = '{0:,}'.format
 def get_time(rtc, time_packet):
     """Get a datetime object based on last time packet and an RTC value."""
 
-    time_packet.body.parse()
-    t = time_packet.body.time
+    # pychapter10
+    if hasattr(time_packet, 'body'):
+        time_packet.body.parse()
+        t = time_packet.body.time
+
+    # libirig106-python
+    else:
+        t = time_packet.time
+
     offset = (rtc - time_packet.rtc) / 10000000.0
     t += timedelta(seconds=offset)
     return t
