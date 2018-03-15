@@ -13,9 +13,8 @@ import struct
 
 from docopt import docopt
 
-from chapter10 import C10, Packet
-from chapter10.datatypes import Computer
 from common import FileProgress
+from i106 import C10
 
 
 # Sequence number for channel 0
@@ -27,6 +26,9 @@ def header(data_length, rtc):
 
     packet = bytes()
 
+    rtc_low = int((rtc >> 32) & 0xffffffff)
+    rtc_high = int((rtc >> 16) & 0xffff)
+
     values = [0xeb25,
               0,
               24 + data_length,
@@ -35,8 +37,8 @@ def header(data_length, rtc):
               seq,
               0,
               0x03,
-              rtc[0],
-              rtc[1]]
+              rtc_low,
+              rtc_high]
 
     # Increment sequence.
     seq += 1
@@ -53,20 +55,19 @@ def header(data_length, rtc):
 def gen_node(packets):
     """Generate an index node packet."""
 
-    packet = header(12 + (20 * len(packets)),
-                    (packets[-1].rtc_low, packets[-1].rtc_high))
+    packet = header(12 + (20 * len(packets)), packets[-1].rtc)
 
     # CSDW
     packet += struct.pack('=I', int(1 << 31) | int(1 << 30) | len(packets))
 
     # File Length (at start of node, doubles as node packet offset)
-    pos = packets[-1].pos + packets[-1].packet_length
+    pos = packets[-1].offset + packets[-1].packet_length
     packet += struct.pack('=Q', pos)
 
     # Packets
     for p in packets:
-        packet += struct.pack('=II', p.rtc_low & 0xffff, p.rtc_high & 0xffff)
-        packet += struct.pack('=xBHQ', p.data_type, p.channel_id, p.pos)
+        packet += struct.pack('=Q', p.rtc)
+        packet += struct.pack('=xBHQ', p.data_type, p.channel_id, p.offset)
 
     return pos, packet
 
@@ -74,15 +75,14 @@ def gen_node(packets):
 def gen_root(nodes, last, last_packet):
     """Generate a root index packet."""
 
-    pos = last_packet.pos + last_packet.packet_length
+    pos = last_packet.offset + last_packet.packet_length
 
     # Root offset (as last message)
     if last is None:
         last = pos
     nodes.append(last)
 
-    packet = header(12 + (16 * len(nodes)),
-                    (last_packet.rtc_low, last_packet.rtc_high))
+    packet = header(12 + (16 * len(nodes)), last_packet.rtc)
 
     # CSDW
     packet += struct.pack('=I', int(1 << 30) | len(nodes))
@@ -92,9 +92,7 @@ def gen_root(nodes, last, last_packet):
 
     # Node Offsets (and a root offset)
     for node in nodes:
-        packet += struct.pack('=II', last_packet.rtc_low & 0xffff,
-                              last_packet.rtc_high & 0xffff)
-        packet += struct.pack('=Q', node)
+        packet += struct.pack('=QQ', last_packet.rtc, node)
 
     return pos, packet
 
@@ -120,7 +118,7 @@ if __name__ == '__main__':
             # Skip old index packets.
             if packet.data_type == 0x03:
                 continue
-            elif isinstance(packet.body, Computer):
+            elif packet.channel_id == 0:
                 seq = packet.sequence_number
 
             last_packet = packet
@@ -135,7 +133,7 @@ if __name__ == '__main__':
                 continue
 
             # Note packet position in the output file.
-            packet.pos = out.tell() - packet.packet_length
+            packet.offset = out.tell() - packet.packet_length
             packets.append(packet)
 
             # Projected index node packet size.
@@ -159,8 +157,10 @@ if __name__ == '__main__':
             offset, raw = gen_node(packets)
             nodes.append(offset)
             out.write(raw)
-            last_packet = Packet.from_string(raw)
-            last_packet.pos = out.tell() - last_packet.packet_length
+            for packet in C10(buffer=raw):
+                last_packet = packet
+                break
+            last_packet.offset = out.tell() - last_packet.packet_length
         if nodes:
             offset, raw = gen_root(nodes, last_root, last_packet)
             out.write(raw)
