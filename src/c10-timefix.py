@@ -1,13 +1,20 @@
 #!/usr/bin/env python
 
-"""usage: c10-timefix <input_file> <output_file>"""
+"""usage: c10-timefix <input_file> <output_file>
+
+Check time packets within a chapter 10 file and ensure they are within an
+acceptable offset of each other (5 seconds) or adjusts to 1 second offset.
+"""
+
+# TODO: add -f option to avoid overwriting existing files by mistake
+# TODO: add ability to generate new time packets when missing or
+# misplaced
 
 from datetime import timedelta
 import struct
 
-from chapter10 import C10
-from chapter10.datatypes import Time
 from docopt import docopt
+from i106 import C10
 
 from common import FileProgress
 
@@ -33,10 +40,11 @@ def main():
             FileProgress(args['<input_file>']) as progress:
         for packet in C10(args['<input_file>']):
             progress.update(packet.packet_length)
-            if isinstance(packet.body, Time):
-                if valid(packet.body.time, prev):
-                    out_f.write(bytes(packet))
-                    prev = packet.body.time
+            raw = bytes(packet)
+            if packet.data_type == 0x11:
+                if valid(packet.time, prev):
+                    out_f.write(raw)
+                    prev = packet.time
 
                 else:
                     # Manually write packet with new time.
@@ -45,9 +53,8 @@ def main():
 
                     # Write headers & csdw
                     prefix = 28
-                    if packet.secondary_sums:
-                        prefix += 12
-                    raw = bytes(packet)
+                    # if packet.secondary_sums:
+                    #     prefix += 12
                     out_f.write(raw[:prefix])
 
                     # Time
@@ -84,7 +91,7 @@ def main():
 
             else:
                 # Write packet to file
-                out_f.write(bytes(packet))
+                out_f.write(raw)
 
 
 if __name__ == "__main__":
