@@ -12,8 +12,8 @@ filedir = os.path.dirname(os.path.abspath(__file__))
 def build():
     os.chdir(filedir)
     for f in glob('src/c10-*.py'):
-        os.system('pyinstaller -F %s -p ../pychapter10 --exclude-module \
-matplotlib;' % f)
+        os.system('pyinstaller -F %s -p ../pychapter10 -p ../libirig106-python \
+--exclude-module matplotlib;' % f)
 
 
 def clean():
