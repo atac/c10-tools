@@ -19,11 +19,16 @@ def setup_module():
         yield
 
 
-@patch('os.path.exists', Mock(return_value=True))
 def test_overwrite():
-    with pytest.raises(SystemExit):
-        main(('src', 'dst'))
+    with NamedTemporaryFile() as out:
+        with pytest.raises(SystemExit):
+            main((os.path.join(dirname, '1.c10'), out.name))
 
+
+def test_force():
+    with NamedTemporaryFile() as out:
+        main((os.path.join(dirname, '1.c10'), out.name, '-f'))
+        assert os.stat(out.name).st_size > 0
 
 def test_defaults():
     with NamedTemporaryFile() as out:
@@ -36,7 +41,7 @@ def test_defaults():
 
 def test_b():
     with NamedTemporaryFile() as out:
-        main((os.path.join(dirname, '1.c10'), out.name, '-f', '-b'))
+        main((os.path.join(dirname, '1.c10'), out.name, '-b', '-f'))
         for packet in C10(out.name):
             if packet.data_type == 0x19:
                 for i, msg in enumerate(packet):
