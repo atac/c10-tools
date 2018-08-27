@@ -1,5 +1,5 @@
--e git+git@bitbucket.org:atac-bham/libirig106-python.git@87f5c5f05ae0beeb84b04ed498bff2b704c3c1ac#egg=i106
--e git+git@bitbucket.org:atac-bham/pychapter10.git@b21c2fceb971d3e91b2d882da48b9e083cd32240#egg=Chapter10
+-e git+git@bitbucket.org:atac-bham/libirig106-python.git@3e56ec9f7206f71d9e04f0d3da3d5273147d6c53#egg=i106
+-e git+git@bitbucket.org:atac-bham/pychapter10.git@f655a3408b2951b4b8f6c56d72dfb2509063b1e8#egg=Chapter10
 PyInstaller==3.3.1
 cloudpickle==0.5.3
 cytoolz==0.9.0.1
