@@ -1,10 +1,12 @@
 
 from tempfile import NamedTemporaryFile
-from unittest.mock import patch, Mock
+from unittest.mock import patch
 import os
 
-from i106 import C10
-# from chapter10 import C10
+try:
+    from i106 import C10
+except ImportError:
+    from chapter10 import C10
 
 import pytest
 
@@ -29,6 +31,7 @@ def test_force():
     with NamedTemporaryFile() as out:
         main((os.path.join(dirname, '1.c10'), out.name, '-f'))
         assert os.stat(out.name).st_size > 0
+
 
 def test_defaults():
     with NamedTemporaryFile() as out:
