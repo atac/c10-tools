@@ -37,3 +37,4 @@ each sample from the commandline using python (eg: python c10-stat.py) and
 commandline help will show you how to use each one.
 
 The compile.py script can be used to generate native binaries (via PyInstaller)
+pytest==3.7.3

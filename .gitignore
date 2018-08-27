@@ -3,3 +3,4 @@
 build
 dist
 data
+.pytest_cache*

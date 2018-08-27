@@ -5,15 +5,21 @@ import os
 import shutil
 import sys
 
-
 filedir = os.path.dirname(os.path.abspath(__file__))
 
 
 def build():
     os.chdir(filedir)
-    for f in glob('src/c10-*.py'):
+    for f in glob('src/c10_*.py') + glob('src/c10-*.py'):
         os.system('pyinstaller -F %s -p ../pychapter10 -p ../libirig106-python \
 --exclude-module matplotlib;' % f)
+        if 'c10_' in f:
+            name, ext = os.path.splitext('dist/' + os.path.basename(f))
+            try:
+                os.rename(name, '-'.join(name.rsplit('_', 1)))
+            except FileNotFoundError:
+                name += '.exe'
+                os.rename(name, '-'.join(name.rsplit('_', 1)))
 
 
 def clean():
