@@ -1,0 +1,1 @@
+-e git+git@bitbucket.org:atac-bham/libirig106-python.git@3e56ec9f7206f71d9e04f0d3da3d5273147d6c53#egg=i106

@@ -10,10 +10,13 @@ Options:
 """
 
 import os
+import sys
 
 from docopt import docopt
-# from i106 import C10
-from chapter10 import C10
+try:
+    from i106 import C10
+except ModuleNotFoundError:
+    from chapter10 import C10
 
 from .common import FileProgress
 
@@ -22,7 +25,7 @@ def main(args=[]):
     args = docopt(__doc__, args)
 
     if os.path.exists(args['<dst>']) and not args['--force']:
-        print ('Destination file exists. Use --force to overwrite it.')
+        print('Destination file exists. Use --force to overwrite it.')
         raise SystemExit
 
     with open(args['<dst>'], 'wb') as out, \
@@ -53,6 +56,7 @@ def main(args=[]):
             # Write filler.
             for i in range(packet.packet_length - offset):
                 out.write(b'0')
+
 
 if __name__ == '__main__':
     main(sys.argv)
