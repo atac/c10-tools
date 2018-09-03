@@ -13,7 +13,8 @@ import os
 
 from docopt import docopt
 from dpkt.pcap import Writer
-from i106 import C10
+# from i106 import C10
+from chapter10 import C10
 
 from common import walk_packets, FileProgress, get_time
 
@@ -50,6 +51,6 @@ if __name__ == '__main__':
                 continue
 
             for msg in packet:
-                t = get_time(msg.rtc, last_time)
+                t = get_time(msg.intra_packet_timestamp, last_time)
                 t = mktime(t.timetuple()) + (t.microsecond/1000000.0)
-                writer.writepkt(msg, t)
+                writer.writepkt(bytes(msg), t)
