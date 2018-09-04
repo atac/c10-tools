@@ -11,4 +11,4 @@ pipelines:
                 - pip
             script:
                 - pip install tox
-                - tox -e py37-c10,py37-i106
+                - tox -e py27-c10,py27-i106,py35-c10,py35-i106
