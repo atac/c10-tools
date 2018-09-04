@@ -53,4 +53,4 @@ if __name__ == '__main__':
             for msg in packet:
                 t = get_time(msg.intra_packet_timestamp, last_time)
                 t = mktime(t.timetuple()) + (t.microsecond/1000000.0)
-                writer.writepkt(bytes(msg), t)
+                writer.writepkt(msg.data, t)
