@@ -1,4 +1,8 @@
-image: python:3.7
+image:
+    name: mcferrill/node-python-git:py3
+    username: $DOCKER_USER
+    password: $DOCKER_PASS
+    email: mcferrill@msn.com
 
 pipelines:
     default:
