@@ -6,4 +6,5 @@ pipelines:
             caches:
                 - pip
             script:
+                - pip install tox
                 - tox -e py37-c10,py37-i106
