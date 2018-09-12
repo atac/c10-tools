@@ -1,9 +1,10 @@
--e git+git@bitbucket.org:atac-bham/pychapter10.git@f655a3408b2951b4b8f6c56d72dfb2509063b1e8#egg=Chapter10
-cloudpickle==0.5.3
+-e git+git@bitbucket.org:atac-bham/pychapter10.git@dee3a84e8d751ad83ffa0bd661de1da98aa8c192#egg=Chapter10
+PyInstaller==3.4
+cloudpickle==0.5.5
 cytoolz==0.9.0.1
-dask==0.17.2
+dask==0.19.1
 docopt==0.6.2
 dpkt==1.9.1
+pytest==3.8.0
 toolz==0.9.0
-tqdm==4.23.4
-pytest==3.7.3
+tqdm==4.26.0
