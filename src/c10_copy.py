@@ -1,26 +1,33 @@
 #!/usr/bin/env python
 
-"""usage: c10-copy <src> <dst> [options]
+"""usage: c10_copy <src> <dst> [options]
 
 Options:
-    -c CHANNEL..., --channel CHANNEL...  Specify channels to include (csv).
-    -e CHANNEL..., --exclude CHANNEL...  Specify channels to ignore (csv).
-    -t TYPE, --type TYPE                 The types of data to copy (csv, may\
- be decimal or hex eg: 0x40)
+    -c CHANNEL..., --channel CHANNEL...  Specify channels to include (comma \
+separated).
+    -e CHANNEL..., --exclude CHANNEL...  Specify channels to ignore (comma \
+separated).
+    -t TYPE, --type TYPE                 The types of data to copy (comma \
+separated, may be decimal or hex eg: 0x40)
     -f --force                           Overwrite existing files."""
 
 import os
+import sys
 
-from i106 import C10
+try:
+    from i106 import C10
+except ImportError:
+    from chapter10 import C10
+
 from docopt import docopt
 
-from common import walk_packets, FileProgress
+from src.common import walk_packets, FileProgress
 
 
-if __name__ == '__main__':
+def main(args=sys.argv[1:]):
 
     # Get commandline args.
-    args = docopt(__doc__)
+    args = docopt(__doc__, args)
 
     # Don't overwrite unless explicitly required.
     if os.path.exists(args['<dst>']) and not args['--force']:
@@ -42,3 +49,7 @@ if __name__ == '__main__':
             raw = bytes(packet)
             if len(raw) == packet.packet_length:
                 out.write(raw)
+
+
+if __name__ == '__main__':
+    main()

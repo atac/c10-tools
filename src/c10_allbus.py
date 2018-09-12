@@ -15,7 +15,7 @@ import sys
 from docopt import docopt
 try:
     from i106 import C10
-except ModuleNotFoundError:
+except ImportError:
     from chapter10 import C10
 
 from .common import FileProgress
