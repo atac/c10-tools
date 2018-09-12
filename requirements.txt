@@ -1,11 +1,11 @@
 -e git+git@bitbucket.org:atac-bham/libirig106-python.git@3e56ec9f7206f71d9e04f0d3da3d5273147d6c53#egg=i106
 -e git+git@bitbucket.org:atac-bham/pychapter10.git@1507b07cc893689eb934cf554b0410f3ba2f841c#egg=Chapter10
-PyInstaller==3.3.1
-cloudpickle==0.5.3
+PyInstaller==3.4
+cloudpickle==0.5.5
 cytoolz==0.9.0.1
-dask==0.17.2
+dask==0.19.1
 docopt==0.6.2
 dpkt==1.9.1
-pytest==3.7.3
+pytest==3.8.0
 toolz==0.9.0
-tqdm==4.23.4
+tqdm==4.26.0
