@@ -8,19 +8,24 @@ Options:
     -q          Don't display progress bar
     -f --force  Overwrite existing files."""
 
+from array import array
 from time import mktime
-import struct
 import os
+import struct
 
-from docopt import docopt
-from dpkt.pcap import Writer
-from dpkt.udp import UDP
-from dpkt.ip import IP
-from dpkt.ethernet import Ethernet
 # from i106 import C10
 from chapter10 import C10
+from docopt import docopt
+from dpkt.ethernet import Ethernet
+from dpkt.ip import IP
+from dpkt.pcap import Writer
+from dpkt.udp import UDP
 
 from common import walk_packets, FileProgress, get_time
+
+
+def print_hex(data):
+    print(' '.join([hex(b)[2:].zfill(2) for b in array('B', bytes(data))]))
 
 
 if __name__ == '__main__':
@@ -56,22 +61,27 @@ if __name__ == '__main__':
 
             for msg in packet:
                 data = msg.data
+
+                # Ethernet format 1 (ARINC 664)
                 if packet.data_type == 0x69:
-                    udp = UDP(sport=msg.src_port,
-                              dport=msg.dst_port,
-                              data=data,
-                              ulen=len(data))
+                    udp = UDP(
+                        sport=msg.src_port,
+                        dport=msg.dst_port,
+                        data=data)
                     ip = IP(data=udp,
-                            len=len(data),
-                            src=bytes(msg.source_ip),
-                            dst=bytes(msg.dest_ip))
-                    print(type(struct.pack('=IH', 50331648, msg.virtual_link)))
+                            len=len(udp),
+                            v=4,
+                            p=17,
+                            src=struct.pack('>L', msg.source_ip),
+                            dst=struct.pack('>L', msg.dest_ip)).pack()
                     ethernet = Ethernet(
                         data=ip,
-                        # len=len(ip),
-                        dst=struct.pack('=IH', 50331648, msg.virtual_link))
+                        len=len(ip),
+                        dst=struct.pack('>IH', 50331648, msg.virtual_link),
+                        src=bytes()
+                    )
 
-                    data = str(ethernet)
+                    data = ethernet.pack()
 
                 t = get_time(msg.intra_packet_timestamp, last_time)
                 t = mktime(t.timetuple()) + (t.microsecond/1000000.0)
