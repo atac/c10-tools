@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
 """Counts error flags in 1553 format 1 packets
-usage: 106errcount <file> [-q] [-l <logfile>]
+usage: c10-errcount <file> [-q] [-l <logfile>]
 """
 
 from __future__ import print_function
-import sys
+import csv
 import os
 
 from i106 import C10
@@ -14,19 +14,6 @@ from tqdm import tqdm
 
 
 error_keys = ('le', 'se', 'we')
-HEADER_KEYS = (
-    'Channel ID',
-    'Packet Length',
-    'Data Length',
-    'Sequence Number',
-    'RTC',
-)
-
-
-def print_summary_labels(out=sys.stdout):
-    for label in ('Channel ID', 'Length', 'Sync', 'Word', 'Total', 'Packets'):
-        out.write(label.rjust(10) + ' ')
-    out.write('\n')
 
 
 def main(args):
@@ -36,6 +23,12 @@ def main(args):
     chan_errors = {}
     chan_count = {}
     file_size = os.stat(args['<file>']).st_size
+    if args['-l']:
+        with open(args['<logfile>'], 'w') as outfile:
+            writer = csv.writer(outfile)
+            writer.writerow(('Channel', 'Sequence', 'RTC', 'Length Errors',
+                             'Sync Errors', 'Word Errors', 'Total Errors'))
+
     with tqdm(total=file_size, dynamic_ncols=True,
               unit='bytes', unit_scale=True, leave=True) as progress:
         if args['-q']:
@@ -63,20 +56,17 @@ def main(args):
                 if args['-l'] and not valid:
                     # Log to file
                     with open(args['<logfile>'], 'a') as logfile:
-                        for k in HEADER_KEYS:
+                        writer = csv.writer(logfile)
+                        row = []
+                        for k in ('Channel ID', 'Sequence Number', 'RTC'):
                             attr = '_'.join(k.split()).lower()
-                            logfile.write('%s: %s\n'
-                                          % (k, getattr(packet, attr)))
-                        for label in ('Length', 'Sync', 'Word', 'Total'):
-                            logfile.write(label.rjust(10) + ' ')
-                        logfile.write('\n')
-                        logfile.write('-' * 80)
-                        logfile.write('\n')
+                            row.append(getattr(packet, attr))
                         for e in chan_errors[packet.channel_id]:
-                            logfile.write(str(e).rjust(10) + ' ')
-                        logfile.write(str(sum(
-                            chan_errors[packet.channel_id])).rjust(10))
-                        logfile.write('\n\n')
+                            row.append(str(e))
+
+                        row.append(str(sum(chan_errors[packet.channel_id])))
+                        writer.writerow(row)
+
             if not args['-q']:
                 try:
                     progress.update(packet.packet_length)
@@ -84,7 +74,9 @@ def main(args):
                     progress.ascii = True
 
     # Print summary.
-    print_summary_labels()
+    for label in ('Channel ID', 'Length', 'Sync', 'Word', 'Total', 'Packets'):
+        print(label.rjust(10), end=' ')
+    print()
     print('-' * 80)
     for k, v in sorted(chan_errors.items()):
         for cell in [k] + v:
