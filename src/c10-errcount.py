@@ -14,6 +14,13 @@ from tqdm import tqdm
 
 
 error_keys = ('le', 'se', 'we')
+HEADER_KEYS = (
+    'Channel ID',
+    'Packet Length',
+    'Data Length',
+    'Sequence Number',
+    'RTC',
+)
 
 
 def print_summary_labels(out=sys.stdout):
@@ -55,8 +62,8 @@ def main(args):
                             chan_errors[packet.channel_id] = errors
                 if args['-l'] and not valid:
                     # Log to file
-                    with open(args['<logfile>'], 'ab') as logfile:
-                        for k in packet.HEADER_KEYS:
+                    with open(args['<logfile>'], 'a') as logfile:
+                        for k in HEADER_KEYS:
                             attr = '_'.join(k.split()).lower()
                             logfile.write('%s: %s\n'
                                           % (k, getattr(packet, attr)))
@@ -78,19 +85,19 @@ def main(args):
 
     # Print summary.
     print_summary_labels()
-    print ('-' * 80)
+    print('-' * 80)
     for k, v in sorted(chan_errors.items()):
         for cell in [k] + v:
-            print (str(cell).rjust(10), end=' ')
-        print (str(sum(v)).rjust(10), end=' ')
-        print (str(chan_count[k]).rjust(10))
-    print ('-' * 80)
-    print ('Totals:'.rjust(10), end=' ')
+            print(str(cell).rjust(10), end=' ')
+        print(str(sum(v)).rjust(10), end=' ')
+        print(str(chan_count[k]).rjust(10))
+    print('-' * 80)
+    print('Totals:'.rjust(10), end=' ')
     for i in range(len(error_keys)):
-        print (str(sum([chan[i] for chan in chan_errors.values()])).rjust(10),
-               end=' ')
-    print (str(errcount).rjust(10), end=' ')
-    print (str(sum(chan_count.values())).rjust(10))
+        print(str(sum([chan[i] for chan in chan_errors.values()])).rjust(10),
+              end=' ')
+    print(str(errcount).rjust(10), end=' ')
+    print(str(sum(chan_count.values())).rjust(10))
 
 
 if __name__ == "__main__":
