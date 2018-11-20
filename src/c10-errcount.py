@@ -25,7 +25,7 @@ def main(args):
     file_size = os.stat(args['<file>']).st_size
     if args['-l']:
         with open(args['<logfile>'], 'w') as outfile:
-            writer = csv.writer(outfile)
+            writer = csv.writer(outfile, lineterminator='\n')
             writer.writerow(('Channel', 'Sequence', 'RTC', 'Length Errors',
                              'Sync Errors', 'Word Errors', 'Total Errors'))
 
@@ -56,7 +56,7 @@ def main(args):
                 if args['-l'] and not valid:
                     # Log to file
                     with open(args['<logfile>'], 'a') as logfile:
-                        writer = csv.writer(logfile)
+                        writer = csv.writer(logfile, lineterminator='\n')
                         row = []
                         for k in ('Channel ID', 'Sequence Number', 'RTC'):
                             attr = '_'.join(k.split()).lower()
@@ -75,21 +75,21 @@ def main(args):
 
     # Print summary.
     for label in ('Channel ID', 'Length', 'Sync', 'Word', 'Total', 'Packets'):
-        print(label.rjust(10), end=' ')
+        print(f'{label:>10}', end=' ')
     print()
     print('-' * 80)
     for k, v in sorted(chan_errors.items()):
         for cell in [k] + v:
-            print(str(cell).rjust(10), end=' ')
-        print(str(sum(v)).rjust(10), end=' ')
-        print(str(chan_count[k]).rjust(10))
+            print(f'{cell:>10,}', end=' ')
+        print(f'{sum(v):>10,}', end=' ')
+        print(f'{chan_count[k]:>10,}')
     print('-' * 80)
     print('Totals:'.rjust(10), end=' ')
     for i in range(len(error_keys)):
-        print(str(sum([chan[i] for chan in chan_errors.values()])).rjust(10),
-              end=' ')
-    print(str(errcount).rjust(10), end=' ')
-    print(str(sum(chan_count.values())).rjust(10))
+        type_total = sum([chan[i] for chan in chan_errors.values()])
+        print(f'{type_total:>10,}', end=' ')
+    print(f'{errcount:>10,}', end=' ')
+    print(f'{sum(chan_count.values()):>10,}')
 
 
 if __name__ == "__main__":
