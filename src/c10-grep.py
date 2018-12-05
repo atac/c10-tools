@@ -81,7 +81,7 @@ def search(path, args, i=None):
                         value &= args.get('--mask')
 
                     if args.get('<value>') == '*':
-                        print (hex(value))
+                        print(hex(value))
                     elif value == args.get('<value>'):
                         outfile.write((' ' * 4) + str(get_time(
                             msg.rtc, last_time)) + '\n')
@@ -104,7 +104,7 @@ if __name__ == '__main__':
                 else:
                     args[opt] = int(args[opt])
             except ValueError:
-                print ('Invalid value "%s" for %s' % (args[opt], opt))
+                print('Invalid value "%s" for %s' % (args[opt], opt))
                 raise SystemExit
 
     if args.get('--output') and os.path.exists(args.get('--output')):
@@ -112,22 +112,22 @@ if __name__ == '__main__':
             with open(args.get('--output'), 'w') as f:
                 f.write('')
         else:
-            print ('Output file exists, use -f to overwrite.')
+            print('Output file exists, use -f to overwrite.')
             raise SystemExit
 
     # Describe the search parameters.
     value_repr = args.get('<value>')
     if isinstance(value_repr, int):
         value_repr = hex(value_repr)
-    print ('Searching for %s' % value_repr, end='')
+    print('Searching for %s' % value_repr, end='')
     if args.get('--channel'):
-        print ('in channel #%s' % args.get('--channel'), end='')
+        print('in channel #%s' % args.get('--channel'), end='')
     if args.get('--cmd'):
-        print ('with command word %s' % hex(args.get('--cmd')), end='')
+        print('with command word %s' % hex(args.get('--cmd')), end='')
     if args.get('--word-offset'):
-        print ('at word %s' % args.get('--word-offset'), end='')
+        print('at word %s' % args.get('--word-offset'), end='')
     if args.get('--mask'):
-        print ('with mask %s' % hex(args.get('--mask')), end='')
+        print('with mask %s' % hex(args.get('--mask')), end='')
 
     files = []
     for path in args.get('<path>'):
@@ -140,7 +140,7 @@ if __name__ == '__main__':
         else:
             files.append(path)
 
-    print ('in %s files...' % len(files))
+    print('in %s files...' % len(files))
     task = partial(search, args=args)
     if args.get('-x'):
         bag = db.from_delayed([
@@ -157,4 +157,4 @@ if __name__ == '__main__':
             files.close()
         for f in files:
             task(f)
-    print ('\nfinished')
+    print('\nfinished')
