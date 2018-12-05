@@ -1,0 +1,22 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+
+[packages]
+chapter10 = {editable = true,path = "./../pychapter10"}
+cloudpickle = "==0.5.5"
+cytoolz = "==0.9.0.1"
+dask = "==0.19.1"
+docopt = "==0.6.2"
+dpkt = "==1.9.1"
+pytest = "==3.8.0"
+toolz = "==0.9.0"
+tqdm = "==4.26.0"
+i106 = {editable = true,git = "ssh://git@bitbucket.org/atac-bham/libirig106-python.git",ref = "3e56ec9f7206f71d9e04f0d3da3d5273147d6c53",markers = "python_version => '3.0'"}
+PyInstaller = "==3.4"
+
+[requires]
+python_version = "3"

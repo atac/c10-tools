@@ -8,7 +8,11 @@ from __future__ import print_function
 import csv
 import os
 
-from i106 import C10
+try:
+    from i106 import C10
+except ImportError:
+    from chapter10 import C10
+
 from docopt import docopt
 from tqdm import tqdm
 
