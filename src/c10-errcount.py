@@ -1,7 +1,13 @@
 #!/usr/bin/env python
 
-"""Counts error flags in 1553 format 1 packets
-usage: c10-errcount <file> [-q] [-l <logfile>]
+"""usage: c10-errcount <path>... [options]
+
+Counts error flags in 1553 format 1 packets.
+
+Options:
+    -q            Quiet output (no progress bar)
+    -o <logfile>  Output to CSV file with channel, sequence, and rtc
+    -x            Run with multiprocessing (using dask)
 """
 
 from __future__ import print_function
@@ -15,30 +21,28 @@ except ImportError:
 
 from docopt import docopt
 from tqdm import tqdm
+from dask.delayed import delayed
+import dask.bag as db
+
+from common import find_c10
 
 
 error_keys = ('le', 'se', 'we')
 
 
-def main(args):
+def parse_file(path, args):
 
     # Parse file.
     errcount = 0
     chan_errors = {}
     chan_count = {}
-    file_size = os.stat(args['<file>']).st_size
-    if args['-l']:
-        with open(args['<logfile>'], 'w') as outfile:
-            writer = csv.writer(outfile, lineterminator='\n')
-            writer.writerow(('Channel', 'Sequence', 'RTC', 'Length Errors',
-                             'Sync Errors', 'Word Errors', 'Total Errors'))
+    file_size = os.stat(path).st_size
 
     with tqdm(total=file_size, dynamic_ncols=True,
-              unit='bytes', unit_scale=True, leave=True) as progress:
+              unit='bytes', unit_scale=True, leave=False) as progress:
         if args['-q']:
-            progress.leave = False
             progress.close()
-        for packet in C10(args['<file>']):
+        for packet in C10(path):
             if packet.data_type == 25:
                 try:
                     chan_count[packet.channel_id] += 1
@@ -57,11 +61,11 @@ def main(args):
                                 chan_errors[packet.channel_id][i] += err
                         except KeyError:
                             chan_errors[packet.channel_id] = errors
-                if args['-l'] and not valid:
+                if args['-o'] and not valid:
                     # Log to file
-                    with open(args['<logfile>'], 'a') as logfile:
+                    with open(args['-o'], 'a') as logfile:
                         writer = csv.writer(logfile, lineterminator='\n')
-                        row = []
+                        row = [path]
                         for k in ('Channel ID', 'Sequence Number', 'RTC'):
                             attr = '_'.join(k.split()).lower()
                             row.append(getattr(packet, attr))
@@ -78,6 +82,9 @@ def main(args):
                     progress.ascii = True
 
     # Print summary.
+    print('=' * 80)
+    print('File: ', path)
+    print('=' * 80)
     for label in ('Channel ID', 'Length', 'Sync', 'Word', 'Total', 'Packets'):
         print(f'{label:>10}', end=' ')
     print()
@@ -94,8 +101,22 @@ def main(args):
         print(f'{type_total:>10,}', end=' ')
     print(f'{errcount:>10,}', end=' ')
     print(f'{sum(chan_count.values()):>10,}')
+    print()
 
 
 if __name__ == "__main__":
     args = docopt(__doc__)
-    main(args)
+    if args['-o']:
+        with open(args['-o'], 'w') as outfile:
+            writer = csv.writer(outfile, lineterminator='\n')
+            writer.writerow(('File', 'Channel', 'Sequence', 'RTC',
+                             'Length Errors', 'Sync Errors', 'Word Errors',
+                             'Total Errors'))
+    files = find_c10(args['<path>'])
+    if args.get('-x'):
+        bag = db.from_delayed([delayed(parse_file)(path, args=args)
+                               for path in files])
+        bag.compute()
+    else:
+        for path in files:
+            parse_file(path, args)
