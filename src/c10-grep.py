@@ -28,7 +28,7 @@ from docopt import docopt
 from tqdm import tqdm
 import dask.bag as db
 
-from common import get_time, FileProgress
+from common import get_time, FileProgress, find_c10
 
 
 def swap_word(word):
@@ -129,16 +129,7 @@ if __name__ == '__main__':
     if args.get('--mask'):
         print('with mask %s' % hex(args.get('--mask')), end='')
 
-    files = []
-    for path in args.get('<path>'):
-        path = os.path.abspath(path)
-        if os.path.isdir(path):
-            for dirname, dirnames, filenames in os.walk(path):
-                for f in filenames:
-                    if os.path.splitext(f)[1].lower() in ('.c10', '.ch10'):
-                        files.append(os.path.join(dirname, f))
-        else:
-            files.append(path)
+    files = list(find_c10(args.get('<path>')))
 
     print('in %s files...' % len(files))
     task = partial(search, args=args)
