@@ -12,7 +12,6 @@ Options:
 
 from __future__ import print_function
 import csv
-import os
 
 try:
     from i106 import C10
@@ -20,11 +19,10 @@ except ImportError:
     from chapter10 import C10
 
 from docopt import docopt
-from tqdm import tqdm
 from dask.delayed import delayed
 import dask.bag as db
 
-from common import find_c10
+from common import find_c10, FileProgress
 
 
 error_keys = ('le', 'se', 'we')
@@ -36,10 +34,8 @@ def parse_file(path, args):
     errcount = 0
     chan_errors = {}
     chan_count = {}
-    file_size = os.stat(path).st_size
 
-    with tqdm(total=file_size, dynamic_ncols=True,
-              unit='bytes', unit_scale=True, leave=False) as progress:
+    with FileProgress(path) as progress:
         if args['-q']:
             progress.close()
         for packet in C10(path):
