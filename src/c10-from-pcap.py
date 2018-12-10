@@ -13,11 +13,10 @@ output file.
 
 from array import array
 from contextlib import suppress
-from datetime import datetime
 import os
 import struct
 
-from i106 import C10
+from chapter10 import C10
 from docopt import docopt
 import dpkt
 
@@ -43,8 +42,8 @@ def parse(data, out_file):
         if sync < 0:
             continue
 
-        with suppress(RuntimeError):
-            for packet in C10(buffer=buf[sync:]):
+        with suppress(RuntimeError, EOFError):
+            for packet in C10.from_string(buf[sync:]):
                 raw = bytes(packet)
                 if len(raw) == packet.packet_length:
                     packets_added += 1
