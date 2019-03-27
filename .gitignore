@@ -5,3 +5,4 @@ dist
 data
 .pytest_cache*
 .tox*
+Pipfile.lock
