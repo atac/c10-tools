@@ -1,5 +1,8 @@
 C10 Tools
 =========
+
+[![Build Status](https://dev.azure.com/atac-bham/c10-tools/_apis/build/status/atac-bham.c10-tools?branchName=master)](https://dev.azure.com/atac-bham/c10-tools/_build/latest?definitionId=5&branchName=master)
+
 Various utilities for analyzing and manipulating Irig 106 Chapter 10 data.
 
 Included Tools
