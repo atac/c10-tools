@@ -1,4 +1,4 @@
--e git+git@bitbucket.org:atac-bham/pychapter10.git@296953ebe44c49ee21f9f749fc5515656440be1b#egg=Chapter10
+-e git+git@github.com:atac-bham/pychapter10.git@2a15b2d2d8cf4ea469c91938317778f696e406f5#egg=Chapter10
 PyInstaller==3.4
 cloudpickle==0.5.5
 cytoolz==0.9.0.1
