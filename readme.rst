@@ -1,9 +1,12 @@
+
 C10 Tools
 =========
 
-[![Build Status](https://dev.azure.com/atac-bham/c10-tools/_apis/build/status/atac-bham.c10-tools?branchName=master)](https://dev.azure.com/atac-bham/c10-tools/_build/latest?definitionId=5&branchName=master)
+|StatusImage|_
 
-Various utilities for analyzing and manipulating Irig 106 Chapter 10 data.
+Various utilities for analyzing and manipulating Irig 106 Chapter 10 data using
+_libirig106-python and _pychapter10.
+
 
 Included Tools
 --------------
@@ -24,11 +27,11 @@ Included Tools
   chapter 10 file.
 * wireshark_dissector - Lua based wireshark dissector for Chapter 10 data
 
+
 Dependencies
 ------------
-* [Python](http://python.org) 2.7 or later
+* [Python](http://python.org) 2.7 or 3.6 and later
 * Pipenv (pip install pipenv)
-* [PyChapter10](https://bitbucket.org/atac-bham/pychapter10)
 
 Building and Running
 --------------------
@@ -36,4 +39,11 @@ If the dependencies are installed (pipenv install) you can run
 each sample from the commandline using python (eg: python c10-stat.py) and
 commandline help will show you how to use each one.
 
-The compile.py script can be used to generate native binaries (via PyInstaller)
+You can use the setup script to compile and install to native binaries if
+needed.
+
+
+.. _pychapter10: https://github.com/atac-bham/pychapter10
+.. _libirig106-python: https://github.com/atac-bham/libirig106-python
+.. |StatusImage| image:: https://dev.azure.com/atac-bham/c10-tools/_apis/build/status/atac-bham.c10-tools?branchName=master
+.. _StatusImage: https://dev.azure.com/atac-bham/c10-tools/_build/latest?definitionId=5&branchName=master
