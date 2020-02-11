@@ -5,7 +5,7 @@ C10 Tools
 |StatusImage|_
 
 Various utilities for analyzing and manipulating Irig 106 Chapter 10 data using
-_libirig106-python and _pychapter10.
+libirig106-python_ and pychapter10_.
 
 
 Included Tools
@@ -30,7 +30,7 @@ Included Tools
 
 Dependencies
 ------------
-* [Python](http://python.org) 2.7 or 3.6 and later
+* Python_ 2.7 or 3.6 and later
 * Pipenv (pip install pipenv)
 
 Building and Running
@@ -43,6 +43,7 @@ You can use the setup script to compile and install to native binaries if
 needed.
 
 
+.. _python: http://python.org
 .. _pychapter10: https://github.com/atac-bham/pychapter10
 .. _libirig106-python: https://github.com/atac-bham/libirig106-python
 .. |StatusImage| image:: https://dev.azure.com/atac-bham/c10-tools/_apis/build/status/atac-bham.c10-tools?branchName=master
