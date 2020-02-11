@@ -7,7 +7,7 @@ Various utilities for analyzing and manipulating Irig 106 Chapter 10 data.
 
 Included Tools
 --------------
-* c10-dmp1554 - Print a hex dump of word n for every 1553 message found.
+* c10-dmp1553 - Print a hex dump of word n for every 1553 message found.
 * c10-dump-pcap - Export Ethernet data from a Chapter 10 file to cap.
 * c10-dump - Export packet data a file.
 * c10-errcount - Count error flags in 1553 format 1 packets.
