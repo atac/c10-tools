@@ -8,46 +8,8 @@ steps:
     versionSpec: '3.7'
     architecture: 'x64'
 
-- task: InstallSSHKey@0
-  displayName: 'Install deployment key'
-  inputs:
-    knownHostsEntry: 'github.com,192.30.253.113 ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ=='
-    sshPublicKey: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCiwRE42F8TzKvRCdqar9mquyuW1sfQh2sOFLBNHzQ9w0NuwS0/qaHDJ/1fCgWOOmxzk+eQo5ZbglXAHo1gWC8OtIfK9v/dZQ/Wizs3P4zUt1tkitlQir4iujSqHryomshmvu4gnCS1g4WnKd6y/5t8KZzs32Ve2YylJLSkmmAUdyBq/hKOBLd4cwAoQvMS7s6PV/CNtdWHq3TcYvd0s5u6Hv/PSb0LdgHeWLHBNIwWCmQnH4XgKMDFRT/HBYRTbAAy99NHWEdbWvFyKq0bh833bnzK+5Niu7SrW8lwHx6/9sloM45BYtauO0v//xRMrPJyX8Y7wuu9mO3nF++2pZ6d'
-    sshKeySecureFile: 'github-deploy-key'
-
 - script: python -m pip install -U tox 
   displayName: 'Install dependencies'
 
 - script: tox 
   displayName: 'Run tests'
-
-# - task: PublishTestResults@2
-#   inputs:
-#     testResultsFormat: 'JUnit'
-#     testResultsFiles: '**/test-results.xml'
-#     testRunTitle: 'Python $(python.version)'
-#   condition: succeededOrFailed()
-
-# - task: PublishPipelineArtifact@0
-#   displayName: 'Publish binary'
-#   inputs:
-#     artifactName: 'witdb'
-#     targetPath: 'dist/witdb.exe'
-
-# - script: python -m pip download -r requirements.txt -d ./deps
-#   displayName: 'Download dependencies'
-
-# - task: ArchiveFiles@2
-#   displayName: 'Zip dependencies'
-#   inputs:
-#     rootFolderOrFile: 'deps' 
-#     includeRootFolder: true 
-#     archiveType: 'zip'
-#     archiveFile: 'deps.zip' 
-#     replaceExistingArchive: true 
-
-# - task: PublishPipelineArtifact@0
-#   displayName: 'Publish dependencies'
-#   inputs:
-#     artifactName: 'dependencies'
-#     targetPath: 'deps.zip'
