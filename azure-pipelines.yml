@@ -11,5 +11,5 @@ steps:
 - script: python -m pip install -U tox 
   displayName: 'Install dependencies'
 
-- script: tox 
+- script: tox -p all
   displayName: 'Run tests'
