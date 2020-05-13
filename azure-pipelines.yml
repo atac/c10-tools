@@ -11,5 +11,5 @@ steps:
 - script: python -m pip install -U tox 
   displayName: 'Install dependencies'
 
-- script: tox -p all
+- script: tox -p all -e py37-i106,py37-c10
   displayName: 'Run tests'
