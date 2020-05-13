@@ -31,11 +31,10 @@ Included Tools
 Dependencies
 ------------
 * Python_ 2.7 or 3.6 and later
-* Pipenv (pip install pipenv)
 
 Building and Running
 --------------------
-If the dependencies are installed (pipenv install) you can run
+If the dependencies are installed (pip install -r requirements) you can run
 each sample from the commandline using python (eg: python c10-stat.py) and
 commandline help will show you how to use each one.
 
