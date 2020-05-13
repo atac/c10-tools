@@ -45,6 +45,17 @@ class Build(Command):
                     os.rename(name, '-'.join(name.rsplit('_', 1)))
 
 
+class Link(Command):
+    description = 'symlink scripts to /usr/bin'
+
+    def run(self):
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        for f in glob('src/c10_*.py') + glob('src/c10-*.py'):
+            f = os.path.abspath(f)
+            link = os.path.basename(os.path.splitext(f)[0].replace('_', '-'))
+            os.system('ln -s %s /usr/bin/%s' % (f, link))
+
+
 class Clean(Command):
     description = 'cleanup .spec files and build/dist directories'
 
@@ -62,6 +73,7 @@ setup(
     cmdclass={
         'clean': Clean,
         'build': Build,
+        'link': Link,
         'install_scripts': Install,
     },
     version='0.1',
