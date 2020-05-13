@@ -202,13 +202,13 @@ def main():
                 progress.update_from_tell(f.tell())
 
         if packet:
-                # message packets
-                csdw = struct.pack('HH', 0, frames)
-                out.write(gen_packet(
-                    32, 0x30, first_time, csdw + packet))
-                added += 1
-                first_time, frames, packet = None, 0, b''
-                added += 1
+            # message packets
+            csdw = struct.pack('HH', 0, frames)
+            out.write(gen_packet(
+                32, 0x30, first_time, csdw + packet))
+            added += 1
+            first_time, frames, packet = None, 0, b''
+            added += 1
 
         if not args['-q']:
             print('Created %s Chapter 10 packets from %s network packets' % (
