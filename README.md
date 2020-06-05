@@ -11,8 +11,8 @@ Various utilities for analyzing and manipulating Irig 106 Chapter 10 data using
 ## Included Tools
 
 * c10-dmp1553 - Print a hex dump of word n for every 1553 message found.
-* c10-dump-pcap - Export Ethernet data from a Chapter 10 file to cap.
-* c10-dump - Export packet data a file.
+* c10-dump-pcap - Export Ethernet data from a Chapter 10 file to pcap.
+* c10-dump - Export packet data to file.
 * c10-errcount - Count error flags in 1553 format 1 packets.
 * c10-allbus - Switch 1553 format 1 messages to indicate the same bus.
 * c10-copy - Copy a file optionally filtering on channel id or data type.
