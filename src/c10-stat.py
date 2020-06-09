@@ -12,9 +12,10 @@ be decimal or hex eg: 0x40).
 from __future__ import print_function
 
 from docopt import docopt
-from i106 import C10
+# from i106 import C10
+from chapter10 import C10
 
-from common import walk_packets, fmt_number, fmt_size, FileProgress
+from common import walk_packets, fmt_number, fmt_size, FileProgress, get_time
 
 
 TYPES = (
@@ -42,6 +43,9 @@ def main():
     # Get commandline args.
     args = docopt(__doc__)
 
+    start_time, end_time = 0, 0
+    last_time = 0
+
     for filename in args['<file>']:
         channels = {}
 
@@ -49,6 +53,11 @@ def main():
 
             # Iterate over selected packets based on args.
             for packet in walk_packets(C10(filename), args):
+                if packet.data_type == 0x11:
+                    last_time = packet
+                    if not start_time:
+                        packet.body.parse()
+                        start_time = packet.body.time
                 key = (packet.channel_id, packet.data_type)
                 if key not in channels:
                     channels[key] = {'packets': 0,
@@ -60,6 +69,8 @@ def main():
                 channels[key]['size'] += packet.packet_length
 
                 progress.update(packet.packet_length)
+
+        end_time = get_time(packet.rtc, last_time)
 
         # Print details for each channel.
         print('{} {:>13} {:>38} {:>16}'.format(
@@ -81,6 +92,16 @@ def main():
 
             packets += channel['packets']
             size += channel['size']
+
+        # Time Info
+        print('-' * 80)
+        print('''Start time: {}
+End time:   {}
+Duration:      {}'''.format(
+            start_time.strftime('%j-%Y %H:%M:%S'),
+            end_time.strftime('%j-%Y %H:%M:%S'),
+            end_time - start_time
+        ))
 
         # Print file summary.
         print('-' * 80)

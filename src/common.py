@@ -75,7 +75,7 @@ def fmt_size(size):
     """Convert byte size to a more readable format (mb, etc.)."""
 
     units = ['gb', 'mb', 'kb']
-    unit = 'b'
+    unit = ' b'
     while size > 1024 and units:
         size /= 1024.0
         unit = units.pop()
