@@ -8,30 +8,24 @@ Options:
     -q          Don't display progress bar
     -f --force  Overwrite existing files."""
 
-from array import array
 from time import mktime
 import os
 import struct
+import sys
 
-# from i106 import C10
-from chapter10 import C10
 from docopt import docopt
 from dpkt.ethernet import Ethernet
 from dpkt.ip import IP
 from dpkt.pcap import Writer
 from dpkt.udp import UDP
 
-from common import walk_packets, FileProgress, get_time
+from common import walk_packets, FileProgress, get_time, C10
 
 
-def print_hex(data):
-    print(' '.join([hex(b)[2:].zfill(2) for b in array('B', bytes(data))]))
-
-
-if __name__ == '__main__':
+def main(args=[]):
 
     # Get commandline args.
-    args = docopt(__doc__)
+    args = docopt(__doc__, args)
     args['<channel>'] = int(args['<channel>'])
 
     # Don't overwrite unless explicitly required.
@@ -86,3 +80,7 @@ if __name__ == '__main__':
                 t = get_time(msg.intra_packet_timestamp, last_time)
                 t = mktime(t.timetuple()) + (t.microsecond/1000000.0)
                 writer.writepkt(data, t)
+
+
+if __name__ == '__main__':
+    main(sys.argv[1:])

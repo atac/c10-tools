@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""usage: i106dmp1553 <file> <word> [options]
+"""usage: c10-dmp1553 <file> <word> [options]
 
 Print a hex dump of word "<word>" for any 1553 messages found.
 
@@ -8,17 +8,15 @@ Options:
     -w COUNT, --word-count COUNT  Number of words to print out [default: 1].
 """
 
-from __future__ import print_function
-
-from i106 import C10
 from docopt import docopt
+
+from common import C10
 
 
 if __name__ == '__main__':
 
     # Get commandline args.
     args = docopt(__doc__)
-
     word = int(args.get('<word>'))
     size = int(args.get('--word-count'))
 
@@ -27,6 +25,8 @@ if __name__ == '__main__':
 
         if packet.data_type == 25:
             for msg in packet:
+                s = ''
                 for w in msg[word:word + size]:
-                    print(hex(w)[2:].zfill(4), end=' ')
-                print()
+                    s += f'{w:02x}'.zfill(4) + ' '
+                if s:
+                    print(s)
