@@ -1,5 +1,4 @@
 
-from __future__ import print_function
 from datetime import timedelta
 import os
 
@@ -21,8 +20,6 @@ def find_c10(paths):
     returned as-is.
     """
 
-    # TODO: support glob style wildcards?
-
     for path in paths:
         path = os.path.abspath(path)
         if os.path.isdir(path):
@@ -34,64 +31,52 @@ def find_c10(paths):
             yield path
 
 
-def print_table(table):
+def fmt_table(table):
     """Print tabular data to stdout. Numeric fields justified right, others
     left.
     """
 
-    col_width = [max(len(x) for x in col) for col in zip(*table)]
+    # Make a list of columns (instead of a list of rows) and find max widths.
+    col_widths = [max(len(x) for x in col) for col in zip(*table)]
+
+    # Width is the sum of the column widths + ~3 padding characters per column.
+    width = (2 * (len(table[0]))) + sum(col_widths) + 1
 
     # Header row
-    line = '-' + ('-' * (sum(col_width) + (2 * (len(table[0]) + 2))))
-    print(line)
-    print('|', end=' ')
+    s = ('-' * width) + '\n|'
     for i, x in enumerate(table[0]):
-        print((x.rjust(col_width[i]) if x.isdigit()
-               else x.ljust(col_width[i])) + ' |', end=' ')
-    print()
-    print(line)
+        s += x.ljust(col_widths[i]) + ' |'
+    s += '\n{}\n'.format('-' * width)
 
-    # Rows
+    # Data rows
+    size_suffix = (' kb', ' mb', ' gb', '  b')
     for row in table[1:]:
-        print('|', end=' ')
+        s += '|'
         for i, x in enumerate(row):
-            if x.replace(',', '').isdigit() or x[-3:] in \
-                    (' kb', ' mb', ' gb') or x.endswith(' b'):
-                print(x.rjust(col_width[i]) + ' |', end=' ')
+            if x.replace(',', '').isdigit() or x[-3:] in size_suffix:
+                s += x.rjust(col_widths[i]) + ' |'
             else:
-                print(x.ljust(col_width[i]) + ' |', end=' ')
-        print()
+                s += x.ljust(col_widths[i]) + ' |'
+        s += '\n'
 
-    print(line)
+    return s + ('-' * width)
 
 
 def get_time(rtc, time_packet):
     """Get a datetime object based on last time packet and an RTC value."""
 
-    # pychapter10
-    if hasattr(time_packet, 'body'):
-        time_packet.body.parse()
-        t = time_packet.body.time
-
-    # libirig106-python
-    else:
-        t = time_packet.time
-
     offset = (rtc - time_packet.rtc) / 10000000.0
-    t += timedelta(seconds=offset)
-    return t
+    return time_packet.time + timedelta(seconds=offset)
 
 
 def fmt_size(size):
     """Convert byte size to a more readable format (mb, etc.)."""
 
-    units = ['gb', 'mb', 'kb']
-    unit = ' b'
+    unit, units = ' b', ['gb', 'mb', 'kb']
     while size > 1024 and units:
         size /= 1024.0
         unit = units.pop()
-
-    return '%s %s' % (round(size, 2), unit)
+    return '{} {}'.format(round(size, 2), unit)
 
 
 def walk_packets(c10, args={}):
@@ -113,11 +98,13 @@ def walk_packets(c10, args={}):
     channels = [c.strip() for c in args['--channel'].split(',') if c.strip()]
     exclude = [e.strip() for e in args['--exclude'].split(',') if e.strip()]
 
+    # Filter packets (except the TMATS packet that should be at 0).
     for i, packet in enumerate(c10):
         if i > 0:
-            if channels and str(packet.channel_id) not in channels:
+            channel = str(packet.channel_id)
+            if channels and channel not in channels:
                 continue
-            elif str(packet.channel_id) in exclude:
+            elif channel in exclude:
                 continue
             elif types and packet.data_type not in types:
                 continue

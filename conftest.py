@@ -19,9 +19,17 @@ def pytest_configure():
     pytest.SAMPLE = SAMPLE
 
 
+class MockC10(C10):
+    def __init__(self, packets):
+        self.packets = packets
+
+    def __iter__(self):
+        return iter(self.packets)
+
+
 @pytest.fixture
 def c10():
-    return C10
+    return MockC10
 
 
 @pytest.fixture(scope='session')

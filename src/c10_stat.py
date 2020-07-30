@@ -87,7 +87,7 @@ def main(args=[]):
             packets += channel['packets']
             size += channel['size']
 
-        common.print_table(table)
+        print(common.fmt_table(table))
 
         # Print file summary.
         duration = str(end_time - start_time)
