@@ -18,7 +18,7 @@ try:
 except ImportError:
     from chapter10 import C10
 
-from .common import FileProgress
+from common import FileProgress
 
 
 def main(args=[]):

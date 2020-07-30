@@ -5,15 +5,23 @@ import os
 
 from tqdm import tqdm
 
+try:
+    from i106 import C10
+except ImportError:
+    from chapter10 import C10
+
 
 # Format a number nicely with commas for thousands, etc.
 fmt_number = '{0:,}'.format
 
 
 def find_c10(paths):
-    """Take a list of paths and yield a Chapter 10 files found at
-    those locations or subdirectories.
+    """Take a list of paths and yield paths to Chapter 10 files found at
+    those locations or subdirectories. Any files in the original list are
+    returned as-is.
     """
+
+    # TODO: support glob style wildcards?
 
     for path in paths:
         path = os.path.abspath(path)
@@ -34,7 +42,7 @@ def print_table(table):
     col_width = [max(len(x) for x in col) for col in zip(*table)]
 
     # Header row
-    line = '-' * (sum(col_width) + (2 * (len(table[0]) + 2)))
+    line = '-' + ('-' * (sum(col_width) + (2 * (len(table[0]) + 2))))
     print(line)
     print('|', end=' ')
     for i, x in enumerate(table[0]):
@@ -47,8 +55,11 @@ def print_table(table):
     for row in table[1:]:
         print('|', end=' ')
         for i, x in enumerate(row):
-            print((x.rjust(col_width[i]) if x.isdigit()
-                   else x.ljust(col_width[i])) + ' |', end=' ')
+            if x.replace(',', '').isdigit() or x[-3:] in \
+                    (' kb', ' mb', ' gb') or x.endswith(' b'):
+                print(x.rjust(col_width[i]) + ' |', end=' ')
+            else:
+                print(x.ljust(col_width[i]) + ' |', end=' ')
         print()
 
     print(line)
@@ -85,6 +96,9 @@ def fmt_size(size):
 
 def walk_packets(c10, args={}):
     """Walk a chapter 10 file based on sys.argv (type, channel, etc.)."""
+
+    if not isinstance(c10, C10):
+        c10 = C10(c10)
 
     # Apply defaults.
     args['--type'] = args.get('--type') or ''

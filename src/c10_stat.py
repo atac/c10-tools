@@ -9,13 +9,12 @@ Options:
 be decimal or hex eg: 0x40).
 """
 
-from __future__ import print_function
+from contextlib import suppress
+import sys
 
 from docopt import docopt
-# from i106 import C10
-from chapter10 import C10
 
-from common import walk_packets, fmt_number, fmt_size, FileProgress, get_time
+import common
 
 
 TYPES = (
@@ -38,26 +37,26 @@ TYPES = (
 )
 
 
-def main():
+def main(args=[]):
 
     # Get commandline args.
-    args = docopt(__doc__)
+    args = docopt(__doc__, args)
 
-    start_time, end_time = 0, 0
     last_time = 0
 
     for filename in args['<file>']:
+        start_time, end_time = 0, 0
         channels = {}
 
-        with FileProgress(filename) as progress:
+        with common.FileProgress(filename) as progress, \
+                suppress(KeyboardInterrupt):
 
             # Iterate over selected packets based on args.
-            for packet in walk_packets(C10(filename), args):
+            for packet in common.walk_packets(filename, args):
                 if packet.data_type == 0x11:
                     last_time = packet
                     if not start_time:
-                        packet.body.parse()
-                        start_time = packet.body.time
+                        start_time = packet.time
                 key = (packet.channel_id, packet.data_type)
                 if key not in channels:
                     channels[key] = {'packets': 0,
@@ -70,50 +69,36 @@ def main():
 
                 progress.update(packet.packet_length)
 
-        end_time = get_time(packet.rtc, last_time)
+        end_time = common.get_time(packet.rtc, last_time)
 
         # Print details for each channel.
-        print('{} {:>13} {:>38} {:>16}'.format(
-            'Channel ID', 'Data Type', 'Packets', 'Size'))
-        print('-' * 80)
+        table = [('Channel ID', 'Data Type', 'Packets', 'Size')]
         packets, size = 0, 0
         for key, channel in sorted(channels.items()):
-            datatype = int(channel['type'] / 8.0)
+            datatype = channel['type'] // 8
             subtype = channel['type'] - (datatype * 8)
-
-            type_label = '{} - {} (format {})'.format(hex(channel['type']),
-                                                      TYPES[datatype],
-                                                      subtype)
-            print('Channel {:<6} {:<40} {:>7} {:>16}'.format(
-                channel['id'],
-                type_label,
-                fmt_number(channel['packets']),
-                fmt_size(channel['size'])))
+            table.append((
+                f'Channel {channel["id"]:2}',
+                f'0x{channel["type"]:02x} - {TYPES[datatype]} (format \
+{subtype})',
+                common.fmt_number(channel['packets']),
+                common.fmt_size(channel['size'])))
 
             packets += channel['packets']
             size += channel['size']
 
-        # Time Info
-        print('-' * 80)
-        print('''Start time: {}
-End time:   {}
-Duration:      {}'''.format(
-            start_time.strftime('%j-%Y %H:%M:%S'),
-            end_time.strftime('%j-%Y %H:%M:%S'),
-            end_time - start_time
-        ))
+        common.print_table(table)
 
         # Print file summary.
-        print('-' * 80)
-        print('''Summary for {}:
-        Channels: {:>10}
-        Packets: {:>11}
-        Size: {:>14}\n'''.format(
-            filename, len(channels), fmt_number(packets), fmt_size(size)))
+        duration = str(end_time - start_time)
+        start_time = start_time.strftime("%j-%Y %H:%M:%S")
+        end_time = end_time.strftime("%j-%Y %H:%M:%S")
+
+        print(f'''Summary for {filename}:
+    Channels: {len(channels):>17}     Start time:{start_time:>25}
+    Packets: {common.fmt_number(packets):>18}     End time:{end_time:>27}
+    Size: {common.fmt_size(size):>21}     Duration:{duration:>27}\n''')
 
 
 if __name__ == '__main__':
-    try:
-        main()
-    except KeyboardInterrupt:
-        print('Interrupted')
+    main(sys.argv[1:])

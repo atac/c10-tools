@@ -1,54 +1,39 @@
 
 from tempfile import NamedTemporaryFile
-try:
-    from unittest.mock import patch
-except ImportError:
-    from mock import patch
 import os
-
-try:
-    from i106 import C10
-except ImportError:
-    from chapter10 import C10
 
 import pytest
 
 from src.c10_allbus import main
 
-dirname = os.path.dirname(__file__)
+SAMPLE = os.path.join(os.path.dirname(__file__), '1.c10')
 
 
-@pytest.fixture(scope='module', autouse=True)
-def setup_module():
-    with patch('src.common.FileProgress'):
-        yield
-
-
-def test_overwrite():
+def test_overwrite(fake_progress):
     with NamedTemporaryFile() as out:
         with pytest.raises(SystemExit):
-            main((os.path.join(dirname, '1.c10'), out.name))
+            main((SAMPLE, out.name))
 
 
-def test_force():
+def test_force(fake_progress):
     with NamedTemporaryFile() as out:
-        main((os.path.join(dirname, '1.c10'), out.name, '-f'))
-        assert os.stat(out.name).st_size > 0
+        main((SAMPLE, out.name, '-f'))
+        assert os.stat(out.name).st_size == os.stat(SAMPLE).st_size
 
 
-def test_defaults():
+def test_defaults(fake_progress, c10):
     with NamedTemporaryFile() as out:
-        main((os.path.join(dirname, '1.c10'), out.name, '-f'))
-        for packet in C10(out.name):
+        main((SAMPLE, out.name, '-f'))
+        for packet in c10(out.name):
             if packet.data_type == 0x19:
                 for i, msg in enumerate(packet):
                     assert msg.bus == 0
 
 
-def test_b():
+def test_b(fake_progress, c10):
     with NamedTemporaryFile() as out:
-        main((os.path.join(dirname, '1.c10'), out.name, '-b', '-f'))
-        for packet in C10(out.name):
+        main((SAMPLE, out.name, '-b', '-f'))
+        for packet in c10(out.name):
             if packet.data_type == 0x19:
                 for i, msg in enumerate(packet):
                     assert msg.bus == 1
