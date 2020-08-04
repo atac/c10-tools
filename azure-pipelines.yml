@@ -1,33 +1,12 @@
 
 strategy:
   matrix:
-    ubuntu-py36:
+    ubuntu:
       imageName: 'ubuntu-latest'
-      pythonVersion: '3.6'
-    ubuntu-py37:
-      imageName: 'ubuntu-latest'
-      pythonVersion: '3.7'
-    ubuntu-py38:
-      imageName: 'ubuntu-latest'
-      pythonVersion: '3.8'
-    macos-py36:
+    macos:
       imageName: 'macos-latest'
-      pythonVersion: '3.6'
-    macos-py37:
-      imageName: 'macos-latest'
-      pythonVersion: '3.7'
-    macos-py38:
-      imageName: 'macos-latest'
-      pythonVersion: '3.8'
-    windows-py36:
+    windows:
       imageName: 'windows-latest'
-      pythonVersion: '3.6'
-    windows-py37:
-      imageName: 'windows-latest'
-      pythonVersion: '3.7'
-    windows-py38:
-      imageName: 'windows-latest'
-      pythonVersion: '3.8'
 
 trigger:
 - master
@@ -35,7 +14,7 @@ trigger:
 steps:
 - task: UsePythonVersion@0
   inputs:
-    versionSpec: $(pythonVersion)
+    versionSpec: '3.8'
     architecture: 'x64'
 
 - script: python -m pip install -U tox 
