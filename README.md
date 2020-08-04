@@ -1,7 +1,7 @@
 
 # C10 Tools
 
-[![Build Status](https://dev.azure.com/atac-bham/c10-tools/_apis/build/status/atac-bham.c10-tools?branchName=master)](https://dev.azure.com/atac-bham/c10-tools/_build/latest?definitionId=5&branchName=master)
+[![Build Status](https://dev.azure.com/atac-bham/c10-tools/_apis/build/status/atac.c10-tools?branchName=master)](https://dev.azure.com/atac-bham/c10-tools/_build/latest?definitionId=8&branchName=master)
 
 Various utilities for analyzing and manipulating Irig 106 Chapter 10 data using
 [libirig106-python](https://github.com/atac-bham/libirig106-python) and
