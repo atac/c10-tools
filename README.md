@@ -4,8 +4,8 @@
 [![Build Status](https://dev.azure.com/atac-bham/c10-tools/_apis/build/status/atac.c10-tools?branchName=master)](https://dev.azure.com/atac-bham/c10-tools/_build/latest?definitionId=8&branchName=master)
 
 Various utilities for analyzing and manipulating Irig 106 Chapter 10 data using
-[libirig106-python](https://github.com/atac-bham/libirig106-python) and
-[pychapter10](https://github.com/atac-bham/pychapter10).
+[libirig106-python](https://github.com/atac/libirig106-python) and
+[pychapter10](https://github.com/atac/pychapter10).
 
 
 ## Included Tools
@@ -30,7 +30,7 @@ Various utilities for analyzing and manipulating Irig 106 Chapter 10 data using
 
 ## Dependencies
 
-* [Python](https://python.org) 3.6 and later
+* [Python](https://python.org) 3.6 or later
 
 ## Building and Running
 
