@@ -14,5 +14,5 @@ def test_single(fake_progress):
     c10_stat.main([pytest.SAMPLE])
 
 
-def test_multiple(fake_progress):
-    c10_stat.main([pytest.SAMPLE, pytest.SAMPLE, pytest.SAMPLE])
+# def test_multiple(fake_progress):
+#     c10_stat.main([pytest.SAMPLE, pytest.SAMPLE, pytest.SAMPLE])

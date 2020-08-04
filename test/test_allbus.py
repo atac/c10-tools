@@ -5,6 +5,7 @@ import os
 import pytest
 
 from src.c10_allbus import main
+from src.common import C10
 
 
 def test_overwrite(fake_progress):
@@ -19,19 +20,19 @@ def test_force(fake_progress):
         assert os.stat(out.name).st_size == os.stat(pytest.SAMPLE).st_size
 
 
-def test_defaults(fake_progress, c10):
+def test_defaults(fake_progress):
     with NamedTemporaryFile() as out:
         main((pytest.SAMPLE, out.name, '-f'))
-        for packet in c10(out.name):
+        for packet in C10(out.name):
             if packet.data_type == 0x19:
                 for i, msg in enumerate(packet):
                     assert msg.bus == 0
 
 
-def test_b(fake_progress, c10):
+def test_b(fake_progress):
     with NamedTemporaryFile() as out:
         main((pytest.SAMPLE, out.name, '-b', '-f'))
-        for packet in c10(out.name):
+        for packet in C10(out.name):
             if packet.data_type == 0x19:
                 for i, msg in enumerate(packet):
                     assert msg.bus == 1

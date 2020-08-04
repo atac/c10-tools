@@ -54,6 +54,7 @@ def main(args=[]):
             # Iterate over selected packets based on args.
             for packet in common.walk_packets(filename, args):
                 if packet.data_type == 0x11:
+                    print(type(packet))
                     last_time = packet
                     if not start_time:
                         start_time = packet.time

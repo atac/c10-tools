@@ -13,12 +13,8 @@ import os
 import sys
 
 from docopt import docopt
-try:
-    from i106 import C10
-except ImportError:
-    from chapter10 import C10
 
-from common import FileProgress
+from common import FileProgress, C10
 
 
 def main(args=[]):
@@ -42,14 +38,22 @@ def main(args=[]):
 
             # Write out packet header secondary if applicable) and CSDW.
             offset = 28
-            if packet.flags & (1 << 7):
+            # TODO: make this consistent between python and c libraries
+            if getattr(packet, 'secondary_header', None) or getattr(
+                    packet, 'flags', 0) & (1 << 7):
                 offset += 12
             out.write(raw[:offset])
 
             # Walk through messages and update bus ID as needed.
             for msg in packet:
                 msg.bus = int(args['-b'])
-                packed = bytes(msg)
+
+                # TODO: replace this when we reimplement Item.bytes in
+                # pychapter10
+                try:
+                    packed = bytes(msg)
+                except TypeError:
+                    packed = msg.pack()
                 out.write(packed)
                 offset += len(packed)
 

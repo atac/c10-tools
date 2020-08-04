@@ -12,19 +12,18 @@ Options:
     -f, --force                          Overwrite existing files."""
 
 from array import array
-import atexit
 import os
+import sys
 
-from chapter10 import C10, datatypes
 from docopt import docopt
 
 from common import walk_packets, FileProgress
 
 
-if __name__ == '__main__':
+def main(args=[]):
 
     # Get commandline args.
-    args = docopt(__doc__)
+    args = docopt(__doc__, args)
 
     # Ensure OUT exists.
     if not os.path.exists(args['--output']):
@@ -34,16 +33,15 @@ if __name__ == '__main__':
 
     # Iterate over packets based on args.
     with FileProgress(args['<file>']) as progress:
-        for packet in walk_packets(C10(args['<file>']), args):
+        for packet in walk_packets(args['<file>'], args):
 
             progress.update(packet.packet_length)
 
             # Get filename for this channel based on data type.
             filename = os.path.join(args['--output'], str(packet.channel_id))
-            t, f = datatypes.format(packet.data_type)
-            if t == 0 and f == 1:
-                filename += packet.body.format == 0 and '.tmats' or '.xml'
-            elif t == 8:
+            if packet.data_type == 0x1:
+                filename += packet.format == 0 and '.tmats' or '.xml'
+            elif packet.data_type // 8 == 8:
                 filename += '.mpg'
 
             # Ensure a file is open (and will close) for a given channel.
@@ -55,20 +53,25 @@ if __name__ == '__main__':
                     break
 
                 out[filename] = open(filename, 'wb')
-                atexit.register(out[filename].close)
 
             # Only write TMATS once.
-            elif t == 0 and f == 1:
+            elif packet.data_type == 0x1:
                 continue
 
             # Handle special case for video data.
-            if t == 8:
+            if packet.data_type // 8 == 8:
                 for ts in packet.body:
                     ts = array('H', ts.data)
                     ts.byteswap()
                     ts.tofile(out[filename])
             else:
-                data = bytes(packet)[24:packet.data_length + 24]
+                header_size = 36 if packet.secondary_header else 24
+                data = bytes(packet)[
+                    header_size:packet.data_length + header_size]
 
                 # Write out raw packet body.
                 out[filename].write(data)
+
+
+if __name__ == '__main__':
+    main(sys.argv[1:])

@@ -14,14 +14,9 @@ separated, may be decimal or hex eg: 0x40)
 import os
 import sys
 
-try:
-    from i106 import C10
-except ImportError:
-    from chapter10 import C10
-
 from docopt import docopt
 
-from src.common import walk_packets, FileProgress
+from src.common import walk_packets, FileProgress, C10
 
 
 def main(args=sys.argv[1:]):

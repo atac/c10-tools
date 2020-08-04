@@ -9,6 +9,9 @@ try:
 except ImportError:
     from chapter10 import C10
 
+if os.environ.get('LIBRARY', None) == 'c10':
+    from chapter10 import C10
+
 
 # Format a number nicely with commas for thousands, etc.
 fmt_number = '{0:,}'.format
@@ -40,12 +43,12 @@ def fmt_table(table):
     col_widths = [max(len(x) for x in col) for col in zip(*table)]
 
     # Width is the sum of the column widths + ~3 padding characters per column.
-    width = (2 * (len(table[0]))) + sum(col_widths) + 1
+    width = sum(col_widths) + (len(table[0]) * 3) + 1
 
     # Header row
     s = ('-' * width) + '\n|'
     for i, x in enumerate(table[0]):
-        s += x.ljust(col_widths[i]) + ' |'
+        s += ' ' + x.ljust(col_widths[i]) + ' |'
     s += '\n{}\n'.format('-' * width)
 
     # Data rows
@@ -54,9 +57,9 @@ def fmt_table(table):
         s += '|'
         for i, x in enumerate(row):
             if x.replace(',', '').isdigit() or x[-3:] in size_suffix:
-                s += x.rjust(col_widths[i]) + ' |'
+                s += ' {} |'.format(x.rjust(col_widths[i]))
             else:
-                s += x.ljust(col_widths[i]) + ' |'
+                s += ' {} |'.format(x.ljust(col_widths[i]))
         s += '\n'
 
     return s + ('-' * width)

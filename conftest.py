@@ -8,6 +8,9 @@ try:
 except ImportError:
     from chapter10 import C10
 
+if os.environ.get('LIBRARY', None) == 'c10':
+    from chapter10 import C10
+
 import pytest
 
 sys.path.append('src')

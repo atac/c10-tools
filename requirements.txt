@@ -1,8 +1,8 @@
--e git+https://github.com/atac-bham/libirig106-python.git@68187e6cfdd001feafd25ece6f7f6a9dd83775fa#egg=i106
--e git+https://github.com/atac-bham/pychapter10.git@13cc42e91cbb0fe0e7c1d2232d0b1486a7f24f68#egg=Chapter10
+-e git+https://github.com/atac/libirig106-python.git@68187e6cfdd001feafd25ece6f7f6a9dd83775fa#egg=i106
+-e git+https://github.com/atac/pychapter10.git@e51957cec32d46394a2dfd0f224b560b06df539e#egg=Chapter10
 PyInstaller==3.6
 dask==2.21.0
 docopt==0.6.2
-dpkt==1.9.3
+dpkt[bag]==1.9.3
 pytest==6.0.1
 tqdm==4.46.0

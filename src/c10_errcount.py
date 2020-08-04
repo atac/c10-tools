@@ -10,19 +10,15 @@ Options:
     -x            Run with multiprocessing (using dask)
 """
 
-from __future__ import print_function
 import csv
-
-try:
-    from i106 import C10
-except ImportError:
-    from chapter10 import C10
+import sys
 
 from docopt import docopt
 from dask.delayed import delayed
 import dask.bag as db
 
-from common import find_c10, FileProgress
+from common import find_c10, FileProgress, C10
+import common
 
 
 error_keys = ('le', 'se', 'we')
@@ -78,30 +74,27 @@ def parse_file(path, args):
                     progress.ascii = True
 
     # Print summary.
-    print('=' * 80)
     print('File: ', path)
-    print('=' * 80)
-    for label in ('Channel ID', 'Length', 'Sync', 'Word', 'Total', 'Packets'):
-        print(f'{label:>10}', end=' ')
-    print()
-    print('-' * 80)
+    table = [('Channel ID', 'Length', 'Sync', 'Word', 'Total', 'Packets')]
     for k, v in sorted(chan_errors.items()):
-        for cell in [k] + v:
-            print(f'{cell:>10,}', end=' ')
-        print(f'{sum(v):>10,}', end=' ')
-        print(f'{chan_count[k]:>10,}')
-    print('-' * 80)
-    print('Totals:'.rjust(10), end=' ')
+        row = [f'{cell:,}' for cell in [k] + v]
+        row += [
+            f'{sum(v):>,}',
+            f'{chan_count[k]:>,}']
+        table.append(row)
+
+    footer = ['Totals:']
     for i in range(len(error_keys)):
         type_total = sum([chan[i] for chan in chan_errors.values()])
-        print(f'{type_total:>10,}', end=' ')
-    print(f'{errcount:>10,}', end=' ')
-    print(f'{sum(chan_count.values()):>10,}')
-    print()
+        footer.append(str(type_total))
+    footer += [str(errcount), str(sum(chan_count.values()))]
+    table.append(footer)
+
+    print(common.fmt_table(table))
 
 
-if __name__ == "__main__":
-    args = docopt(__doc__)
+def main(args=[]):
+    args = docopt(__doc__, args)
     if args['-o']:
         with open(args['-o'], 'w') as outfile:
             writer = csv.writer(outfile, lineterminator='\n')
@@ -116,3 +109,7 @@ if __name__ == "__main__":
     else:
         for path in files:
             parse_file(path, args)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

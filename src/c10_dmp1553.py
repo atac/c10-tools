@@ -8,15 +8,17 @@ Options:
     -w COUNT, --word-count COUNT  Number of words to print out [default: 1].
 """
 
+import sys
+
 from docopt import docopt
 
 from common import C10
 
 
-if __name__ == '__main__':
+def main(args=[]):
 
     # Get commandline args.
-    args = docopt(__doc__)
+    args = docopt(__doc__, args)
     word = int(args.get('<word>'))
     size = int(args.get('--word-count'))
 
@@ -26,7 +28,12 @@ if __name__ == '__main__':
         if packet.data_type == 25:
             for msg in packet:
                 s = ''
+                msg = getattr(msg, 'data', msg)
                 for w in msg[word:word + size]:
                     s += f'{w:02x}'.zfill(4) + ' '
                 if s:
                     print(s)
+
+
+if __name__ == '__main__':
+    main(sys.argv[1:])
