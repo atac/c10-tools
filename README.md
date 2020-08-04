@@ -30,7 +30,7 @@ Various utilities for analyzing and manipulating Irig 106 Chapter 10 data using
 
 ## Dependencies
 
-* [Python](https://python.org) 2.7 or 3.6 and later
+* [Python](https://python.org) 3.6 and later
 
 ## Building and Running
 
