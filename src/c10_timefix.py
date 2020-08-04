@@ -6,17 +6,13 @@ Check time packets within a chapter 10 file and ensure they are within an
 acceptable offset of each other (5 seconds) or adjusts to 1 second offset.
 """
 
-# TODO: add -f option to avoid overwriting existing files by mistake
-# TODO: add ability to generate new time packets when missing or
-# misplaced
-
 from datetime import timedelta
 import struct
+import sys
 
 from docopt import docopt
-from i106 import C10
 
-from common import FileProgress
+from common import FileProgress, C10
 
 
 def valid(timestamp, previous):
@@ -31,9 +27,9 @@ def valid(timestamp, previous):
     return diff < timedelta(seconds=5)
 
 
-def main():
+def main(args=[]):
 
-    args = docopt(__doc__)
+    args = docopt(__doc__, args)
 
     prev = None
     with open(args['<output_file>'], 'wb') as out_f, \
@@ -95,4 +91,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1:])
