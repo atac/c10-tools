@@ -16,19 +16,17 @@ Options:
 but progress reporting is a little exciting)
 """
 
-from __future__ import print_function
 from functools import partial
 import os
 import struct
 import sys
 
-from i106 import C10
 from dask.delayed import delayed
 from docopt import docopt
 from tqdm import tqdm
 import dask.bag as db
 
-from common import get_time, FileProgress, find_c10
+from common import get_time, FileProgress, find_c10, C10
 
 
 def swap_word(word):
@@ -68,6 +66,8 @@ def search(path, args, i=None):
 
             # Iterate over messages if applicable
             for msg in packet:
+                if hasattr(msg, 'data'):
+                    msg = msg.data
                 if packet.data_type == 0x19:
                     cmd = msg[0]
 
@@ -90,8 +90,9 @@ def search(path, args, i=None):
         outfile.close()
 
 
-if __name__ == '__main__':
-    args = docopt(__doc__)
+def main(args=[]):
+
+    args = docopt(__doc__, args)
 
     # Validate int/hex inputs.
     for opt in ('--channel', '--word-offset', '--cmd', '<value>', '--mask'):
@@ -131,7 +132,7 @@ if __name__ == '__main__':
 
     files = list(find_c10(args.get('<path>')))
 
-    print('in %s files...' % len(files))
+    print(' in %s files...' % len(files))
     task = partial(search, args=args)
     if args.get('-x'):
         bag = db.from_delayed([
@@ -149,3 +150,7 @@ if __name__ == '__main__':
         for f in files:
             task(f)
     print('\nfinished')
+
+
+if __name__ == '__main__':
+    main(sys.argv[1:])
