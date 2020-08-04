@@ -2,13 +2,15 @@
 from unittest.mock import Mock
 import os
 
+import pytest
+
 from src import common
 
 
 def test_find_c10():
     dirname = os.path.dirname(__file__)
     result = common.find_c10([dirname])
-    assert list(result) == [os.path.join(dirname, '1.c10')]
+    assert list(result) == [pytest.SAMPLE, pytest.EVENTS]
 
 
 def test_fmt_table():

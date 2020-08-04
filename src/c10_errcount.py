@@ -31,47 +31,47 @@ def parse_file(path, args):
     chan_errors = {}
     chan_count = {}
 
-    with FileProgress(path) as progress:
-        if args['-q']:
-            progress.close()
-        for packet in C10(path):
-            if packet.data_type == 25:
-                try:
-                    chan_count[packet.channel_id] += 1
-                except KeyError:
-                    chan_count[packet.channel_id] = 1
-                valid = True
-                for msg in packet:
-                    errors = [getattr(msg, k) for k in error_keys]
-                    count = sum(errors)
-                    if count:
-                        valid = False
-                        errcount += count
+    if not args['-q']:
+        progress = FileProgress(path)
 
-                        try:
-                            for i, err in enumerate(errors):
-                                chan_errors[packet.channel_id][i] += err
-                        except KeyError:
-                            chan_errors[packet.channel_id] = errors
-                if args['-o'] and not valid:
-                    # Log to file
-                    with open(args['-o'], 'a') as logfile:
-                        writer = csv.writer(logfile, lineterminator='\n')
-                        row = [path]
-                        for k in ('Channel ID', 'Sequence Number', 'RTC'):
-                            attr = '_'.join(k.split()).lower()
-                            row.append(getattr(packet, attr))
-                        for e in chan_errors[packet.channel_id]:
-                            row.append(str(e))
+    for packet in C10(path):
+        if packet.data_type == 25:
+            try:
+                chan_count[packet.channel_id] += 1
+            except KeyError:
+                chan_count[packet.channel_id] = 1
+            valid = True
+            for msg in packet:
+                errors = [getattr(msg, k) for k in error_keys]
+                count = sum(errors)
+                if count:
+                    valid = False
+                    errcount += count
 
-                        row.append(str(sum(chan_errors[packet.channel_id])))
-                        writer.writerow(row)
+                    try:
+                        for i, err in enumerate(errors):
+                            chan_errors[packet.channel_id][i] += err
+                    except KeyError:
+                        chan_errors[packet.channel_id] = errors
+            if args['-o'] and not valid:
+                # Log to file
+                with open(args['-o'], 'a') as logfile:
+                    writer = csv.writer(logfile, lineterminator='\n')
+                    row = [path]
+                    for k in ('Channel ID', 'Sequence Number', 'RTC'):
+                        attr = '_'.join(k.split()).lower()
+                        row.append(getattr(packet, attr))
+                    for e in chan_errors[packet.channel_id]:
+                        row.append(str(e))
 
-            if not args['-q']:
-                try:
-                    progress.update(packet.packet_length)
-                except UnicodeEncodeError:
-                    progress.ascii = True
+                    row.append(str(sum(chan_errors[packet.channel_id])))
+                    writer.writerow(row)
+
+        if not args['-q']:
+            try:
+                progress.update(packet.packet_length)
+            except UnicodeEncodeError:
+                progress.ascii = True
 
     # Print summary.
     print('File: ', path)

@@ -15,11 +15,12 @@ import pytest
 
 sys.path.append('src')
 
-SAMPLE = os.path.join(os.path.dirname(__file__), 'test', '1.c10')
+TESTDIR = os.path.join(os.path.dirname(__file__), 'test')
 
 
 def pytest_configure():
-    pytest.SAMPLE = SAMPLE
+    pytest.SAMPLE = os.path.join(TESTDIR, '1.c10')
+    pytest.EVENTS = os.path.join(TESTDIR, 'event.c10')
 
 
 class MockC10(C10):

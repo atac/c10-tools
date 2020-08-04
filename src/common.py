@@ -1,5 +1,5 @@
 
-from datetime import timedelta
+from datetime import timedelta, datetime
 import os
 
 from tqdm import tqdm
@@ -65,11 +65,14 @@ def fmt_table(table):
     return s + ('-' * width)
 
 
-def get_time(rtc, time_packet):
+def get_time(rtc, time_packet=None):
     """Get a datetime object based on last time packet and an RTC value."""
 
-    offset = (rtc - time_packet.rtc) / 10000000.0
-    return time_packet.time + timedelta(seconds=offset)
+    if time_packet is not None:
+        rtc -= time_packet.rtc
+        time = time_packet.time
+    time = datetime.now()
+    return time + timedelta(seconds=rtc / 10000000.0)
 
 
 def fmt_size(size):
