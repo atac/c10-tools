@@ -1,8 +1,10 @@
 
 # C10 Tools
 
-![Build Status](https://img.shields.io/azure-devops/build/atac-bham/ee9fec36-25b3-4698-9fc2-f77a58ad9ecb/8)
-![Docker Status](https://img.shields.io/docker/automated/mcferrill/c10-tools)
+[![Build Status](https://dev.azure.com/atac-bham/c10-tools/_apis/build/status/atac.c10-tools?branchName=master)]()
+
+[![Build Status](https://img.shields.io/azure-devops/build/atac-bham/ee9fec36-25b3-4698-9fc2-f77a58ad9ecb/8)](https://dev.azure.com/atac-bham/c10-tools/_build/latest?definitionId=8&branchName=master)
+[![Docker Status](https://img.shields.io/docker/automated/mcferrill/c10-tools)](https://hub.docker.com/repository/docker/mcferrill/c10-tools/builds)
 
 Various utilities for analyzing and manipulating Irig 106 Chapter 10 data using
 [libirig106-python](https://github.com/atac/libirig106-python) and
