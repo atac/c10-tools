@@ -3,8 +3,8 @@
 from distutils import cmd
 from distutils.core import setup
 from glob import glob
-import shutil
 import os
+import shutil
 
 
 class Command(cmd.Command):
@@ -33,16 +33,15 @@ class Build(Command):
 
     def run(self):
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        for f in glob('src/c10_*.py') + glob('src/c10-*.py'):
+        for f in glob('src/c10_*.py'):
             os.system('pyinstaller -F %s -p . -p src \
 --exclude-module matplotlib;' % f)
-            if 'c10_' in f:
-                name, ext = os.path.splitext('dist/' + os.path.basename(f))
-                try:
-                    os.rename(name, '-'.join(name.rsplit('_', 1)))
-                except FileNotFoundError:
-                    name += '.exe'
-                    os.rename(name, '-'.join(name.rsplit('_', 1)))
+            name, ext = os.path.splitext('dist/' + os.path.basename(f))
+            try:
+                os.rename(name, '-'.join(name.rsplit('_', 1)))
+            except FileNotFoundError:
+                name += '.exe'
+                os.rename(name, '-'.join(name.rsplit('_', 1)))
 
 
 class Link(Command):
@@ -50,7 +49,7 @@ class Link(Command):
 
     def run(self):
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        for f in glob('src/c10_*.py') + glob('src/c10-*.py'):
+        for f in glob('src/c10_*.py'):
             f = os.path.abspath(f)
             link = os.path.basename(os.path.splitext(f)[0].replace('_', '-'))
             os.system('ln -s %s /usr/bin/%s' % (f, link))
@@ -77,13 +76,7 @@ setup(
         'install_scripts': Install,
     },
     version='0.1',
-    description='A collection of basic tools for managing Irig106 Chapter \
-10/11 data',
-
-    # Not supported in 3.7?
-    # setup_requires=['pytest-runner'],
-    # tests_requires=['pytest'],
-
+    description='Various tools for managing IRIG 106 Chapter 10/11 data',
     author='Micah Ferrill',
     packages=['src'],
 )
