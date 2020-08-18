@@ -7,3 +7,4 @@ data
 .tox*
 Pipfile.lock
 junit*
+*.egg-info
