@@ -4,7 +4,7 @@ import os
 
 import pytest
 
-from src import common
+from c10_tools import common
 
 
 def test_find_c10():

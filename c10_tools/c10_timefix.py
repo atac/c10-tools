@@ -12,7 +12,7 @@ import sys
 
 from docopt import docopt
 
-from common import FileProgress, C10
+from c10_tools.common import FileProgress, C10
 
 
 def valid(timestamp, previous):

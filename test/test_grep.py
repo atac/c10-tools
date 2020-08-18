@@ -2,7 +2,7 @@
 import pytest
 import docopt
 
-from src.c10_grep import main
+from c10_tools.c10_grep import main
 
 
 def test_noargs():

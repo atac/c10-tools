@@ -4,7 +4,7 @@ import os
 
 import pytest
 
-from src.c10_copy import main
+from c10_tools.c10_copy import main
 
 
 SOURCE = os.path.join(os.path.dirname(__file__), '1.c10')

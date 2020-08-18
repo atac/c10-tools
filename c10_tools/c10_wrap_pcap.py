@@ -22,7 +22,7 @@ import sys
 from docopt import docopt
 import dpkt
 
-from common import FileProgress, fmt_number
+from c10_tools.common import FileProgress, fmt_number
 
 
 class Parser:

@@ -19,7 +19,7 @@ from dpkt.ip import IP
 from dpkt.pcap import Writer
 from dpkt.udp import UDP
 
-from common import walk_packets, FileProgress, get_time, C10
+from c10_tools.common import walk_packets, FileProgress, get_time, C10
 
 
 def main(args=[]):

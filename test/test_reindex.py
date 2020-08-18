@@ -4,7 +4,7 @@ from tempfile import NamedTemporaryFile
 import pytest
 import docopt
 
-from src.c10_reindex import Parser
+from c10_tools.c10_reindex import Parser
 
 
 def test_noargs():

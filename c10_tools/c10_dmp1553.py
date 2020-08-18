@@ -12,7 +12,7 @@ import sys
 
 from docopt import docopt
 
-from common import C10
+from c10_tools.common import C10
 
 
 def main(args=[]):

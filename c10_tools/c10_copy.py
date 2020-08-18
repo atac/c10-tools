@@ -16,7 +16,7 @@ import sys
 
 from docopt import docopt
 
-from src.common import walk_packets, FileProgress, C10
+from c10_tools.common import walk_packets, FileProgress, C10
 
 
 def main(args=sys.argv[1:]):

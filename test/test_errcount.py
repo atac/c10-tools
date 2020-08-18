@@ -2,7 +2,7 @@
 import pytest
 import docopt
 
-from src import c10_errcount
+from c10_tools import c10_errcount
 
 
 def test_noargs():

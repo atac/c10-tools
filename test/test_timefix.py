@@ -4,7 +4,7 @@ from tempfile import NamedTemporaryFile
 import pytest
 import docopt
 
-from src.c10_timefix import main
+from c10_tools.c10_timefix import main
 
 
 def test_noargs():

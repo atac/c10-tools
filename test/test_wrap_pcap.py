@@ -4,7 +4,7 @@ from tempfile import NamedTemporaryFile
 import pytest
 import docopt
 
-from src.c10_wrap_pcap import Parser
+from c10_tools.c10_wrap_pcap import Parser
 
 
 def test_noargs():

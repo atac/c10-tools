@@ -17,8 +17,7 @@ from docopt import docopt
 from dask.delayed import delayed
 import dask.bag as db
 
-from common import find_c10, FileProgress, C10
-import common
+from c10_tools.common import find_c10, FileProgress, C10, fmt_table
 
 
 error_keys = ('le', 'se', 'we')
@@ -90,7 +89,7 @@ def parse_file(path, args):
     footer += [str(errcount), str(sum(chan_count.values()))]
     table.append(footer)
 
-    print(common.fmt_table(table))
+    print(fmt_table(table))
 
 
 def main(args=[]):

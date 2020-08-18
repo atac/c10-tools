@@ -2,7 +2,7 @@
 import docopt
 import pytest
 
-from src import c10_stat
+from c10_tools import c10_stat
 
 
 def test_noargs(fake_progress):

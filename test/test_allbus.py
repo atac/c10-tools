@@ -4,8 +4,8 @@ import os
 
 import pytest
 
-from src.c10_allbus import main
-from src.common import C10
+from c10_tools.c10_allbus import main
+from c10_tools.common import C10
 
 
 def test_overwrite(fake_progress):

@@ -15,7 +15,7 @@ import struct
 from chapter10 import C10
 from docopt import docopt
 
-from common import FileProgress, fmt_number
+from c10_tools.common import FileProgress, fmt_number
 
 
 class Parser:

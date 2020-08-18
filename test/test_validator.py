@@ -2,7 +2,7 @@
 import pytest
 import docopt
 
-from src.c10_validator import Parser
+from c10_tools.c10_validator import Parser
 
 
 def test_noargs():

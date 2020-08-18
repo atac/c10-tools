@@ -21,7 +21,7 @@ from chapter10 import C10
 from docopt import docopt
 import dpkt
 
-from common import FileProgress, fmt_number
+from c10_tools.common import FileProgress, fmt_number
 
 
 class PCAPParser:

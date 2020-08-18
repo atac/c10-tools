@@ -14,7 +14,7 @@ import sys
 
 from docopt import docopt
 
-import common
+from c10_tools import common
 
 
 TYPES = (

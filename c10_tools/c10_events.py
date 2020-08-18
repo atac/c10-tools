@@ -6,7 +6,7 @@ import sys
 
 from docopt import docopt
 
-from common import C10, get_time
+from c10_tools.common import C10, get_time
 
 
 def main(args=[]):

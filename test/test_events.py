@@ -1,10 +1,8 @@
 
-from datetime import datetime
-
 import pytest
 import docopt
 
-from src import c10_events
+from c10_tools import c10_events
 
 
 def test_noargs():

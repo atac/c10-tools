@@ -14,7 +14,8 @@ import sys
 
 from docopt import docopt
 
-from common import FileProgress
+from c10_tools.common import FileProgress
+# TODO: this should use either library
 from i106 import C10
 
 

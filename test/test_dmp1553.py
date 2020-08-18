@@ -3,7 +3,7 @@ import pytest
 
 import docopt
 
-from src import c10_dmp1553
+from c10_tools import c10_dmp1553
 
 
 def test_noargs():

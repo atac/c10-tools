@@ -1,7 +1,6 @@
 
 from unittest.mock import patch
 import os
-import sys
 
 try:
     from i106 import C10
@@ -12,8 +11,6 @@ if os.environ.get('LIBRARY', None) == 'c10':
     from chapter10 import C10
 
 import pytest
-
-sys.path.append('src')
 
 TESTDIR = os.path.join(os.path.dirname(__file__), 'test')
 
@@ -38,5 +35,5 @@ def c10():
 
 @pytest.fixture(scope='session')
 def fake_progress():
-    with patch('src.common.FileProgress'):
+    with patch('c10_tools.common.FileProgress'):
         yield

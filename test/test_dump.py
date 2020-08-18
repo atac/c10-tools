@@ -4,7 +4,7 @@ from tempfile import TemporaryDirectory
 import pytest
 import docopt
 
-from src import c10_dump
+from c10_tools import c10_dump
 
 
 def test_noargs():

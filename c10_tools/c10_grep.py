@@ -26,7 +26,7 @@ from docopt import docopt
 from tqdm import tqdm
 import dask.bag as db
 
-from common import get_time, FileProgress, find_c10, C10
+from c10_tools.common import get_time, FileProgress, find_c10, C10
 
 
 def swap_word(word):
