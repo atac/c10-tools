@@ -17,7 +17,7 @@ from docopt import docopt
 from c10_tools.common import FileProgress, C10
 
 
-def main(args=[]):
+def main(args=sys.argv[1:]):
     args = docopt(__doc__, args)
 
     if os.path.exists(args['<dst>']) and not args['--force']:
@@ -63,4 +63,4 @@ def main(args=[]):
 
 
 if __name__ == '__main__':
-    main(sys.argv)
+    main()

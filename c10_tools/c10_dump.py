@@ -20,7 +20,7 @@ from docopt import docopt
 from c10_tools.common import walk_packets, FileProgress
 
 
-def main(args=[]):
+def main(args=sys.argv[1:]):
 
     # Get commandline args.
     args = docopt(__doc__, args)
@@ -74,4 +74,4 @@ def main(args=[]):
 
 
 if __name__ == '__main__':
-    main(sys.argv[1:])
+    main()

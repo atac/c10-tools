@@ -92,7 +92,7 @@ def parse_file(path, args):
     print(fmt_table(table))
 
 
-def main(args=[]):
+def main(args=sys.argv[1:]):
     args = docopt(__doc__, args)
     if args['-o']:
         with open(args['-o'], 'w') as outfile:
@@ -111,4 +111,4 @@ def main(args=[]):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    main()

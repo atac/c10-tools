@@ -90,7 +90,7 @@ def search(path, args, i=None):
         outfile.close()
 
 
-def main(args=[]):
+def main(args=sys.argv[1:]):
 
     args = docopt(__doc__, args)
 
@@ -153,4 +153,4 @@ def main(args=[]):
 
 
 if __name__ == '__main__':
-    main(sys.argv[1:])
+    main()

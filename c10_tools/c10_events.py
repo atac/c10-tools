@@ -9,7 +9,7 @@ from docopt import docopt
 from c10_tools.common import C10, get_time
 
 
-def main(args=[]):
+def main(args=sys.argv[1:]):
     args = docopt(__doc__, args)
 
     last_time = None
@@ -31,4 +31,4 @@ def main(args=[]):
 
 
 if __name__ == '__main__':
-    main(sys.argv[1:])
+    main()
