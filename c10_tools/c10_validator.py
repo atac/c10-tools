@@ -77,5 +77,9 @@ class Parser:
             fmt_number(valid + invalid)))
 
 
-if __name__ == '__main__':
+def main():
     Parser(sys.argv[1:]).main()
+
+
+if __name__ == '__main__':
+    main()

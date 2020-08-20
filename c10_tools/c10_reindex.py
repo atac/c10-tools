@@ -169,5 +169,9 @@ class Parser:
             print('Stripped existing indices.')
 
 
-if __name__ == '__main__':
+def main():
     Parser(sys.argv[1:]).main()
+
+
+if __name__ == '__main__':
+    main()

@@ -120,6 +120,10 @@ class PCAPParser:
                       % (fmt_number(added), fmt_number(packets)))
 
 
-if __name__ == '__main__':
+def main():
     parser = PCAPParser(sys.argv[1:])
     parser.main()
+
+
+if __name__ == '__main__':
+    main()

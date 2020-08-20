@@ -205,5 +205,9 @@ class Parser:
                       % (fmt_number(added), fmt_number(packets)))
 
 
-if __name__ == '__main__':
+def main():
     Parser(sys.argv[1:]).main()
+
+
+if __name__ == '__main__':
+    main()
