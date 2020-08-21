@@ -1,5 +1,5 @@
+-e git+git@github.com:atac/pychapter10.git@9337f3ed215cc4110d972cdbf63a6d6c724ec783#egg=Chapter10
 -e git+https://github.com/atac/libirig106-python.git@68187e6cfdd001feafd25ece6f7f6a9dd83775fa#egg=i106
--e git+https://github.com/atac/pychapter10.git@1d6341e1695916f5e94954fbae7522b2cab3c19b#egg=Chapter10
 dask[bag,delayed]==2.23.0
 docopt==0.6.2
 dpkt==1.9.3
