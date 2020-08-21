@@ -91,8 +91,9 @@ def main(args=sys.argv[1:]):
 
         # Print file summary.
         duration = str(end_time - start_time)
-        start_time = start_time.strftime("%j-%Y %H:%M:%S")
-        end_time = end_time.strftime("%j-%Y %H:%M:%S")
+        # TODO: Only show year if format provides it. Requires i106 update.
+        start_time = start_time.strftime('%j-%Y %H:%M:%S')
+        end_time = end_time.strftime('%j-%Y %H:%M:%S')
 
         print(f'''Summary for {filename}:
     Channels: {len(channels):>17}     Start time:{start_time:>25}
