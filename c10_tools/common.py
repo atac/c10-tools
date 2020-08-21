@@ -65,14 +65,15 @@ def fmt_table(table):
     return s + ('-' * width)
 
 
-def get_time(rtc, time_packet=None):
+def get_time(rtc, time_packet):
     """Get a datetime object based on last time packet and an RTC value."""
 
-    if time_packet is not None:
-        rtc -= time_packet.rtc
-        time = time_packet.time
-    time = datetime.now()
-    return time + timedelta(seconds=rtc / 10000000.0)
+    # TODO: this is here because the event sample file has no time
+    if time_packet is None:
+        return datetime.now()
+
+    rtc -= time_packet.rtc
+    return time_packet.time + timedelta(seconds=rtc / 10_000_000)
 
 
 def fmt_size(size):
