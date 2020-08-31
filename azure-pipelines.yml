@@ -56,13 +56,13 @@ jobs:
   - script: python -m pip install -U tox pytest-azurepipelines
     displayName: 'Install dependencies'
 
-  - script: "tox -e {python.env}-c10,{python.env}-i106"
+  - script: "tox -e $(python.env)-c10,$(python.env)-i106"
     displayName: 'Run Tests'
 
   - task: PublishTestResults@2
     inputs:
       testResultsFormat: 'JUnit'
-      testResultsFiles: 'junit-*-*.xml'
+      testResultsFiles: 'junit-*.xml'
       testRunTitle: 'Python $(python.version)'
     condition: succeededOrFailed()
 
