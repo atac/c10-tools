@@ -1,24 +1,86 @@
-
-strategy:
-  matrix:
-    ubuntu:
-      imageName: 'ubuntu-latest'
-    macos:
-      imageName: 'macos-latest'
-    windows:
-      imageName: 'windows-latest'
-
 trigger:
 - master
 
-steps:
-- task: UsePythonVersion@0
-  inputs:
-    versionSpec: '3.8'
-    architecture: 'x64'
+jobs:
 
-- script: python -m pip install -U tox 
-  displayName: 'Install dependencies'
+- job: Test
+  strategy:
+    maxParallel: 5
+    matrix:
+      Ubuntu-py3.6:
+        imageName: 'ubuntu-latest'
+        python.version: '3.6'
+      Ubuntu-py3.7:
+        imageName: 'ubuntu-latest'
+        python.version: '3.7'
+      Ubuntu-py3.8:
+        imageName: 'ubuntu-latest'
+        python.version: '3.8'
+      macOS-py3.6:
+        imageName: 'macos-latest'
+        python.version: '3.6'
+      macOS-py3.7:
+        imageName: 'macos-latest'
+        python.version: '3.7'
+      macOS-py3.8:
+        imageName: 'macos-latest'
+        python.version: '3.8'
+      Windows-py3.6:
+        imageName: 'windows-latest'
+        python.version: '3.6'
+      Windows-py3.7:
+        imageName: 'windows-latest'
+        python.version: '3.7'
+      Windows-py3.8:
+        imageName: 'windows-latest'
+        python.version: '3.8'
 
-- script: tox
-  displayName: 'Run tests'
+  pool:
+    vmImage: $(imageName)
+
+  steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: "$(python.version)"
+      architecture: 'x64'
+
+  - script: python -m pip install -U tox pytest-azurepipelines
+    displayName: 'Install dependencies'
+
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: 'JUnit'
+      testResultsFiles: 'junit-*.xml'
+      testRunTitle: 'Python $(python.version)'
+    condition: succeededOrFailed()
+
+  - task: PublishCodeCoverageResults@1
+    inputs:
+      codeCoverageTool: Cobertura
+      summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
+
+
+- job: Package
+  dependsOn: 'Test'
+  steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: "3.8"
+      architecture: 'x64'
+
+  - script: "python -m pip download -r requirements.txt -d dependencies --no-binary :all:"
+    displayName: 'Download dependencies'
+
+  - task: ArchiveFiles@2
+    displayName: 'Zip full package'
+    inputs:
+      rootFolderOrFile: '$(Build.SourcesDirectory)' 
+      includeRootFolder: false
+      archiveType: 'zip'
+      archiveFile: 'c10-tools-$(Build.BuildNumber)-full.zip' 
+      replaceExistingArchive: true 
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathToPublish: 'c10-tools-$(Build.BuildNumber)-full.zip'
+      artifactName: complete-library

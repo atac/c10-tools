@@ -38,7 +38,8 @@ class Clean(Command):
     def run(self):
         shutil.rmtree('dist', True)
         shutil.rmtree('build', True)
-        for f in glob('*.spec') + glob('junit*.xml'):
+        shutil.rmtree('htmlcov', True)
+        for f in glob('*.spec') + glob('junit*.xml') + ['coverage.xml']:
             os.remove(f)
 
         print('cleaned build & dist files')

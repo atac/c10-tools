@@ -8,3 +8,4 @@ data
 Pipfile.lock
 junit*
 *.egg-info
+.coverage
