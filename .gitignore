@@ -9,3 +9,5 @@ Pipfile.lock
 junit*
 *.egg-info
 .coverage
+coverage.xml
+htmlcov
