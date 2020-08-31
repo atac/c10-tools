@@ -47,6 +47,9 @@ jobs:
   - script: python -m pip install -U tox pytest-azurepipelines
     displayName: 'Install dependencies'
 
+  - script: tox
+    displayName: 'Run Tests'
+
   - task: PublishTestResults@2
     inputs:
       testResultsFormat: 'JUnit'
