@@ -9,9 +9,9 @@ from c10_tools.c10_timefix import main
 
 def test_noargs():
     with pytest.raises(docopt.DocoptExit):
-        main()
+        main([])
 
 
 def test_default():
-    with NamedTemporaryFile() as out:
-        main([pytest.SAMPLE, out.name])
+    path = NamedTemporaryFile().name
+    main([pytest.SAMPLE, path])

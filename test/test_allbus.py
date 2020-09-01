@@ -15,24 +15,24 @@ def test_overwrite(fake_progress):
 
 
 def test_force(fake_progress):
-    with NamedTemporaryFile() as out:
-        main((pytest.SAMPLE, out.name, '-f'))
-        assert os.stat(out.name).st_size == os.stat(pytest.SAMPLE).st_size
+    path = NamedTemporaryFile().name
+    main((pytest.SAMPLE, path, '-f'))
+    assert os.stat(path).st_size == os.stat(pytest.SAMPLE).st_size
 
 
 def test_defaults(fake_progress):
-    with NamedTemporaryFile() as out:
-        main((pytest.SAMPLE, out.name, '-f'))
-        for packet in C10(out.name):
-            if packet.data_type == 0x19:
-                for i, msg in enumerate(packet):
-                    assert msg.bus == 0
+    path = NamedTemporaryFile().name
+    main((pytest.SAMPLE, path, '-f'))
+    for packet in C10(path):
+        if packet.data_type == 0x19:
+            for i, msg in enumerate(packet):
+                assert msg.bus == 0
 
 
 def test_b(fake_progress):
-    with NamedTemporaryFile() as out:
-        main((pytest.SAMPLE, out.name, '-b', '-f'))
-        for packet in C10(out.name):
-            if packet.data_type == 0x19:
-                for i, msg in enumerate(packet):
-                    assert msg.bus == 1
+    path = NamedTemporaryFile().name
+    main((pytest.SAMPLE, path, '-b', '-f'))
+    for packet in C10(path):
+        if packet.data_type == 0x19:
+            for i, msg in enumerate(packet):
+                assert msg.bus == 1

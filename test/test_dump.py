@@ -9,7 +9,7 @@ from c10_tools import c10_dump
 
 def test_noargs():
     with pytest.raises(docopt.DocoptExit):
-        c10_dump.main()
+        c10_dump.main([])
 
 
 # Segfaults with i106

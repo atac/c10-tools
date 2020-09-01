@@ -17,7 +17,8 @@ def test_overwrite():
 
 
 def test_noargs():
-    with NamedTemporaryFile('w+b') as out:
-        main((SOURCE, out.name, '-f'))
+    path = NamedTemporaryFile().name
+    with open(path, 'w+b') as out:
+        main((SOURCE, path, '-f'))
         out.seek(0)
         assert out.read() == open(SOURCE, 'rb').read()
