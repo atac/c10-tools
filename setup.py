@@ -1,11 +1,16 @@
 #!/usr/bin/env python
 
-from setuptools import setup, Command
-from glob import glob
 from contextlib import suppress
+from glob import glob
+from setuptools import setup, Command
 import os
 import shutil
 import subprocess
+import sys
+
+sys.path.insert(0, 'c10_tools')
+from version import version
+sys.path.remove('c10_tools')
 
 
 class BaseCommand(Command):
