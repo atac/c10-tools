@@ -17,7 +17,7 @@ def test_overwrite(fake_progress):
 def test_force(fake_progress):
     path = NamedTemporaryFile().name
     main((pytest.SAMPLE, path, '-f'))
-    assert os.stat(path).st_size == os.stat(pytest.SAMPLE).st_size
+    assert len(list(C10(path))) == len(list(C10(pytest.SAMPLE)))
 
 
 def test_defaults(fake_progress):

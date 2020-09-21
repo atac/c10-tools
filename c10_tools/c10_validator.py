@@ -47,7 +47,7 @@ class Parser:
                         c10 = C10.from_string(self.buf[sync:])
                         packet = next(c10)
 
-                        if packet.check():
+                        if packet.validate(True):
                             valid += 1
 
                             if self.args['-o']:

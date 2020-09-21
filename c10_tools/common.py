@@ -4,13 +4,16 @@ import os
 
 from tqdm import tqdm
 
-try:
-    from i106 import C10
-except ImportError:
-    from chapter10 import C10
-
+# Allow for explicit parser selection, or else use what's available.
 if os.environ.get('LIBRARY', None) == 'c10':
     from chapter10 import C10
+elif os.environ.get('LIBRARY', None) == 'i106':
+    from i106 import C10
+else:
+    try:
+        from i106 import C10
+    except ImportError:
+        from chapter10 import C10
 
 
 # Format a number nicely with commas for thousands, etc.

@@ -27,39 +27,13 @@ def main(args=sys.argv[1:]):
     with open(args['<dst>'], 'wb') as out, \
             FileProgress(args['<src>']) as progress:
         for packet in C10(args['<src>']):
+            progress.update(packet.packet_length)
 
-            raw = bytes(packet)
-            progress.update(len(raw))
+            if packet.data_type == 0x19:
+                for msg in packet:
+                    msg.bus = int(args['-b'])
 
-            # Write non-1553 out as-is.
-            if packet.data_type != 0x19:
-                out.write(raw)
-                continue
-
-            # Write out packet header secondary if applicable) and CSDW.
-            offset = 28
-            # TODO: make this consistent between python and c libraries
-            if getattr(packet, 'secondary_header', None) or getattr(
-                    packet, 'flags', 0) & (1 << 7):
-                offset += 12
-            out.write(raw[:offset])
-
-            # Walk through messages and update bus ID as needed.
-            for msg in packet:
-                msg.bus = int(args['-b'])
-
-                # TODO: replace this when we reimplement Item.bytes in
-                # pychapter10
-                try:
-                    packed = bytes(msg)
-                except TypeError:
-                    packed = msg.pack()
-                out.write(packed)
-                offset += len(packed)
-
-            # Write filler.
-            for i in range(packet.packet_length - offset):
-                out.write(b'0')
+            out.write(bytes(packet))
 
 
 if __name__ == '__main__':

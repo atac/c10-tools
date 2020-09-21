@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 
-from distutils import cmd
-from distutils.core import setup
+from setuptools import setup, Command
 from glob import glob
+from contextlib import suppress
 import os
 import shutil
 import subprocess
 
 
-class Command(cmd.Command):
+class BaseCommand(Command):
     description = ''
     user_options = []
 
@@ -19,7 +19,7 @@ class Command(cmd.Command):
         pass
 
 
-class Build(Command):
+class Build(BaseCommand):
     description = 'compile tools to standalone binaries'
 
     def run(self):
@@ -32,17 +32,25 @@ class Build(Command):
                            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 
-class Clean(Command):
+class Clean(BaseCommand):
     description = 'cleanup .spec files and build/dist directories'
 
-    def run(self):
-        shutil.rmtree('dist', True)
-        shutil.rmtree('build', True)
-        shutil.rmtree('htmlcov', True)
-        for f in glob('*.spec') + glob('junit*.xml') + ['coverage.xml']:
-            os.remove(f)
+    CLEAN_FILES = '''
+        build dist *.pyc *.tgz *.egg-info __pycache__ dependencies
+        htmlcov MANIFEST coverage.xml junit*.xml
+    '''
 
-        print('cleaned build & dist files')
+    def run(self):
+        here = os.path.abspath(os.path.dirname(__file__))
+        for path_spec in self.CLEAN_FILES.split():
+            abs_paths = glob(os.path.normpath(os.path.join(here, path_spec)))
+            for path in abs_paths:
+                print('removing %s' % os.path.relpath(path))
+                if os.path.isdir(path):
+                    shutil.rmtree(path, True)
+                else:
+                    with suppress(os.error):
+                        os.remove(path)
 
 
 setup(
@@ -72,5 +80,31 @@ setup(
     version='0.1',
     description='Various tools for managing IRIG 106 Chapter 10/11 data',
     author='Micah Ferrill',
+    author_email='ferrillm@avtest.com',
     packages=['c10_tools'],
+    long_description=open('README.md').read(),
+    url='https://github.com/atac/c10-tools',
+    python_requires='>=py3.6',
+    install_requires=[
+        'dask[bag,delayed]~=2.23',
+        'docopt~=0.6.2',
+        'dpkt~=1.9.3',
+        'pychapter10==0.3.4',
+        'pyinstaller~=4.0',
+        'pytest~=6.0.1',
+        'pytest-cov~=2.10.1',
+        'tqdm~=4.48.2',
+    ],
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3 :: Only",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Topic :: Software Development :: Libraries",
+        "Development Status :: 4 - Beta",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: BSD License",
+        "Operating System :: OS Independent",
+    ],
 )

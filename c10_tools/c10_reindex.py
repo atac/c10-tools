@@ -7,6 +7,7 @@ Options:
     -f, --force  Overwrite existing files.
 """
 
+from io import BytesIO
 from array import array
 import os
 import struct
@@ -14,9 +15,7 @@ import sys
 
 from docopt import docopt
 
-from c10_tools.common import FileProgress
-# TODO: this should use either library
-from i106 import C10
+from c10_tools.common import FileProgress, C10
 
 
 class Parser:
@@ -157,7 +156,7 @@ class Parser:
                 offset, raw = self.gen_node(packets)
                 nodes.append(offset)
                 out.write(raw)
-                for packet in C10(buffer=raw):
+                for packet in C10(BytesIO(raw)):
                     last_packet = packet
                     break
                 last_packet.offset = out.tell() - last_packet.packet_length
