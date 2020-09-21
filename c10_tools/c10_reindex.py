@@ -156,7 +156,11 @@ class Parser:
                 offset, raw = self.gen_node(packets)
                 nodes.append(offset)
                 out.write(raw)
-                for packet in C10(BytesIO(raw)):
+                try:
+                    batch = C10(BytesIO(raw))
+                except TypeError:
+                    batch = C10(buffer=raw)
+                for packet in batch:
                     last_packet = packet
                     break
                 last_packet.offset = out.tell() - last_packet.packet_length
