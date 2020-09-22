@@ -109,7 +109,7 @@ jobs:
       versionSpec: "3.8"
       architecture: 'x64'
 
-  - script: "python -m pip download -r requirements.txt -d dependencies --no-binary :all:"
+  - script: "python -m pip download . -r requirements.txt -d dependencies --no-binary :all:"
     displayName: 'Download dependencies'
 
   - task: ArchiveFiles@2
@@ -125,3 +125,43 @@ jobs:
     inputs:
       pathToPublish: 'c10-tools-$(Build.BuildNumber)-full.zip'
       artifactName: complete-library
+
+# Bundle native binaries for windows.
+- job: Build-Native
+  dependsOn: 'Test'
+  strategy:
+    maxParallel: 2
+    matrix:
+      linux:
+        imageName: 'ubuntu-latest'
+        platform: 'linux'
+      windows:
+        imageName: 'windows-latest'
+        platform: 'windows'
+  pool:
+    vmImage: $(imageName)
+  steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: "3.8"
+      architecture: 'x64'
+
+  - script: "python -m pip install . -r requirements.txt"
+    displayName: 'Install dependencies'
+
+  - script: "python setup.py build_scripts"
+    displayName: 'Build'
+
+  - task: ArchiveFiles@2
+    displayName: 'Zip binaries'
+    inputs:
+      rootFolderOrFile: 'dist/**' 
+      includeRootFolder: false
+      archiveType: 'zip'
+      archiveFile: 'c10-tools-$(Build.BuildNumber)-$(platform).zip' 
+      replaceExistingArchive: true 
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathToPublish: 'c10-tools-$(Build.BuildNumber)-$(platform).zip' 
+      artifactName: native-binaries
