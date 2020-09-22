@@ -82,7 +82,7 @@ setup(
             'c10-wrap-pcap=c10_tools.c10_wrap_pcap:main',
         ],
     },
-    version='0.1',
+    version=version,
     description='Various tools for managing IRIG 106 Chapter 10/11 data',
     author='Micah Ferrill',
     author_email='ferrillm@avtest.com',
