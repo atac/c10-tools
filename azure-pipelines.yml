@@ -127,7 +127,7 @@ jobs:
       artifactName: complete-library
 
 # Bundle native binaries for windows.
-- job: Build-Native
+- job: Build_Native
   dependsOn: 'Test'
   strategy:
     maxParallel: 2
