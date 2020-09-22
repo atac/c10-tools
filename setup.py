@@ -96,9 +96,6 @@ setup(
         'docopt~=0.6.2',
         'dpkt~=1.9.3',
         'pychapter10==0.3.4',
-        'pyinstaller~=4.0',
-        'pytest~=6.0.1',
-        'pytest-cov~=2.10.1',
         'tqdm~=4.48.2',
     ],
     classifiers=[
