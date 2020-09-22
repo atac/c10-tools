@@ -155,7 +155,7 @@ jobs:
   - task: ArchiveFiles@2
     displayName: 'Zip binaries'
     inputs:
-      rootFolderOrFile: 'dist/**' 
+      rootFolderOrFile: 'dist' 
       includeRootFolder: false
       archiveType: 'zip'
       archiveFile: 'c10-tools-$(Build.BuildNumber)-$(platform).zip' 
