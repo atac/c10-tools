@@ -2,6 +2,9 @@
 # C10 Tools
 
 [![Build Status](https://img.shields.io/azure-devops/build/atac-bham/ee9fec36-25b3-4698-9fc2-f77a58ad9ecb/8)](https://dev.azure.com/atac-bham/c10-tools/_build/latest?definitionId=8&branchName=master)
+![PyPI - License](https://img.shields.io/pypi/l/c10-tools)
+![PyPI](https://img.shields.io/pypi/v/c10-tools)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/c10-tools)
 [![Docker Cloud Automated build](https://img.shields.io/docker/cloud/automated/mcferrill/c10-tools)](https://hub.docker.com/repository/docker/mcferrill/c10-tools/builds)
 
 Various utilities for analyzing and manipulating Irig 106 Chapter 10 data using
@@ -10,6 +13,12 @@ Various utilities for analyzing and manipulating Irig 106 Chapter 10 data using
 
 
 ## Included Tools
+
+Each tool is self-documenting with the --help flag as in:
+
+```
+c10-stat --help
+```
 
 * c10-allbus - Switch 1553 format 1 messages to indicate the same bus.
 * c10-copy - Copy a file optionally filtering on channel id or data type.
@@ -28,16 +37,46 @@ Various utilities for analyzing and manipulating Irig 106 Chapter 10 data using
   chapter 10 file.
 * wireshark_dissector - Lua based wireshark dissector for Chapter 10 data
 
+## Installation
 
-## Dependencies
+Install the latest version with pip:
 
-* [Python](https://python.org) 3.6 or later
+```
+pip install c10-tools
+```
 
-## Building and Running
+To install offline from the "full" zip, install the included dependencies and the library with:
 
-If the dependencies are installed (pip install -r requirements) you can run
-each sample from the commandline using python (eg: python c10-stat.py) and
-commandline help will show you how to use each one.
+```
+pip install dependencies/* .
+```
 
-You can use the setup script to compile and install to native binaries if
-needed.
+## Choosing Backend Library
+
+By default everything will run with pychapter10. You can improve the performance of pychapter10 by installing cbitstruct `pip install cbitstruct`. You can also install libirig106-python. To manually select between backends when both are installed, set the LIBRARY environment variable with c10 or i106 as in (for unix):
+
+```
+LIBRARY=c10 c10-stat test.ch10
+```
+
+## Running Tests
+
+To run the included sanity tests install dependencies with pip (also included in full zip, see above):
+
+```
+pip install -r requirements.txt
+```
+
+Then run:
+
+```
+pytest test
+```
+
+## Building Native Binaries
+
+If the dependencies are installed (see Running Tests) you can compile native executables of the tools with:
+
+```
+python setup.py build_scripts
+```
