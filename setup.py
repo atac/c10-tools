@@ -88,6 +88,7 @@ setup(
     author_email='ferrillm@avtest.com',
     packages=['c10_tools'],
     long_description=open('README.md').read(),
+    long_description_content_type='text/markdown',
     url='https://github.com/atac/c10-tools',
     python_requires='>=py3.6',
     install_requires=[
