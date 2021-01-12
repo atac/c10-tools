@@ -51,23 +51,27 @@ def main(args=sys.argv[1:]):
         with common.FileProgress(filename) as progress, \
                 suppress(KeyboardInterrupt):
 
-            # Iterate over selected packets based on args.
-            for packet in common.walk_packets(filename, args):
-                if packet.data_type == 0x11:
-                    last_time = packet
-                    if not start_time:
-                        start_time = packet.time
-                key = (packet.channel_id, packet.data_type)
-                if key not in channels:
-                    channels[key] = {'packets': 0,
-                                     'size': 0,
-                                     'type': packet.data_type,
-                                     'id': packet.channel_id}
+            try:
+                # Iterate over selected packets based on args.
+                for packet in common.walk_packets(filename, args):
+                    if packet.data_type == 0x11:
+                        last_time = packet
+                        if not start_time:
+                            start_time = packet.time
+                    key = (packet.channel_id, packet.data_type)
+                    if key not in channels:
+                        channels[key] = {'packets': 0,
+                                         'size': 0,
+                                         'type': packet.data_type,
+                                         'id': packet.channel_id}
 
-                channels[key]['packets'] += 1
-                channels[key]['size'] += packet.packet_length
+                    channels[key]['packets'] += 1
+                    channels[key]['size'] += packet.packet_length
 
-                progress.update(packet.packet_length)
+                    progress.update(packet.packet_length)
+            except Exception as err:
+                print(f'Failed to read file {filename} with error "{err}"')
+                continue
 
         end_time = common.get_time(packet.rtc, last_time)
 
