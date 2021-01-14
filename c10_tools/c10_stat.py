@@ -10,9 +10,12 @@ be decimal or hex eg: 0x40).
 """
 
 from contextlib import suppress
+from urllib.parse import urlparse
+import os
 import sys
 
 from docopt import docopt
+import s3fs
 
 from c10_tools import common
 
@@ -48,12 +51,27 @@ def main(args=sys.argv[1:]):
         start_time, end_time = 0, 0
         channels = {}
 
-        with common.FileProgress(filename) as progress, \
+        # Format: s3://user:pass@host:port/bucket/path.c10
+        if filename.startswith('s3://'):
+            path = urlparse(filename)
+            endpoint = f'http://{path.hostname}:{path.port}'
+            fs = s3fs.S3FileSystem(key=path.username,
+                                   secret=path.password,
+                                   client_kwargs={
+                                       'endpoint_url': endpoint})
+            f = fs.open(path.path[1:])
+            size = fs.du(path.path[1:])
+        else:
+            f = open(filename, 'rb')
+            size = os.stat(filename).st_size
+
+        with common.FileProgress(total=size) as progress, \
                 suppress(KeyboardInterrupt):
 
             try:
+
                 # Iterate over selected packets based on args.
-                for packet in common.walk_packets(filename, args):
+                for packet in common.walk_packets(common.C10(f), args):
                     if packet.data_type == 0x11:
                         last_time = packet
                         if not start_time:
@@ -69,6 +87,8 @@ def main(args=sys.argv[1:]):
                     channels[key]['size'] += packet.packet_length
 
                     progress.update(packet.packet_length)
+
+                f.close()
             except Exception as err:
                 print(f'Failed to read file {filename} with error "{err}"')
                 continue

@@ -93,6 +93,7 @@ def walk_packets(c10, args={}):
     """Walk a chapter 10 file based on sys.argv (type, channel, etc.)."""
 
     if not isinstance(c10, C10):
+        print(c10.__class__, isinstance(c10, c10.__class__))
         c10 = C10(c10)
 
     # Apply defaults.
@@ -125,10 +126,12 @@ def walk_packets(c10, args={}):
 class FileProgress(tqdm):
     """Extend tqdm to show progress reading over a file based on f.tell()."""
 
-    def __init__(self, filename, **kwargs):
+    def __init__(self, filename=None, total=None, **kwargs):
+        if total is None:
+            total = os.stat(filename).st_size
         tqdm_kwargs = dict(
             dynamic_ncols=True,
-            total=os.stat(filename).st_size,
+            total=total,
             leave=False,
             unit='bytes',
             unit_scale=True)

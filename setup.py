@@ -97,6 +97,7 @@ setup(
         'dpkt~=1.9.3',
         'pychapter10>=0.3.9,<0.4.0',
         'tqdm~=4.48.2',
+        's3fs>=0.5.2',
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
