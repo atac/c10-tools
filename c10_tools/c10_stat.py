@@ -114,10 +114,13 @@ def main(args=sys.argv[1:]):
         print(common.fmt_table(table))
 
         # Print file summary.
-        duration = str(end_time - start_time)
-        # TODO: Only show year if format provides it. Requires i106 update.
-        start_time = start_time.strftime('%j-%Y %H:%M:%S')
-        end_time = end_time.strftime('%j-%Y %H:%M:%S')
+        if start_time:
+            duration = str(end_time - start_time)
+            # TODO: Only show year if format provides it. Requires i106 update.
+            start_time = start_time.strftime('%j-%Y %H:%M:%S')
+            end_time = end_time.strftime('%j-%Y %H:%M:%S')
+        else:
+            duration, end_time = 0, 0
 
         print(f'''Summary for {filename}:
     Channels: {len(channels):>17}     Start time:{start_time:>25}
