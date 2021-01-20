@@ -62,7 +62,10 @@ def main(args=sys.argv[1:]):
             f = fs.open(path.path[1:])
             size = fs.du(path.path[1:])
         else:
-            f = open(filename, 'rb')
+            if os.environ.get('LIBRARY', 'c10') == 'i106':
+                f = filename
+            else:
+                f = open(filename, 'rb')
             size = os.stat(filename).st_size
 
         with common.FileProgress(total=size) as progress, \
