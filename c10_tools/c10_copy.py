@@ -41,9 +41,8 @@ def main(args=sys.argv[1:]):
             progress.update(packet.packet_length)
 
             # Copy packet to new file.
-            raw = bytes(packet)
-            if len(raw) == packet.packet_length:
-                out.write(raw)
+            if packet.data_type:
+                out.write(bytes(packet))
 
 
 if __name__ == '__main__':
