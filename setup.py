@@ -92,11 +92,11 @@ setup(
     url='https://github.com/atac/c10-tools',
     python_requires='>=py3.6',
     install_requires=[
-        'dask[bag,delayed,distributed,dataframe]~=2.23',
-        'docopt~=0.6.2',
-        'dpkt~=1.9.3',
-        'pychapter10>=0.3.9,<0.4.0',
-        'tqdm~=4.48.2',
+        'dask[bag,delayed,distributed,dataframe]>=2.23',
+        'docopt>=0.6.2',
+        'dpkt>=1.9.3',
+        'pychapter10>=1.0',
+        'tqdm>=4.48.2',
         's3fs>=0.5.2',
     ],
     classifiers=[
