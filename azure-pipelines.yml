@@ -13,10 +13,6 @@ jobs:
   strategy:
     maxParallel: 5
     matrix:
-      Ubuntu-py3.6:
-        imageName: 'ubuntu-latest'
-        python.version: '3.6'
-        python.env: '36'
       Ubuntu-py3.7:
         imageName: 'ubuntu-latest'
         python.version: '3.7'
@@ -25,10 +21,6 @@ jobs:
         imageName: 'ubuntu-latest'
         python.version: '3.8'
         python.env: '38'
-      macOS-py3.6:
-        imageName: 'macos-latest'
-        python.version: '3.6'
-        python.env: '36'
       macOS-py3.7:
         imageName: 'macos-latest'
         python.version: '3.7'
@@ -37,10 +29,6 @@ jobs:
         imageName: 'macos-latest'
         python.version: '3.8'
         python.env: '38'
-      Windows-py3.6:
-        imageName: 'windows-latest'
-        python.version: '3.6'
-        python.env: '36'
       Windows-py3.7:
         imageName: 'windows-latest'
         python.version: '3.7'
