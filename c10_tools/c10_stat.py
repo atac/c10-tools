@@ -96,7 +96,8 @@ def main(args=sys.argv[1:]):
                 print(f'Failed to read file {filename} with error "{err}"')
                 continue
 
-        end_time = common.get_time(packet.rtc, last_time)
+        if last_time != 0:
+            end_time = common.get_time(packet.rtc, last_time)
 
         # Print details for each channel.
         table = [('Channel ID', 'Data Type', 'Packets', 'Size')]
