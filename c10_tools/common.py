@@ -4,16 +4,13 @@ import os
 
 from tqdm import tqdm
 
-# Allow for explicit parser selection, or else use what's available.
-if os.environ.get('LIBRARY', None) == 'c10':
-    from chapter10 import C10
-elif os.environ.get('LIBRARY', None) == 'i106':
-    from i106 import C10
-else:
+# Allow for explicit parser selection, or else use pychapter10 by default.
+from chapter10 import C10
+if os.environ.get('LIBRARY', 'c10') == 'i106':
     try:
         from i106 import C10
     except ImportError:
-        from chapter10 import C10
+        print('Could not import libirig106-python, reverting to pychapter10')
 
 
 # Format a number nicely with commas for thousands, etc.
@@ -91,10 +88,6 @@ def fmt_size(size):
 
 def walk_packets(c10, args={}):
     """Walk a chapter 10 file based on sys.argv (type, channel, etc.)."""
-
-    if not isinstance(c10, C10):
-        print(c10.__class__, isinstance(c10, c10.__class__))
-        c10 = C10(c10)
 
     # Apply defaults.
     args['--type'] = args.get('--type') or ''
