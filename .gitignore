@@ -11,3 +11,6 @@ junit*
 .coverage
 coverage.xml
 htmlcov
+.eggs
+dask-worker-space
+src
