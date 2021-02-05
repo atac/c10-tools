@@ -47,13 +47,16 @@ class Build(BaseCommand):
 
     def run(self):
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        env = os.environ.copy()
+        env['PYTHONOPTIMIZE'] = '1'
         for f in self.scripts:
             f = 'c10_tools/' + f
             print(f'Building {f}')
             name, _ = os.path.splitext(os.path.basename(f))
             subprocess.run([
-                'pyinstaller', '-F', f, '-n', name.replace('_', '-')],
-                           stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                'pyinstaller', f, '-n', name.replace('_', '-')],
+                           stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                           env=env)
 
 
 class Clean(BaseCommand):

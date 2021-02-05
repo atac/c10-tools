@@ -6,8 +6,8 @@ import types
 from docopt import docopt
 from termcolor import colored
 
-from .version import version
-from .c10_stat import main as stat
+from c10_tools.version import version
+from c10_tools.c10_stat import main as stat
 
 
 def build_usage(s=''):
@@ -137,3 +137,7 @@ def main(args=sys.argv[1:]):
                     print(line)
             else:
                 print(result)
+
+
+if __name__ == '__main__':
+    main()
