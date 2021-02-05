@@ -26,10 +26,29 @@ class BaseCommand(Command):
 
 class Build(BaseCommand):
     description = 'compile tools to standalone binaries'
+    scripts = [
+        'c10_allbus.py',
+        'c10_copy.py',
+        'c10_dmp1553.py',
+        'c10_dump.py',
+        'c10_dump_pcap.py',
+        'c10_errcount.py',
+        'c10_events.py',
+        'c10_from_pcap.py',
+        'c10_grep.py',
+        'c10_headers.py',
+        'c10_reindex.py',
+        'c10_stat.py',
+        'c10_timefix.py',
+        'c10_validator.py',
+        'c10_wrap_pcap.py',
+        'c10.py',
+    ]
 
     def run(self):
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        for f in glob('c10_tools/c10_*.py'):
+        for f in self.scripts:
+            f = 'c10_tools/' + f
             print(f'Building {f}')
             name, _ = os.path.splitext(os.path.basename(f))
             subprocess.run([
@@ -80,7 +99,7 @@ setup(
             'c10-timefix=c10_tools.c10_timefix:main',
             'c10-validator=c10_tools.c10_validator:main',
             'c10-wrap-pcap=c10_tools.c10_wrap_pcap:main',
-            'c10=c10_tools.cli:main',
+            'c10=c10_tools.c10:main',
         ],
     },
     version=version,
