@@ -8,6 +8,7 @@ from termcolor import colored
 
 from c10_tools.version import version
 from c10_tools.c10_stat import main as stat
+from c10_tools.c10_allbus import main as allbus
 
 
 def build_usage(s=''):
@@ -42,14 +43,17 @@ def build_usage(s=''):
                                          colored('Usage:', 'yellow'),
                                          '\n'.join(usage))
 
+    # Spacing based on option size
+    width = max(len(opt.split('  ')[0]) for opt in options) + 2
+
     # When called without args print full global usage
-    else:
+    if not s:
         output = '{}\n\n{}\n'.format(GLOBAL_USAGE,
                                      colored('Commands:', 'yellow'))
         for cmd in sorted(COMMANDS.keys()):
             help = COMMANDS[cmd].__doc__.splitlines()[0].strip()
             output += '    {}{}{}\n'.format(cmd,
-                                            ' ' * (COMMAND_SPACING - len(cmd)),
+                                            ' ' * (width - len(cmd)),
                                             help)
 
     # Output options.
@@ -59,7 +63,7 @@ def build_usage(s=''):
         if isinstance(opt, list) and len(opt) == 2:
             opt, help = opt
         output += '    {}{}{}\n'.format(opt,
-                                        (' ' * (COMMAND_SPACING - len(opt))),
+                                        (' ' * (width - len(opt))),
                                         help)
 
     # Output any misc text.
@@ -95,6 +99,7 @@ COMMAND_SPACING = 40  # Left column width for top-level usage or options
 
 # Create a dictionary of type (command: function) of available commands.
 std_commands = (
+    allbus,
     stat,
     help,
 )

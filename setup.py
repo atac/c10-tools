@@ -88,7 +88,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'c10-allbus=c10_tools.c10_allbus:main',
+            'c10-allbus=c10_tools.c10_allbus:wrapper',
             'c10-copy=c10_tools.c10_copy:main',
             'c10-dmp1553=c10_tools.c10_dmp1553:main',
             'c10-dump=c10_tools.c10_dump:main',
