@@ -1,20 +1,11 @@
 #!/usr/bin/env python
 
-"""usage: c10-stat <file> [<file>...] [options]
-
-Options:
-    -c CHANNEL..., --channel CHANNEL...  Specify channels to include (csv).
-    -e CHANNEL..., --exclude CHANNEL...  Specify channels to ignore (csv).
-    -t TYPE, --type TYPE                 The types of data to show (csv, may \
-be decimal or hex eg: 0x40).
-"""
-
 from contextlib import suppress
 from urllib.parse import urlparse
 import os
-import sys
 
 from docopt import docopt
+from termcolor import colored
 import s3fs
 
 from c10_tools import common
@@ -40,10 +31,30 @@ TYPES = (
 )
 
 
-def main(args=sys.argv[1:]):
+def wrapper():
+    print(colored('This will be deprecated in favor of c10 stat', 'red'))
+    args = docopt('''
+Usage:
+    c10-stat <file> [<file>...] [options]
 
-    # Get commandline args.
-    args = docopt(__doc__, args)
+Options:
+    -c CHANNEL..., --channel CHANNEL...  Specify channels to include (csv).
+    -e CHANNEL..., --exclude CHANNEL...  Specify channels to ignore (csv).
+    -t TYPE, --type TYPE  The types of data to show (csv, may be decimal or \
+hex eg: 0x40).''')
+
+    for line in main(args):
+        print(line)
+
+
+def main(args):
+    """Inspect one or more Chapter 10 files and get channel info.
+    stat <file> [<file>...] [options]
+    -c CHANNEL..., --channel CHANNEL...  Specify channels to include (csv).
+    -e CHANNEL..., --exclude CHANNEL...  Specify channels to ignore (csv).
+    -t TYPE, --type TYPE  The types of data to show (csv, may be decimal or \
+hex eg: 0x40).
+    """
 
     last_time = 0
 
@@ -93,7 +104,7 @@ def main(args=sys.argv[1:]):
 
                 f.close()
             except Exception as err:
-                print(f'Failed to read file {filename} with error "{err}"')
+                yield f'Failed to read file {filename} with error "{err}"'
                 continue
 
         if last_time != 0:
@@ -115,7 +126,7 @@ def main(args=sys.argv[1:]):
             packets += channel['packets']
             size += channel['size']
 
-        print(common.fmt_table(table))
+        yield common.fmt_table(table)
 
         # Print file summary.
         if start_time:
@@ -126,10 +137,10 @@ def main(args=sys.argv[1:]):
         else:
             duration, end_time = 0, 0
 
-        print(f'''Summary for {filename}:
+        yield f'''Summary for {filename}:
     Channels: {len(channels):>17}     Start time:{start_time:>25}
     Packets: {common.fmt_number(packets):>18}     End time:{end_time:>27}
-    Size: {common.fmt_size(size):>21}     Duration:{duration:>27}\n''')
+    Size: {common.fmt_size(size):>21}     Duration:{duration:>27}\n'''
 
 
 if __name__ == '__main__':
