@@ -26,6 +26,7 @@ def main(args=sys.argv[1:]):
 
     # Get commandline args.
     args = docopt(__doc__, args)
+    print(args)
     args['<channel>'] = int(args['<channel>'])
 
     # Don't overwrite unless explicitly required.
@@ -77,7 +78,7 @@ def main(args=sys.argv[1:]):
 
                     data = ethernet.pack()
 
-                t = get_time(msg.intra_packet_timestamp, last_time)
+                t = get_time(msg.ipts, last_time)
                 t = mktime(t.timetuple()) + (t.microsecond/1000000.0)
                 writer.writepkt(data, t)
 

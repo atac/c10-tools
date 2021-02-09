@@ -73,6 +73,7 @@ def get_time(rtc, time_packet):
         return datetime.now()
 
     rtc -= time_packet.rtc
+    rtc &= 0xffffffffffff
     return time_packet.time + timedelta(seconds=rtc / 10_000_000)
 
 
