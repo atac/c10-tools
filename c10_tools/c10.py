@@ -6,9 +6,10 @@ import types
 from docopt import docopt
 from termcolor import colored
 
-from c10_tools.version import version
-from c10_tools.c10_stat import main as stat
 from c10_tools.c10_allbus import main as allbus
+from c10_tools.c10_stat import main as stat
+from c10_tools.c10_streamcheck import main as streamcheck
+from c10_tools.version import version
 
 
 def build_usage(s=''):
@@ -100,8 +101,9 @@ COMMAND_SPACING = 40  # Left column width for top-level usage or options
 # Create a dictionary of type (command: function) of available commands.
 std_commands = (
     allbus,
-    stat,
     help,
+    stat,
+    streamcheck
 )
 COMMANDS = {}
 for cmd in std_commands:
