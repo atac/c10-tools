@@ -122,6 +122,7 @@ setup(
         'tqdm>=4.48.2',
         's3fs>=0.5.2',
         'termcolor>=1.1.0',
+        'matplotlib>=3.3.4',
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
