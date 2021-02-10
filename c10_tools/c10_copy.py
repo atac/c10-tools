@@ -1,6 +1,17 @@
 #!/usr/bin/env python
 
-"""usage: c10_copy <src> <dst> [options]
+import os
+import sys
+
+from termcolor import colored
+from docopt import docopt
+
+from c10_tools.common import walk_packets, FileProgress, C10
+
+
+def wrapper(argv=sys.argv[1:]):
+    print(colored('This will be deprecated in favor of c10 copy', 'red'))
+    args = docopt('''usage: c10_copy <src> <dst> [options]
 
 Options:
     -c CHANNEL..., --channel CHANNEL...  Specify channels to include (comma \
@@ -9,20 +20,22 @@ separated).
 separated).
     -t TYPE, --type TYPE                 The types of data to copy (comma \
 separated, may be decimal or hex eg: 0x40)
-    -f --force                           Overwrite existing files."""
+    -f --force                           Overwrite existing files.''', argv)
 
-import os
-import sys
-
-from docopt import docopt
-
-from c10_tools.common import walk_packets, FileProgress, C10
+    return main(args)
 
 
-def main(args=sys.argv[1:]):
-
-    # Get commandline args.
-    args = docopt(__doc__, args)
+def main(args):
+    """Copy a Chapter 10 file. Can be filtered on channel ID or data type.
+    copy <src> <dst> [options]
+    -c CHANNEL..., --channel CHANNEL...  Specify channels to include (comma \
+separated).
+    -e CHANNEL..., --exclude CHANNEL...  Specify channels to ignore (comma \
+separated).
+    -t TYPE, --type TYPE  The types of data to copy (comma separated, may be \
+decimal or hex eg: 0x40)
+    -f --force  Overwrite existing files.
+    """
 
     # Don't overwrite unless explicitly required.
     if os.path.exists(args['<dst>']) and not args['--force']:
@@ -43,7 +56,3 @@ def main(args=sys.argv[1:]):
             # Copy packet to new file.
             if packet.data_type:
                 out.write(bytes(packet))
-
-
-if __name__ == '__main__':
-    main()

@@ -1,24 +1,20 @@
 
 from tempfile import NamedTemporaryFile
-import os
 
 import pytest
 
-from c10_tools.c10_copy import main
-
-
-SOURCE = os.path.join(os.path.dirname(__file__), '1.c10')
+from c10_tools.c10_copy import wrapper as main
 
 
 def test_overwrite():
     with NamedTemporaryFile() as out:
         with pytest.raises(SystemExit):
-            main((SOURCE, out.name))
+            main((pytest.SOURCE, out.name))
 
 
 def test_noargs():
     path = NamedTemporaryFile().name
     with open(path, 'w+b') as out:
-        main((SOURCE, path, '-f'))
+        main((pytest.SOURCE, path, '-f'))
         out.seek(0)
-        assert out.read() == open(SOURCE, 'rb').read()
+        assert out.read() == open(pytest.SOURCE, 'rb').read()
