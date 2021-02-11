@@ -1,77 +1,59 @@
 #!/usr/bin/env python
 
-"""usage: c10-dump <file> [options]
+"""usage: c10-dump <file> <channel> [options]
+
+Dump hex (default), or binary data from a channel.
 
 Options:
-    -o OUT, --output OUT                 The directory to place files \
-[default: .].
-    -c CHANNEL..., --channel CHANNEL...  Specify channels to include(csv).
-    -e CHANNEL..., --exclude CHANNEL...  Specify channels to ignore (csv).
-    -t TYPE, --type TYPE                 The types of data to export (csv, may\
- be decimal or hex eg: 0x40)
-    -f, --force                          Overwrite existing files."""
+    -c COUNT, --count COUNT  Number of bytes to show.
+    -b BYTEOFFSET, --byteoffset BYTEOFFSET  Offset into message.
+    --bin, --binary  Output in raw binary format (useful for exporting video).
+    -p, --pcap  Output in PCAP format (ethernet only).
+"""
 
 from array import array
-import os
 import sys
 
 from docopt import docopt
 
-from c10_tools.common import walk_packets, FileProgress
+from c10_tools.common import FileProgress, C10, get_time
 
 
 def main(args=sys.argv[1:]):
 
     # Get commandline args.
     args = docopt(__doc__, args)
-
-    # Ensure OUT exists.
-    if not os.path.exists(args['--output']):
-        os.makedirs(args['--output'])
-
-    out = {}
+    for arg in ('--count', '--byteoffset', '<channel>'):
+        if args.get(arg):
+            args[arg] = int(args[arg])
 
     # Iterate over packets based on args.
+    last_time = None
     with FileProgress(args['<file>']) as progress:
-        for packet in walk_packets(args['<file>'], args):
+        if sys.stdout.isatty():
+            progress.close()
 
+        for packet in C10(args['<file>']):
             progress.update(packet.packet_length)
 
-            # Get filename for this channel based on data type.
-            filename = os.path.join(args['--output'], str(packet.channel_id))
-            if packet.data_type == 0x1:
-                filename += packet.format == 0 and '.tmats' or '.xml'
-            elif packet.data_type // 8 == 8:
-                filename += '.mpg'
+            if packet.data_type == 0x11:
+                last_time = packet
 
-            # Ensure a file is open (and will close) for a given channel.
-            if filename not in out:
+            elif packet.channel_id == args['<channel>']:
+                for msg in packet:
+                    rtc = packet.rtc
+                    if hasattr(msg, 'ipts'):
+                        rtc = msg.ipts
+                    data_bytes = msg.data[args['--byteoffset']:args['--count']]
 
-                # Don't overwrite unless explicitly required.
-                if os.path.exists(filename) and not args['--force']:
-                    print('%s already exists. Use -f to overwrite.' % filename)
-                    break
-
-                out[filename] = open(filename, 'wb')
-
-            # Only write TMATS once.
-            elif packet.data_type == 0x1:
-                continue
-
-            # Handle special case for video data.
-            if packet.data_type // 8 == 8:
-                for ts in packet.body:
-                    ts = array('H', ts.data)
-                    ts.byteswap()
-                    ts.tofile(out[filename])
-            else:
-                header_size = 36 if packet.secondary_header else 24
-                data = bytes(packet)[
-                    header_size:packet.data_length + header_size]
-
-                # Write out raw packet body.
-                out[filename].write(data)
-
-
-if __name__ == '__main__':
-    main()
+                    if args['--binary']:
+                        if packet.data_type in list(range(0x40, 0x45)):
+                            ts = array('H', msg.data)
+                            ts.byteswap()
+                            sys.stdout.buffer.write(ts.tobytes())
+                        else:
+                            sys.stdout.buffer.write(msg.data)
+                    else:
+                        print(get_time(rtc, last_time),
+                              ' '.join(
+                                  f'{b:02x}'.zfill(2) for b in data_bytes))

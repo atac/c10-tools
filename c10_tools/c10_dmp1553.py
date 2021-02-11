@@ -10,12 +10,14 @@ Options:
 
 import sys
 
+from termcolor import colored
 from docopt import docopt
 
 from c10_tools.common import C10
 
 
 def main(args=sys.argv[1:]):
+    print(colored('This will be deprecated in favor of c10 dump', 'red'))
 
     # Get commandline args.
     args = docopt(__doc__, args)
