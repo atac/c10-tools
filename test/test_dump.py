@@ -1,6 +1,4 @@
 
-from tempfile import TemporaryDirectory
-
 import pytest
 import docopt
 
@@ -13,6 +11,9 @@ def test_noargs():
 
 
 # Segfaults with i106
-# def test_sanity(c10):
-#     with TemporaryDirectory() as out:
-#         c10_dump.main([pytest.SAMPLE, '-o', out])
+def test_sanity(c10):
+    c10_dump.main([pytest.SAMPLE, '30'])
+
+
+def test_pcap():
+    c10_dump.main([pytest.ETHERNET, '30', '-p'])
