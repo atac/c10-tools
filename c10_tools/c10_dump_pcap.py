@@ -13,6 +13,8 @@ import os
 import struct
 import sys
 
+from termcolor import colored
+
 from docopt import docopt
 from dpkt.ethernet import Ethernet
 from dpkt.ip import IP
@@ -24,9 +26,10 @@ from c10_tools.common import walk_packets, FileProgress, get_time, C10
 
 def main(args=sys.argv[1:]):
 
+    print(colored('This will be deprecated in favor of c10 dump', 'red'))
+
     # Get commandline args.
     args = docopt(__doc__, args)
-    print(args)
     args['<channel>'] = int(args['<channel>'])
 
     # Don't overwrite unless explicitly required.
@@ -81,7 +84,3 @@ def main(args=sys.argv[1:]):
                 t = get_time(msg.ipts, last_time)
                 t = mktime(t.timetuple()) + (t.microsecond/1000000.0)
                 writer.writepkt(data, t)
-
-
-if __name__ == '__main__':
-    main()
