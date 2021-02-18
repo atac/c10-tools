@@ -100,6 +100,9 @@ jobs:
   - script: "python -m pip download . -r requirements.txt -d dependencies --no-binary :all:"
     displayName: 'Download dependencies'
 
+  - script: "python -m pip download cbitstruct -d dependencies --no-binary :all:"
+    displayName: 'Download cbitstruct'
+
   - task: ArchiveFiles@2
     displayName: 'Zip full package'
     inputs:
