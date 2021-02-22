@@ -3,7 +3,7 @@ import os
 
 import pytest
 
-from c10_tools import c10_stat
+from c10_tools import stat as c10_stat
 
 expected = '''
 ---------------------------------------------------------------------------

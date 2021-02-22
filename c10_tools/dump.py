@@ -1,6 +1,22 @@
 #!/usr/bin/env python
 
-"""usage:
+from array import array
+import struct
+import sys
+
+from docopt import docopt
+from dpkt.ethernet import Ethernet
+from dpkt.ip import IP
+from dpkt.pcap import Writer
+from dpkt.udp import UDP
+from termcolor import colored
+
+from c10_tools.common import FileProgress, C10, get_time
+
+
+def wrapper():
+    print(colored('This will be deprecated in favor of c10 dump', 'red'))
+    args = docopt('''usage:
     c10-dump <file> <channel> [-c COUNT] [-b BYTEOFFSET] [options]
     c10-dump <file> <channel> --bin [options]
     c10-dump <file> <channel> -p [options]
@@ -12,25 +28,24 @@ Options:
     -b BYTEOFFSET, --byteoffset BYTEOFFSET  Offset into message.
     --bin, --binary  Output in raw binary format (useful for exporting video).
     -p, --pcap  Output in PCAP format (ethernet only).
-"""
+''')
 
-from array import array
-import struct
-import sys
-
-from docopt import docopt
-from dpkt.ethernet import Ethernet
-from dpkt.ip import IP
-from dpkt.pcap import Writer
-from dpkt.udp import UDP
-
-from c10_tools.common import FileProgress, C10, get_time
+    for line in main(args):
+        print(line)
 
 
-def main(args=sys.argv[1:]):
+def main(args):
+    """Dump hex (default), binary data, or PCAP from a Chapter 10 channel.
+    dump <file> <channel> [-c COUNT] [-b BYTEOFFSET] [options]
+    dump <file> <channel> --bin [options]
+    dump <file> <channel> -p [options]
+    -c COUNT, --count COUNT  Number of bytes to show.
+    -b BYTEOFFSET, --byteoffset BYTEOFFSET  Offset into message.
+    --bin, --binary  Output in raw binary format (useful for exporting video).
+    -p, --pcap  Output in PCAP format (ethernet only).
+    """
 
-    # Get commandline args.
-    args = docopt(__doc__, args)
+    # Convert int args.
     for arg in ('--count', '--byteoffset', '<channel>'):
         if args.get(arg):
             args[arg] = int(args[arg])
@@ -109,6 +124,5 @@ def main(args=sys.argv[1:]):
                     else:
                         data_bytes = msg.data[
                             args['--byteoffset']:args['--count']]
-                        print(get_time(rtc, last_time),
-                              ' '.join(
-                                  f'{b:02x}'.zfill(2) for b in data_bytes))
+                        yield ' '.join([str(get_time(rtc, last_time))] + [
+                            f'{b:02x}'.zfill(2) for b in data_bytes])

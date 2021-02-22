@@ -3,7 +3,7 @@ from tempfile import NamedTemporaryFile
 
 import pytest
 
-from c10_tools.c10_allbus import main
+from c10_tools.allbus import main
 from c10_tools.common import C10
 
 

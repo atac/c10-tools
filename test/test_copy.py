@@ -3,7 +3,7 @@ from tempfile import NamedTemporaryFile
 
 import pytest
 
-from c10_tools.c10_copy import wrapper as main
+from c10_tools.copy import wrapper as main
 
 
 def test_overwrite():

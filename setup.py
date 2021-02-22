@@ -6,11 +6,8 @@ from setuptools import setup, Command
 import os
 import shutil
 import subprocess
-import sys
 
-sys.path.insert(0, 'c10_tools')
-from version import version
-sys.path.remove('c10_tools')
+from c10_tools.version import version
 
 
 class BaseCommand(Command):
@@ -27,10 +24,9 @@ class BaseCommand(Command):
 class Build(BaseCommand):
     description = 'compile tools to standalone binaries'
     scripts = [
-        'c10_allbus.py',
-        'c10_copy.py',
+        'allbus.py',
+        'c10.py',
         'c10_dmp1553.py',
-        'c10_dump.py',
         'c10_dump_pcap.py',
         'c10_errcount.py',
         'c10_events.py',
@@ -38,11 +34,12 @@ class Build(BaseCommand):
         'c10_grep.py',
         'c10_headers.py',
         'c10_reindex.py',
-        'c10_stat.py',
         'c10_timefix.py',
         'c10_validator.py',
         'c10_wrap_pcap.py',
-        'c10.py',
+        'copy.py',
+        'dump.py',
+        'stat.py',
     ]
 
     def run(self):
@@ -51,10 +48,14 @@ class Build(BaseCommand):
         env['PYTHONOPTIMIZE'] = '1'
         for f in self.scripts:
             f = 'c10_tools/' + f
-            print(f'Building {f}')
             name, _ = os.path.splitext(os.path.basename(f))
+            if name.startswith('c10_'):
+                name = name.replace('_', '-')
+            elif not name.startswith('c10'):
+                name = 'c10-' + name
+            print(f'Building {name}')
             subprocess.run([
-                'pyinstaller', f, '-n', name.replace('_', '-')],
+                'pyinstaller', f, '-n', name],
                            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                            env=env)
 
@@ -88,8 +89,8 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'c10-allbus=c10_tools.c10_allbus:wrapper',
-            'c10-copy=c10_tools.c10_copy:wrapper',
+            'c10-allbus=c10_tools.allbus:wrapper',
+            'c10-copy=c10_tools.copy:wrapper',
             'c10-dmp1553=c10_tools.c10_dmp1553:main',
             'c10-dump=c10_tools.c10_dump:main',
             'c10-dump-pcap=c10_tools.c10_dump_pcap:main',
@@ -98,7 +99,7 @@ setup(
             'c10-from-pcap=c10_tools.c10_from_pcap:main',
             'c10-grep=c10_tools.c10_grep:main',
             'c10-reindex=c10_tools.c10_reindex:main',
-            'c10-stat=c10_tools.c10_stat:wrapper',
+            'c10-stat=c10_tools.stat:wrapper',
             'c10-timefix=c10_tools.c10_timefix:main',
             'c10-validator=c10_tools.c10_validator:main',
             'c10-wrap-pcap=c10_tools.c10_wrap_pcap:main',
