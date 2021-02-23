@@ -50,7 +50,7 @@ jobs:
   - script: python -m pip install -r requirements.txt
     displayName: 'Install dependencies'
 
-  - script: "pytest tests --junitxml=junit-{envname}.xml --cov c10_tools --cov-report xml --cov-report html --cov-append"
+  - script: "pytest tests --cov c10_tools --cov-report xml --cov-report html --cov-append"
     displayName: 'Run Tests'
 
   - task: PublishTestResults@2
