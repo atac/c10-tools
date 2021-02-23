@@ -12,7 +12,7 @@ if os.environ.get('LIBRARY', None) == 'c10':
 
 import pytest
 
-TESTDIR = os.path.join(os.path.dirname(__file__), 'test')
+TESTDIR = os.path.join(os.path.dirname(__file__), 'tests')
 
 
 def pytest_configure():
