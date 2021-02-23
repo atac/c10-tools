@@ -14,3 +14,4 @@ htmlcov
 .eggs
 dask-worker-space
 src
+test-output.xml
