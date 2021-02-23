@@ -8,7 +8,6 @@
 [![Docker Cloud Automated build](https://img.shields.io/docker/cloud/automated/mcferrill/c10-tools)](https://hub.docker.com/repository/docker/mcferrill/c10-tools/builds)
 
 Various utilities for analyzing and manipulating Irig 106 Chapter 10 data using
-[libirig106-python](https://github.com/atac/libirig106-python) and
 [pychapter10](https://github.com/atac/pychapter10).
 
 
