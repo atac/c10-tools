@@ -65,7 +65,7 @@ class Clean(BaseCommand):
 
     CLEAN_FILES = '''
         build dist *.pyc *.tgz *.egg-info __pycache__ dependencies
-        htmlcov MANIFEST coverage.xml junit*.xml *.spec
+        htmlcov MANIFEST coverage.xml junit*.xml *.spec src
     '''
 
     def run(self):
