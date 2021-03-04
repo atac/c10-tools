@@ -1,4 +1,3 @@
--e git+https://github.com/atac/libirig106-python.git@68187e6cfdd001feafd25ece6f7f6a9dd83775fa#egg=i106
 bokeh>=0.13.0
 pyinstaller-hooks-contrib==2020.10
 pyinstaller>=4.2

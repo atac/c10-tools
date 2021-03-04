@@ -50,17 +50,6 @@ To install offline from the "full" zip, install the included dependencies and th
 pip install dependencies/* .
 ```
 
-## Choosing Parser Library
-
-By default everything will run with pychapter10.
-You can improve the performance of pychapter10 by installing cbitstruct `pip install cbitstruct`.
-You can also install libirig106-python to use the libirig106 wrapper instead of the python library.
-To manually select between backends when both are installed, set the LIBRARY environment variable to c10 or i106 as in (for unix):
-
-```
-LIBRARY=i106 c10-stat test.ch10
-```
-
 ## Running Tests
 
 To run the included sanity tests install dependencies with pip (also included in full zip, see above):
