@@ -46,11 +46,8 @@ decimal or hex eg: 0x40)
     with open(args['<dst>'], 'wb') as out, FileProgress(args['<src>']) \
             as progress:
 
-        src = C10(args['<src>'])
-
         # Iterate over packets based on args.
-        for packet in walk_packets(src, args):
-
+        for packet in walk_packets(C10(args['<src>']), args):
             progress.update(packet.packet_length)
 
             # Copy packet to new file.

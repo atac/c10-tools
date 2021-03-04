@@ -71,5 +71,5 @@ def main(args):
                     ax1.plot(range(len(plot)), plot)
                     plt.pause(0.1)
         except KeyboardInterrupt:
-            print('Finished')
+            print('Stopped')
             break

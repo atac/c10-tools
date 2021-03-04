@@ -85,39 +85,34 @@ def main(args):
 
                         # Format 0 (MAC payload), msg.content 1 = payload only
                         if packet.data_type == 0x68 and msg.content:
-                            ethernet = Ethernet(
+                            data = Ethernet(
                                 data=data,
                                 len=len(data),
                                 dst=bytes(),
                                 src=bytes()
-                            )
-                            data = ethernet.pack()
+                            ).pack()
 
                         # Format 1 (UDP/ARINC 664)
                         elif packet.data_type == 0x69:
-                            udp = UDP(
-                                sport=msg.src_port,
-                                dport=msg.dst_port,
-                                data=data)
+                            udp = UDP(sport=msg.src_port,
+                                      dport=msg.dst_port,
+                                      data=data)
                             ip = IP(data=udp,
                                     len=len(udp),
                                     v=4,
                                     p=17,
                                     src=struct.pack('>L', msg.source_ip),
                                     dst=struct.pack('>L', msg.dest_ip)).pack()
-                            ethernet = Ethernet(
+                            data = Ethernet(
                                 data=ip,
                                 len=len(ip),
-                                dst=struct.pack('>IH',
-                                                50331648,
+                                dst=struct.pack('>IH', 50331648,
                                                 msg.virtual_link),
                                 src=bytes()
-                            )
+                            ).pack()
 
-                            data = ethernet.pack()
-
-                        t = get_time(rtc, last_time)
-                        writer.writepkt(data, t.timestamp())
+                        writer.writepkt(data,
+                                        get_time(rtc, last_time).timestamp())
                         sys.stdout.flush()
 
                     # Hex dump

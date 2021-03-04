@@ -110,7 +110,7 @@ def file_summary(filename, channels, start_time, end_time):
     yield fmt_table(table)
 
     # Print file summary.
-    duration, end_time = 0, 0
+    duration = 0
     if start_time:
         duration = str(end_time - start_time.time)
         fmt = '%j-%Y %H:%M:%S' if start_time.date_format else '%j %H:%M:%S'
@@ -118,9 +118,9 @@ def file_summary(filename, channels, start_time, end_time):
         end_time = end_time.strftime(fmt)
 
     yield f'''Summary for {filename}:
-Channels: {len(channels):>17}     Start time:{start_time:>25}
-Packets: {fmt_number(packets):>18}     End time:{end_time:>27}
-Size: {fmt_size(size):>21}     Duration:{duration:>27}\n'''
+    Channels: {len(channels):>17}     Start time:{start_time:>25}
+    Packets: {fmt_number(packets):>18}     End time:{end_time:>27}
+    Size: {fmt_size(size):>21}     Duration:{duration:>27}\n'''
 
 
 def main(args):

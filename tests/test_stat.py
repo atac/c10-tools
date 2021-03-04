@@ -32,8 +32,8 @@ expected = '''
 | Channel 20 | 0x40 - Video (format 0)              |       7 | 106.89 kb |
 ---------------------------------------------------------------------------
 Summary for {}:
-    Channels:                21     Start time:        343-2021 16:47:12
-    Packets:                 95     End time:          343-2021 16:47:12
+    Channels:                21     Start time:             343 16:47:12
+    Packets:                 95     End time:               343 16:47:12
     Size:            1017.11 kb     Duration:             0:00:00.472549
     '''.format(os.path.abspath(pytest.SAMPLE)).strip()
 
