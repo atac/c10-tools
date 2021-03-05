@@ -40,7 +40,9 @@ def fmt_table(table):
     """
 
     # Make a list of columns (instead of a list of rows) and find max widths.
-    col_widths = [max(len(x) for x in col) for col in zip(*table)]
+    columns = len(table[0])
+    tmp = [r for r in table if len(r) == columns]
+    col_widths = [max(len(x) for x in col) for col in zip(*tmp)]
 
     # Width is the sum of the column widths + ~3 padding characters per column.
     width = sum(col_widths) + (len(table[0]) * 3) + 1
@@ -55,11 +57,14 @@ def fmt_table(table):
     size_suffix = (' kb', ' mb', ' gb', '  b')
     for row in table[1:]:
         s += '|'
-        for i, x in enumerate(row):
-            if x.replace(',', '').isdigit() or x[-3:] in size_suffix:
-                s += ' {} |'.format(x.rjust(col_widths[i]))
-            else:
-                s += ' {} |'.format(x.ljust(col_widths[i]))
+        if len(row) < columns:
+            s += ' ' + row[0] + '|'.rjust(width - len(row[0]) - 2)
+        else:
+            for i, x in enumerate(row):
+                if x.replace(',', '').isdigit() or x[-3:] in size_suffix:
+                    s += ' {} |'.format(x.rjust(col_widths[i]))
+                else:
+                    s += ' {} |'.format(x.ljust(col_widths[i]))
         s += '\n'
 
     return s + ('-' * width)
