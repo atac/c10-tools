@@ -45,13 +45,14 @@ def parse_file(path, args):
                 count = sum(errors)
                 if count:
                     valid = False
-                    errcount += count
+                errcount += count
 
-                    try:
-                        for i, err in enumerate(errors):
-                            chan_errors[packet.channel_id][i] += err
-                    except KeyError:
-                        chan_errors[packet.channel_id] = errors
+                if packet.channel_id not in chan_errors:
+                    chan_errors[packet.channel_id] = errors
+                else:
+                    for i, err in enumerate(errors):
+                        chan_errors[packet.channel_id][i] += err
+
             if args['-o'] and not valid:
                 # Log to file
                 with open(args['-o'], 'a') as logfile:
