@@ -8,7 +8,8 @@ from docopt import docopt
 from termcolor import colored
 import s3fs
 
-from c10_tools.common import C10, FileProgress, fmt_number, fmt_size, fmt_table
+from c10_tools.common import C10, FileProgress, fmt_number, fmt_size, \
+    fmt_table, walk_packets
 
 
 TYPES = (
@@ -80,7 +81,7 @@ class Stat:
         # Walk through packets and track counts.
         with FileProgress(total=size) as progress, suppress(KeyboardInterrupt):
             try:
-                for packet in C10(f):
+                for packet in walk_packets(C10(f)):
                     if not self.start_time and packet.data_type == 0x11:
                         self.start_time = packet
                     key = (packet.channel_id, packet.data_type)
@@ -149,14 +150,20 @@ class Stat:
             end_time = self.end_time.strftime(fmt)
 
         yield f'''Summary for {self.filename}:
-        Channels: {len(self.channels):>17}     Start time:{start_time:>25}
-        Packets: {fmt_number(packets):>18}     End time:{end_time:>27}
-        Size: {fmt_size(size):>21}     Duration:{duration:>27}\n'''
+    Channels: {len(self.channels):>17}     Start time:{start_time:>25}
+    Packets: {fmt_number(packets):>18}     End time:{end_time:>27}
+    Size: {fmt_size(size):>21}     Duration:{duration:>27}\n'''
 
 
 def main(args):
     """Inspect one or more Chapter 10 files and get channel info.
     stat <file> [<file>...] [options]
+    -c CHANNEL..., --channel CHANNEL...  Specify channels to include (comma \
+separated).
+    -e CHANNEL..., --exclude CHANNEL...  Specify channels to ignore (comma \
+separated).
+    -t TYPE, --type TYPE  The types of data to copy (comma separated, may be \
+decimal or hex eg: 0x40)
     """
 
     for filename in args['<file>']:

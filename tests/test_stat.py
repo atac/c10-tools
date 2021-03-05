@@ -40,10 +40,12 @@ Summary for {}:
 
 def test_single(fake_progress):
     assert '\n'.join(
-        list(c10_stat.main({'<file>': [pytest.SAMPLE]}))).strip() == expected
+        list(c10_stat.main({'<file>': [pytest.SAMPLE],
+                            '--verbose': False}))).strip() == expected
 
 
 def test_multiple(fake_progress):
     result = '\n'.join(list(c10_stat.main(
-        {'<file>': [pytest.SAMPLE, pytest.SAMPLE, pytest.SAMPLE]})))
+        {'<file>': [pytest.SAMPLE, pytest.SAMPLE, pytest.SAMPLE],
+         '--verbose': False})))
     assert result.strip() == '\n\n'.join([expected, expected, expected])
