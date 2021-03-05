@@ -16,6 +16,7 @@ import sys
 from docopt import docopt
 from dask.delayed import delayed
 import dask.bag as db
+from termcolor import colored
 
 from c10_tools.common import find_c10, FileProgress, C10, fmt_table
 
@@ -94,6 +95,7 @@ def parse_file(path, args):
 
 
 def main(args=sys.argv[1:]):
+    print(colored('This will be deprecated in favor of c10 stat --verbose'))
     args = docopt(__doc__, args)
     if args['-o']:
         with open(args['-o'], 'w') as outfile:
