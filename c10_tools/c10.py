@@ -7,11 +7,11 @@ from docopt import docopt
 from termcolor import colored
 
 from c10_tools.allbus import main as allbus
+from c10_tools.copy import main as copy
+from c10_tools.dump import main as dump
 from c10_tools.stat import main as stat
 from c10_tools.streamcheck import main as streamcheck
 from c10_tools.version import version
-from c10_tools.copy import main as copy
-from c10_tools.dump import main as dump
 
 
 def build_usage(s=''):
@@ -32,7 +32,7 @@ def build_usage(s=''):
         # Pull the four parts from s.
         s = s.split('\n\n', 1)
         if len(s) == 2:
-            s, text = s
+            s, description = s
         else:
             s = s[0]
         usage = [line.strip() for line in s.splitlines() if line.strip()]
@@ -107,7 +107,7 @@ std_commands = (
     dump,
     help,
     stat,
-    streamcheck
+    streamcheck,
 )
 COMMANDS = {}
 for cmd in std_commands:
