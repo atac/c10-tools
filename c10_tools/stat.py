@@ -141,6 +141,7 @@ class Stat:
 
         # Print file summary.
         duration = 0
+        start_time, end_time = 0, 0
         if self.start_time:
             duration = str(self.end_time - self.start_time.time)
             fmt = '%j %H:%M:%S'
