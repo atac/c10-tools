@@ -10,7 +10,11 @@ from c10_tools.allbus import main as allbus
 from c10_tools.copy import main as copy
 from c10_tools.dump import main as dump
 from c10_tools.stat import main as stat
-from c10_tools.streamcheck import main as streamcheck
+try:
+    import matplotlib
+    from c10_tools.streamcheck import main as streamcheck
+except ImportError:
+    streamcheck = None
 from c10_tools.version import version
 
 
@@ -101,14 +105,15 @@ GLOBAL_OPTIONS = [
 COMMAND_SPACING = 40  # Left column width for top-level usage or options
 
 # Create a dictionary of type (command: function) of available commands.
-std_commands = (
+std_commands = [
     allbus,
     copy,
     dump,
     help,
     stat,
-    streamcheck,
-)
+]
+if streamcheck:
+    std_commands.append(streamcheck)
 COMMANDS = {}
 for cmd in std_commands:
     COMMANDS[cmd.__doc__.splitlines()[1].strip().split()[0]] = cmd
