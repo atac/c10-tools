@@ -24,22 +24,22 @@ class BaseCommand(Command):
 class Build(BaseCommand):
     description = 'compile tools to standalone binaries'
     scripts = [
-        'allbus.py',
         'c10.py',
-        'c10_dmp1553.py',
-        'c10_dump_pcap.py',
-        'c10_errcount.py',
-        'c10_events.py',
-        'c10_from_pcap.py',
-        'c10_grep.py',
-        'c10_headers.py',
-        'c10_reindex.py',
-        'c10_timefix.py',
-        'c10_validator.py',
-        'c10_wrap_pcap.py',
-        'copy.py',
-        'dump.py',
-        'stat.py',
+        # 'allbus.py',
+        # 'c10_dmp1553.py',
+        # 'c10_dump_pcap.py',
+        # 'c10_errcount.py',
+        # 'c10_events.py',
+        # 'c10_from_pcap.py',
+        # 'c10_grep.py',
+        # 'c10_headers.py',
+        # 'c10_reindex.py',
+        # 'c10_timefix.py',
+        # 'c10_validator.py',
+        # 'c10_wrap_pcap.py',
+        # 'copy.py',
+        # 'dump.py',
+        # 'stat.py',
     ]
 
     def run(self):
@@ -55,7 +55,15 @@ class Build(BaseCommand):
                 name = 'c10-' + name
             print(f'Building {name}')
             subprocess.run([
-                'pyinstaller', f, '-n', name],
+                'pyinstaller', f, '-n', name,
+                '--exclude-module', 'numpy',
+                '--exclude-module', 'matplotlib',
+                '--exclude-module', 'tcl',
+                '--exclude-module', 'pytz',
+                '--exclude-module', 'pandas',
+                '--exclude-module', 'tk',
+                '--exclude-module', 'bokeh',
+            ],
                            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                            env=env)
 
