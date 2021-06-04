@@ -90,17 +90,28 @@ class Stat:
                                               'size': packet.packet_length,
                                               'type': packet.data_type,
                                               'id': packet.channel_id,
-                                              '1553_errors': [0, 0, 0]}
+                                              '1553_errors': [0, 0, 0],
+                                              'events': {}}
                     else:
                         self.channels[key]['packets'] += 1
                         self.channels[key]['size'] += packet.packet_length
 
-                    # Track 1553 error counts
-                    if packet.data_type == 0x19:
-                        for msg in packet:
-                            for i, err in enumerate(('le', 'se', 'we')):
-                                err = getattr(msg, err)
-                                self.channels[key]['1553_errors'][i] += err
+                    if self.args['--verbose']:
+                        # Track 1553 error counts
+                        if packet.data_type == 0x19:
+                            for msg in packet:
+                                for i, err in enumerate(('le', 'se', 'we')):
+                                    err = getattr(msg, err)
+                                    self.channels[key]['1553_errors'][i] += err
+
+                        # Record events
+                        elif packet.data_type == 0x2:
+                            event_list = self.channels[key]['events']
+                            for event in packet:
+                                if event.number not in event_list:
+                                    event_list[event.number] = 1
+                                else:
+                                    event_list[event.number] += 1
 
                     progress.update(packet.packet_length)
 
@@ -125,14 +136,19 @@ class Stat:
                 fmt_number(channel['packets']),
                 fmt_size(channel['size'])))
 
-            if self.args['--verbose'] and channel['type'] == 0x19:
-                total = sum(channel['1553_errors'])
-                if total:
-                    error_str = f'{total:>10,} Errors - '
-                    for i, err in enumerate(('Length', 'Sync', 'Word')):
-                        count = channel['1553_errors'][i]
-                        error_str += f'{err}: {count:>9,} '.ljust(14)
-                    table.append((error_str,))
+            if self.args['--verbose']:
+                if channel['type'] == 0x19:
+                    total = sum(channel['1553_errors'])
+                    if total:
+                        error_str = '  Err: ' + f'{total:>11,}'
+                        for i, err in enumerate(('Length', 'Sync', 'Word')):
+                            count = channel['1553_errors'][i]
+                            error_str += f'  {err}: {count:>9,}'.ljust(14)
+                        table.append((colored(error_str + ' ', 'red'),))
+                elif channel['type'] == 0x2:
+                    table.append(('  Events:',))
+                    for event, count in sorted(channel['events'].items()):
+                        table.append((f'{event:>8}: {count:>10}',))
 
             packets += channel['packets']
             size += channel['size']
