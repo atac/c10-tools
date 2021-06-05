@@ -10,7 +10,8 @@ from c10_tools import common
 def test_find_c10():
     dirname = os.path.dirname(__file__)
     result = common.find_c10([dirname])
-    assert set(result) == set([pytest.SAMPLE, pytest.EVENTS, pytest.ETHERNET])
+    assert set(result) == set([
+        pytest.ERR, pytest.SAMPLE, pytest.EVENTS, pytest.ETHERNET])
 
 
 def test_fmt_table():
