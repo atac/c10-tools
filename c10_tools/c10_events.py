@@ -5,11 +5,13 @@
 import sys
 
 from docopt import docopt
+from termcolor import colored
 
 from c10_tools.common import C10, get_time
 
 
 def main(args=sys.argv[1:]):
+    print(colored('This will be deprecated in favor of c10 stat --verbose'))
     args = docopt(__doc__, args)
 
     last_time = None
