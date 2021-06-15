@@ -118,7 +118,10 @@ class Stat:
             finally:
                 f.close()
 
-        self.end_time = packet.get_time()
+        try:
+            self.end_time = packet.get_time()
+        except UnboundLocalError:
+            self.end_time = None
 
     def file_summary(self):
         """Summarize channels and the file as a whole."""
