@@ -66,6 +66,10 @@ def main(args):
                 last_time = packet
 
             elif packet.channel_id == args['<channel>']:
+                if packet.data_type == 1:
+                    yield from packet.data.decode().splitlines()
+                    return
+
                 for msg in packet:
                     rtc = getattr(msg, 'ipts', packet.rtc)
 
