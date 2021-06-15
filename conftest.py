@@ -20,6 +20,8 @@ def pytest_configure():
     pytest.EVENTS = os.path.join(TESTDIR, 'event.c10')
     pytest.ETHERNET = os.path.join(TESTDIR, 'ethernet.c10')
     pytest.ERR = os.path.join(TESTDIR, 'err.c10')
+    pytest.PCAP = os.path.join(TESTDIR, 'test.pcap')
+    pytest.TMATS = os.path.join(TESTDIR, 'test.tmt')
 
 
 class MockC10(C10):

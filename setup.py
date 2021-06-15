@@ -104,7 +104,7 @@ setup(
             'c10-dump-pcap=c10_tools.c10_dump_pcap:main',
             'c10-errcount=c10_tools.c10_errcount:main',
             'c10-events=c10_tools.c10_events:main',
-            'c10-from-pcap=c10_tools.c10_from_pcap:main',
+            'c10-from-pcap=c10_tools.capture:wrapper',
             'c10-grep=c10_tools.c10_grep:main',
             'c10-reindex=c10_tools.c10_reindex:main',
             'c10-stat=c10_tools.stat:wrapper',

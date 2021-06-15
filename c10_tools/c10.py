@@ -10,6 +10,7 @@ from c10_tools.allbus import main as allbus
 from c10_tools.copy import main as copy
 from c10_tools.dump import main as dump
 from c10_tools.stat import main as stat
+from c10_tools.capture import main as capture
 try:
     import matplotlib
     from c10_tools.streamcheck import main as streamcheck
@@ -108,6 +109,7 @@ COMMAND_SPACING = 40  # Left column width for top-level usage or options
 std_commands = [
     allbus,
     copy,
+    capture,
     dump,
     help,
     stat,

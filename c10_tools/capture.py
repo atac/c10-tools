@@ -1,6 +1,23 @@
 #!/usr/bin/env python
 
-"""Extract chapter 10 data from a pcap file.
+from array import array
+from contextlib import suppress
+import os
+import struct
+import sys
+
+from chapter10 import C10
+from chapter10.computer import ComputerF1
+from termcolor import colored
+from docopt import docopt
+import dpkt
+
+from c10_tools.common import FileProgress, fmt_number
+
+
+def wrapper(argv=sys.argv[1:]):
+    print(colored('This will be deprecated in favor of c10 capture', 'red'))
+    args = docopt('''Extract chapter 10 data from a pcap file.
 
 usage: c10-from-pcap <infile> <outfile> [options]
 
@@ -9,19 +26,8 @@ Options:
     -f               Overwrite existing output file.
     -t <tmats_file>  Insert an existing TMATS record at the beginning of the\
 output file.
-"""
-
-from array import array
-from contextlib import suppress
-import os
-import struct
-import sys
-
-from chapter10 import C10
-from docopt import docopt
-import dpkt
-
-from c10_tools.common import FileProgress, fmt_number
+''')
+    return main(args)
 
 
 class PCAPParser:
@@ -29,7 +35,7 @@ class PCAPParser:
     buf = b''
 
     def __init__(self, args=[]):
-        self.args = docopt(__doc__, args)
+        self.args = args
 
     def parse(self, data, out_file):
         """Take a string of bytes and attempt to parse chapter 10 data."""
@@ -63,36 +69,16 @@ class PCAPParser:
 
         if os.path.exists(self.args['<outfile>']) and not self.args['-f']:
             print('Output file exists. Use -f to overwrite.')
-            return
+            raise SystemExit
 
         with open(self.args['<outfile>'], 'wb') as out:
 
             # Write TMATS.
             if self.args['-t']:
-                with open(self.args['<tmats_file>'], 'r') as tmats:
+                with open(self.args['-t'], 'r') as tmats:
                     tmats_body = tmats.read()
-
-                header_values = [
-                    0xeb25,
-                    0,
-                    len(tmats_body) + 24,
-                    len(tmats_body),
-                    0,
-                    0,
-                    0,
-                    1,
-                    0,
-                    0,
-                ]
-
-                header = struct.pack('HHIIBBBBIH', *header_values)
-                out.write(header)
-
-                # Compute and append checksum.
-                sums = sum(array('H', header)) & 0xffff
-                out.write(struct.pack('H', sums))
-
-                out.write(tmats_body)
+                tmats = ComputerF1(data_type=1, data=tmats_body)
+                out.write(bytes(tmats))
 
             # Loop over the packets and parse into C10.Packet objects if
             # possible.
@@ -118,12 +104,16 @@ class PCAPParser:
             if not self.args['-q']:
                 print('Parsed %s Chapter 10 packets from %s network packets'
                       % (fmt_number(added), fmt_number(packets)))
+                
 
+def main(args):
+    """Capture chapter 10 data from a pcap file.
+    capture <infile> <outfile> [options]
+    -q  Don't display progress bar.
+    -f  Overwrite existing output file.
+    -t <tmats_file>  Insert an existing TMATS record at the beginning of the\
+output file.
+    """
 
-def main():
-    parser = PCAPParser(sys.argv[1:])
+    parser = PCAPParser(args)
     parser.main()
-
-
-if __name__ == '__main__':
-    main()
