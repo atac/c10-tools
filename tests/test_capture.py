@@ -10,7 +10,7 @@ from c10_tools.capture import main
 @pytest.fixture
 def args():
     return {'<infile>': pytest.PCAP,
-            '<outfile>': NamedTemporaryFile().name,
+            '<outfile>': NamedTemporaryFile('wb').name,
             '-f': True,
             '-q': True,
             '-t': None}
