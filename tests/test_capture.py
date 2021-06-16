@@ -30,5 +30,6 @@ def test_checks_exists(args):
 def test_tmats(args):
     args['-t'] = pytest.TMATS
     main(args)
+    expected = open(pytest.TMATS, 'rb').read().replace(b'\r\n', b'\n')
     with open(args['<outfile>'], 'rb') as f:
-        assert f.read(6351)[28:] == open(pytest.TMATS, 'rb').read()
+        assert f.read(6351)[28:] == expected 
