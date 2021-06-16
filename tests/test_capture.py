@@ -9,12 +9,11 @@ from c10_tools.capture import main
 
 @pytest.fixture
 def args():
-    with NamedTemporaryFile() as out:
-        yield {'<infile>': pytest.PCAP,
-               '<outfile>': out.name,
-               '-f': True,
-               '-q': True,
-               '-t': None}
+    return {'<infile>': pytest.PCAP,
+            '<outfile>': NamedTemporaryFile().name,
+            '-f': True,
+            '-q': True,
+            '-t': None}
 
 
 def test_overwrite(args):
@@ -24,7 +23,6 @@ def test_overwrite(args):
 
 def test_checks_exists(args):
     args['-f'] = False
-    assert os.path.exists(args['<outfile>'])
     with open(args['<outfile>'], 'w+b'), pytest.raises(SystemExit):
         main(args)
 
