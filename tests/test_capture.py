@@ -13,12 +13,12 @@ def args():
             '<outfile>': NamedTemporaryFile('wb').name,
             '-f': True,
             '-q': True,
-            '-t': None}
+            '-t': pytest.TMATS}
 
 
 def test_overwrite(args):
     main(args)
-    assert os.stat(args['<outfile>']).st_size == 1552
+    assert os.stat(args['<outfile>']).st_size == 7904
 
 
 def test_checks_exists(args):
