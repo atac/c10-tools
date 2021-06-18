@@ -7,34 +7,25 @@
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/c10-tools)
 [![Docker Cloud Automated build](https://img.shields.io/docker/cloud/automated/mcferrill/c10-tools)](https://hub.docker.com/repository/docker/mcferrill/c10-tools/builds)
 
-Various utilities for analyzing and manipulating Irig 106 Chapter 10 data using
+Commandline toolkit for inspecting and troubleshooting IRIG 106 Chapter 10/11 data with 
 [pychapter10](https://github.com/atac/pychapter10).
 
 
-## Included Tools
+## Usage
 
-Each tool is self-documenting with the --help flag as in:
+Get top-level usage and list of commands with:
 
 ```
-c10-stat --help
+c10 help
 ```
 
-* c10-allbus - Switch 1553 format 1 messages to indicate the same bus.
-* c10-copy - Copy a file optionally filtering on channel id or data type.
-* c10-dmp1553 - Print a hex dump of word n for every 1553 message found.
-* c10-dump - Export packet data to file.
-* c10-dump-pcap - Export Ethernet data from a Chapter 10 file to pcap.
-* c10-errcount - Count error flags in 1553 format 1 packets.
-* c10-events - Print recording event packet info.
-* c10-from-pcap - Extract chapter 10 data from a pcap file.
-* c10-grep - Search files/directories for specific data markers
-* c10-reindex - Strip and optionally rebuild index packets for a file.
-* c10-stat - Display packet counts and channel information for a file.
-* c10-timefix - Correct time values in a file.
-* c10-validator - Attempt to recover viable data from a corrupt file.
-* c10-wrap-pcap - Wrap ethernet data from a pcap file as ethernet packets in a
-  chapter 10 file.
-* wireshark_dissector - Lua based wireshark dissector for Chapter 10 data
+Get specific usage for each command with
+
+```
+c10-stat help <command>
+```
+
+See issue #8 for details on new command layout for 1.0
 
 ## Installation
 
@@ -52,7 +43,7 @@ pip install dependencies/* .
 
 ## Running Tests
 
-To run the included sanity tests install dependencies with pip (also included in full zip, see above):
+To run the included tests install dependencies with pip (also included in full zip, see above):
 
 ```
 pip install -r requirements.txt
@@ -61,12 +52,12 @@ pip install -r requirements.txt
 Then run:
 
 ```
-pytest test
+pytest
 ```
 
 ## Building Native Binaries
 
-If the dependencies are installed (see Running Tests) you can compile native executables of the tools with:
+If the dependencies are installed you can compile a native executable with:
 
 ```
 python setup.py build_scripts
