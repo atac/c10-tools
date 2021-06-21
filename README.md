@@ -22,7 +22,7 @@ c10 help
 Get specific usage for each command with
 
 ```
-c10-stat help <command>
+c10 help <command>
 ```
 
 See issue #8 for details on new command layout for 1.0
