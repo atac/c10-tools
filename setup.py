@@ -22,50 +22,25 @@ class BaseCommand(Command):
 
 
 class Build(BaseCommand):
-    description = 'compile tools to standalone binaries'
-    scripts = [
-        'c10.py',
-        # 'allbus.py',
-        # 'c10_dmp1553.py',
-        # 'c10_dump_pcap.py',
-        # 'c10_errcount.py',
-        # 'c10_events.py',
-        # 'c10_from_pcap.py',
-        # 'c10_grep.py',
-        # 'c10_headers.py',
-        # 'c10_reindex.py',
-        # 'c10_timefix.py',
-        # 'c10_validator.py',
-        # 'c10_wrap_pcap.py',
-        # 'copy.py',
-        # 'dump.py',
-        # 'stat.py',
-    ]
+    description = 'compile to native binary executable'
 
     def run(self):
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         env = os.environ.copy()
         env['PYTHONOPTIMIZE'] = '1'
-        for f in self.scripts:
-            f = 'c10_tools/' + f
-            name, _ = os.path.splitext(os.path.basename(f))
-            if name.startswith('c10_'):
-                name = name.replace('_', '-')
-            elif not name.startswith('c10'):
-                name = 'c10-' + name
-            print(f'Building {name}')
-            subprocess.run([
-                'pyinstaller', f, '-n', name,
-                '--exclude-module', 'numpy',
-                '--exclude-module', 'matplotlib',
-                '--exclude-module', 'tcl',
-                '--exclude-module', 'pytz',
-                '--exclude-module', 'pandas',
-                '--exclude-module', 'tk',
-                '--exclude-module', 'bokeh',
-            ],
-                           stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                           env=env)
+        print('Building')
+        subprocess.run([
+            'pyinstaller', 'c10_tools/c10.py', '-n', 'c10',
+            '--exclude-module', 'numpy',
+            '--exclude-module', 'matplotlib',
+            '--exclude-module', 'tcl',
+            '--exclude-module', 'pytz',
+            '--exclude-module', 'pandas',
+            '--exclude-module', 'tk',
+            '--exclude-module', 'bokeh',
+        ],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            env=env)
 
 
 class Clean(BaseCommand):
@@ -111,7 +86,7 @@ setup(
             'c10-timefix=c10_tools.c10_timefix:main',
             'c10-validator=c10_tools.c10_validator:main',
             'c10-wrap-pcap=c10_tools.c10_wrap_pcap:main',
-            'c10=c10_tools.c10:main',
+            'c10=c10_tools.c10:cli',
         ],
     },
     version=version,

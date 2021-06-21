@@ -119,10 +119,9 @@ if streamcheck:
 COMMANDS = {}
 for cmd in std_commands:
     COMMANDS[cmd.__doc__.splitlines()[1].strip().split()[0]] = cmd
-# TODO: aliases such as cp for copy and st for stat
 
 
-def main(args=sys.argv[1:]):
+def cli(args=sys.argv[1:]):
     """Find and run the appropriate command."""
 
     # Reroute anything with a help flag to the help command.
@@ -155,7 +154,3 @@ def main(args=sys.argv[1:]):
                     print(line)
             else:
                 print(result)
-
-
-if __name__ == '__main__':
-    main()
