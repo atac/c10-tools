@@ -13,12 +13,14 @@ output file.
 
 # @TODO: make channel # and datatype options
 
-from array import array
 from datetime import datetime
+from io import BytesIO
 import os
-import struct
 import sys
 
+from chapter10.computer import ComputerF1
+from chapter10.message import MessageF0
+from chapter10.time import TimeF1
 from docopt import docopt
 import dpkt
 
@@ -27,187 +29,118 @@ from c10_tools.common import FileProgress, fmt_number
 
 class Parser:
     start_timestamp, seq = 0, {}
-    MAX_BODY_SIZE = 500000
+    network_packets, c10_packets = 0, 0
+    last_time = 0
+    MAX_BODY_SIZE = 400000
 
     def __init__(self, args=[]):
-        self.args = docopt(__doc__, args)
+        self.args = args
 
-    def make_rtc(timestamp):
+    def make_rtc(self, timestamp):
         """Take a timestamp and give an incrementing 10Mhz equivalent time."""
 
-        global start_timestamp
-
-        if not start_timestamp:
-            start_timestamp = timestamp
-            offset = 0
+        if not self.start_timestamp:
+            self.start_timestamp = timestamp
+            return 0
         else:
-            offset = timestamp - start_timestamp
+            offset = timestamp - self.start_timestamp
 
-        # Convert seconds to 10Mhz clock
-        return int(offset * 10000000)
+        # Convert seconds to 10Mhz clock and mask to 6 bytes
+        return int(offset * 10_000_000) & 0xffffffffffff
+    
+    def write_tmats(self):
+        """Generate a TMATS packet from a source file."""
 
-    def gen_packet(self, channel, type, time, body):
-        """Quickly and easily build a packet given just a few arguments."""
+        with open(self.args['-t'], 'r') as tmats:
+            tmats_body = tmats.read()
+        tmats = ComputerF1(data_type=1, data=tmats_body)
+        self.out.write(bytes(tmats))
+    
+    def write_data(self, messages):
+        """Make a Message packet from a list of messages."""
+        
+        timestamp = messages[0][0]
+        while timestamp - self.last_time > 1:
+            self.write_time(timestamp)
 
-        sequence_number = self.seq.get(channel, 0)
+        p = MessageF0(channel_id=32, data_type=0x30,
+                      count=len(messages), rtc=messages[0][1].ipts,
+                      sequence_number=self.get_seq(32))
+        p._messages = [m[1] for m in messages]
+        self.c10_packets += 1
+        self.out.write(bytes(p))
+        
+    def get_seq(self, channel):
+        sequence_number = self.seq.get(0, 0)
         self.seq[channel] = sequence_number + 1
-
-        # Split RTC into high and low components
-        rtc = self.make_rtc(time)
-        rtc_low = int((rtc >> 32) & 0xffffffff)
-        rtc_high = int((rtc >> 16) & 0xffff)
-
-        header = [
-            0xeb25,
-            channel,
-            len(body) + 24,
-            len(body),
-            1,
-            sequence_number,
-            0,
-            type,
-            rtc_low,
-            rtc_high,
-        ]
-        checksum = sum(
-            array('H', struct.pack('=HHIIBBBBIH', *header))) & 0xffff
-        header.append(checksum)
-        header = struct.pack('=HHIIBBBBIHH', *header)
-        return header + body
-
-    def time_packet(self, t):
-        """Generate and return a complete time packet from a unix timestamp."""
-
-        time = datetime.fromtimestamp(t)
-
-        # Time
-        TSn, Sn = (int(char) for char in str(time.second).zfill(2))
-        Hmn, Tmn = (int(char)
-                    for char in str(time.microsecond).zfill(2)[:2])
-        TMn, Mn = (int(char) for char in str(time.minute).zfill(2))
-        THn, Hn = (int(char) for char in str(time.hour).zfill(2))
-
-        # IRIG day
-        day = time.timetuple().tm_yday
-        HDn, TDn, Dn = (int(char) for char in str(day))
-
-        data = [
-            (TSn << 12) + (Sn << 8) + (Hmn << 4) + Tmn,
-            (THn << 12) + (Hn << 8) + (TMn << 4) + Mn,
-            (HDn << 8) + (TDn << 4) + Dn
-        ]
-        body = struct.pack('xxxxH' * len(data), *data)
-        return self.gen_packet(0, 0x10, t, body)
+        if sequence_number == 255:
+            self.seq[channel] = 0
+        return sequence_number
+    
+    def write_time(self, timestamp):
+        if not self.last_time:
+            timestamp = int(timestamp)
+        else:
+            timestamp = self.last_time + 1
+        self.last_time = timestamp
+        t = datetime.fromtimestamp(timestamp)
+        packet = TimeF1(data_type=0x11, time=t,
+                        rtc=self.make_rtc(timestamp),
+                        header_version=8,
+                        sequence_number=self.get_seq(0))
+        self.out.write(bytes(packet))
 
     def main(self):
         """Parse a pcap file into chapter 10 format."""
+        
+        self.out = open(self.args['<outfile>'], 'wb')
 
-        if os.path.exists(self.args['<outfile>']) and not self.args['-f']:
-            print('Output file exists. Use -f to overwrite.')
-            return
+        if self.args['-t']:
+            self.write_tmats()
 
-        with open(self.args['<outfile>'], 'wb') as out:
+        # Loop over the packets and parse into C10.Packet objects if possile.
+        with open(self.args['<infile>'], 'rb') as f, \
+                FileProgress(self.args['<infile>']) as progress:
 
-            # Write TMATS.
-            if self.args['-t']:
-                with open(self.args['-t'], 'r') as tmats:
-                    tmats_body = tmats.read()
+            if self.args['-q']:
+                progress.close()
 
-                header_values = [
-                    0xeb25,
-                    0,
-                    len(tmats_body) + 24,
-                    len(tmats_body),
-                    0,
-                    0,
-                    0,
-                    1,
-                    0,
-                    0,
-                ]
+            length, messages = 0, []
+            for timestamp, ethernet in dpkt.pcap.Reader(f):
+                ip = dpkt.ethernet.Ethernet(ethernet).data
+                if isinstance(getattr(ip, 'data', None), dpkt.udp.UDP):
+                    self.network_packets += 1
 
-                header = struct.pack('HHIIBBBBIH', *header_values)
-                out.write(header)
+                    # Wrap message with intra-packet headers
+                    data = ip.data.data[4:]
+                    msg = MessageF0.Message(ipts=self.make_rtc(timestamp),
+                                            length=len(data),
+                                            data=data)
+                    messages.append((timestamp, msg))
+                    length += len(data)
+                    
+                    # Write packet when full.
+                    if length + 4 > self.MAX_BODY_SIZE:
+                        self.write_data(messages)
+                        length, messages = 0, []
 
-                # Compute and append checksum.
-                sums = sum(array('H', header)) & 0xffff
-                out.write(struct.pack('H', sums))
+                # Update progress bar.
+                progress.update_from_tell(f.tell())
 
-                out.write(tmats_body.encode('utf8'))
+        if messages:
+            self.write_data(messages)
 
-            # Loop over the packets and parse into C10.Packet objects if
-            # possile.
-            packets, added = 0, 0
-
-            with open(self.args['<infile>'], 'rb') as f, \
-                    FileProgress(self.args['<infile>']) as progress:
-
-                if self.args['-q']:
-                    progress.close()
-
-                first_time, frames, packet = None, 0, b''
-                file_start_time = None
-
-                for timestamp, ether in dpkt.pcap.Reader(f):
-                    if first_time is None:
-                        first_time = timestamp
-                    if file_start_time is None:
-                        file_start_time = timestamp
-                        out.write(self.time_packet(timestamp))
-                    ether = dpkt.ethernet.Ethernet(ether)
-                    ip = ether.data
-                    if hasattr(ip, 'data') and isinstance(
-                            ip.data, dpkt.udp.UDP):
-
-                        # Payload
-                        data = ip.data.data[4:]
-
-                        ipts = struct.pack('Q', self.make_rtc(timestamp))
-                        packet += ipts
-
-                        # message
-                        ipdh = struct.pack('=HH', 99, len(data))
-
-                        packet += ipdh
-                        packet += data
-
-                        frames += 1
-                        if len(packet) + 4 > self.MAX_BODY_SIZE:
-                            # ethernet packets
-                            # csdw = struct.pack('HH', frames, 24)
-                            # out.write(gen_packet(
-                            #     40, 0x69, first_time, csdw + packet))
-
-                            # message packets
-                            csdw = struct.pack('HH', frames, 0)
-                            out.write(self.gen_packet(
-                                32, 0x30, first_time, csdw + packet))
-
-                            added += 1
-                            first_time, frames, packet = None, 0, b''
-
-                        packets += 1
-
-                    # Update progress bar.
-                    progress.update_from_tell(f.tell())
-
-            if packet:
-                # message packets
-                csdw = struct.pack('HH', 0, frames)
-                out.write(self.gen_packet(
-                    32, 0x30, first_time, csdw + packet))
-                added += 1
-                first_time, frames, packet = None, 0, b''
-                added += 1
-
-            if not self.args['-q']:
-                print('Created %s Chapter 10 packets from %s network packets'
-                      % (fmt_number(added), fmt_number(packets)))
+        if not self.args['-q']:
+            print('Created %s Chapter 10 packets from %s network packets'
+                    % (fmt_number(self.c10_packets),
+                       fmt_number(self.network_packets)))
 
 
-def main():
-    Parser(sys.argv[1:]).main()
+def main(args=sys.argv[1:]):
+    args = docopt(__doc__, args)
 
+    if os.path.exists(args['<outfile>']) and not args['-f']:
+        print('Output file exists. Use -f to overwrite.')
+        return
 
-if __name__ == '__main__':
-    main()
+    Parser(args).main()

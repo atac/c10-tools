@@ -4,14 +4,14 @@ from tempfile import NamedTemporaryFile
 import pytest
 import docopt
 
-from c10_tools.c10_wrap_pcap import Parser
+from c10_tools.c10_wrap_pcap import main
 
 
 def test_noargs():
     with pytest.raises(docopt.DocoptExit):
-        Parser().main()
+        main([])
 
 
 def test_default():
     with NamedTemporaryFile() as out:
-        Parser([pytest.SAMPLE, out.name]).main()
+        main([pytest.SAMPLE, out.name])
