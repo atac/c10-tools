@@ -79,6 +79,7 @@ setup(
             'c10-dump-pcap=c10_tools.c10_dump_pcap:main',
             'c10-errcount=c10_tools.deprecated:errcount',
             'c10-events=c10_tools.deprecated:events',
+            'c10-headers=c10_tools.c10_headers:main',
             'c10-from-pcap=c10_tools.capture:wrapper',
             'c10-grep=c10_tools.c10_grep:main',
             'c10-reindex=c10_tools.c10_reindex:main',
