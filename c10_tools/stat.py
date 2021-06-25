@@ -53,9 +53,7 @@ class Stat:
     def parse(self):
         try:
             self.scan_file()
-        except Exception as err:
-            print(f'Failed to read file {self.filename} with \
-{err.__class__.__name__}: {err}')
+        except:
             return
         yield from self.file_summary()
 
@@ -114,6 +112,11 @@ class Stat:
                                     event_list[event.number] += 1
 
                     progress.update(packet.packet_length)
+
+            except Exception as err:
+                print(f'Failed to read file {self.filename} at offset \
+{progress.n} with {err.__class__.__name__}: {err}')
+                raise
 
             finally:
                 f.close()
