@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 
 """usage: c10-grep <value> <path>... [options]
 
@@ -12,25 +11,15 @@ Options:
     -m MASK, --mask=MASK           Value mask
     -o OUTFILE, --output OUTFILE   Print results to file
     -f, --force                    Overwrite existing output file
-    -x                             Utilize multiprocessing via dask (works, \
-but progress reporting is a little exciting)
 """
 
-from functools import partial
 import os
-import struct
 import sys
 
-from dask.delayed import delayed
 from docopt import docopt
 from tqdm import tqdm
-import dask.bag as db
 
 from c10_tools.common import get_time, FileProgress, find_c10, C10
-
-
-def swap_word(word):
-    return struct.unpack('<H', struct.pack('>H', word))[0]
 
 
 def search(path, args, i=None):
@@ -60,8 +49,7 @@ def search(path, args, i=None):
                 last_time = packet
 
             # Match channel
-            if (args.get('--channel') or packet.channel_id) != \
-                    packet.channel_id:
+            if args.get('--channel', None) != packet.channel_id:
                 continue
 
             # Iterate over messages if applicable
@@ -133,24 +121,14 @@ def main(args=sys.argv[1:]):
     files = list(find_c10(args.get('<path>')))
 
     print(' in %s files...' % len(files))
-    task = partial(search, args=args)
-    if args.get('-x'):
-        bag = db.from_delayed([
-            delayed(task)(f, i=i) for i, f in enumerate(files)])
-        bag.compute()
-    else:
-        files = tqdm(
-            files,
-            desc='Overall',
-            unit='files',
-            dynamic_ncols=True,
-            leave=False)
-        if not args.get('--output'):
-            files.close()
-        for f in files:
-            task(f)
+    files = tqdm(
+        files,
+        desc='Overall',
+        unit='files',
+        dynamic_ncols=True,
+        leave=False)
+    if not args.get('--output'):
+        files.close()
+    for f in files:
+        search(f, args)
     print('\nfinished')
-
-
-if __name__ == '__main__':
-    main()
