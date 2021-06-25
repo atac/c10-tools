@@ -17,6 +17,10 @@ if os.environ.get('LIBRARY', 'c10') == 'i106':
 fmt_number = '{0:,}'.format
 
 
+def swap_word(word):
+    return struct.unpack('<H', struct.pack('>H', word))[0]
+
+
 def find_c10(paths):
     """Take a list of paths and yield paths to Chapter 10 files found at
     those locations or subdirectories. Any files in the original list are
