@@ -22,7 +22,9 @@ from chapter10.computer import ComputerF1
 from chapter10.message import MessageF0
 from chapter10.time import TimeF1
 from docopt import docopt
-import dpkt
+from dpkt.udp import UDP
+from dpkt.ethernet import Ethernet
+from dpkt import pcap
 
 from c10_tools.common import FileProgress, fmt_number
 
@@ -71,6 +73,8 @@ class Parser:
         self.out.write(bytes(p))
         
     def get_seq(self, channel):
+        """Get a valid sequence number for a given channel ID."""
+
         sequence_number = self.seq.get(0, 0)
         self.seq[channel] = sequence_number + 1
         if sequence_number == 255:
@@ -78,19 +82,27 @@ class Parser:
         return sequence_number
     
     def write_time(self, timestamp):
-        if not self.last_time:
-            timestamp = int(timestamp)
-        else:
+        """Write a Chapter 10 time packet based on a unix timestamp."""
+
+        if self.last_time:
             timestamp = self.last_time + 1
+        timestamp = int(timestamp)
         self.last_time = timestamp
-        t = datetime.fromtimestamp(timestamp)
-        packet = TimeF1(data_type=0x11, time=t,
+        packet = TimeF1(data_type=0x11,
+                        time=datetime.fromtimestamp(timestamp),
                         rtc=self.make_rtc(timestamp),
                         header_version=8,
                         sequence_number=self.get_seq(0))
         self.out.write(bytes(packet))
+        
+    def parse_udp(self, timestamp, data):
+        self.network_packets += 1
+        msg = MessageF0.Message(ipts=self.make_rtc(timestamp),
+                                length=len(data),
+                                data=data)
+        return bytes(msg)
 
-    def main(self):
+    def parse_and_write(self):
         """Parse a pcap file into chapter 10 format."""
         
         self.out = open(self.args['<outfile>'], 'wb')
@@ -98,35 +110,27 @@ class Parser:
         if self.args['-t']:
             self.write_tmats()
 
-        # Loop over the packets and parse into C10.Packet objects if possile.
-        with open(self.args['<infile>'], 'rb') as f, \
-                FileProgress(self.args['<infile>']) as progress:
+        filename = self.args['<infile>']
+        quiet = self.args['-q']
+        with FileProgress(filename, disable=quiet) as progress:
 
-            if self.args['-q']:
-                progress.close()
-
+            f = open(filename, 'rb')
             length, messages = 0, []
-            for timestamp, ethernet in dpkt.pcap.Reader(f):
-                ip = dpkt.ethernet.Ethernet(ethernet).data
-                if isinstance(getattr(ip, 'data', None), dpkt.udp.UDP):
-                    self.network_packets += 1
-
-                    # Wrap message with intra-packet headers
-                    data = ip.data.data[4:]
-                    msg = MessageF0.Message(ipts=self.make_rtc(timestamp),
-                                            length=len(data),
-                                            data=data)
+            for timestamp, ethernet in pcap.Reader(f):
+                ip = Ethernet(ethernet).data
+                if isinstance(getattr(ip, 'data', None), UDP):
+                    msg = self.parse_udp(timestamp, ip.data.data[4:])
                     messages.append((timestamp, msg))
-                    length += len(data)
+                    length += len(msg)
                     
                     # Write packet when full.
-                    if length + 4 > self.MAX_BODY_SIZE:
+                    if length > self.MAX_BODY_SIZE:
                         self.write_data(messages)
                         length, messages = 0, []
 
-                # Update progress bar.
                 progress.update_from_tell(f.tell())
 
+        # Write any remaining messages.
         if messages:
             self.write_data(messages)
 
@@ -143,4 +147,4 @@ def main(args=sys.argv[1:]):
         print('Output file exists. Use -f to overwrite.')
         return
 
-    Parser(args).main()
+    Parser(args).parse_and_write()
