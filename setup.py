@@ -87,7 +87,7 @@ setup(
             'c10-timefix=c10_tools.c10_timefix:main',
             'c10-validator=c10_tools.c10_validator:main',
             'c10-wrap-pcap=c10_tools.c10_wrap_pcap:main',
-            'c10=c10_tools.c10:cli',
+            'c10=c10_tools.c10:CLI.main',
         ],
     },
     version=version,
