@@ -1,30 +1,15 @@
-#!/usr/bin/env python
-
-"""Wrap ethernet data in a pcap file in a valid chapter 10 file.
-
-usage: c10-wrap-pcap <infile> <outfile> [options]
-
-Options:
-    -q               Don't display progress bar.
-    -f               Overwrite existing output file.
-    -t <tmats_file>  Insert an existing TMATS record at the beginning of the\
-output file.
-"""
-
-# @TODO: make channel # and datatype options
 
 from datetime import datetime
-from io import BytesIO
 import os
-import sys
 
 from chapter10.computer import ComputerF1
 from chapter10.message import MessageF0
 from chapter10.time import TimeF1
 from docopt import docopt
-from dpkt.udp import UDP
-from dpkt.ethernet import Ethernet
 from dpkt import pcap
+from dpkt.ethernet import Ethernet
+from dpkt.udp import UDP
+from termcolor import colored
 
 from c10_tools.common import FileProgress, fmt_number
 
@@ -66,7 +51,7 @@ class Parser:
             self.write_time(timestamp)
 
         p = MessageF0(channel_id=32, data_type=0x30,
-                      count=len(messages), rtc=messages[0][1].ipts,
+                      count=len(messages), rtc=self.make_rtc(timestamp),
                       sequence_number=self.get_seq(32))
         p._messages = [m[1] for m in messages]
         self.c10_packets += 1
@@ -138,13 +123,37 @@ class Parser:
             print('Created %s Chapter 10 packets from %s network packets'
                     % (fmt_number(self.c10_packets),
                        fmt_number(self.network_packets)))
+            
+
+def wrapper():
+    """Wrap ethernet data in a pcap file in a valid chapter 10 file.
+
+usage: c10-wrap-pcap <infile> <outfile> [options]
+
+Options:
+    -q               Don't display progress bar.
+    -f               Overwrite existing output file.
+    -t <tmats_file>  Insert an existing TMATS record at the beginning of the\
+output file.
+    """
+
+    print(colored('This will be deprecated in favor of c10 stat', 'red'))
+    args = docopt(wrapper.__doc__)
+    main(args)
 
 
-def main(args=sys.argv[1:]):
-    args = docopt(__doc__, args)
+# @TODO: make channel # and datatype options
+def main(args):
+    """Wrap network data in a pcap file as Chapter 10 Message format.
+    frompcap <infile> <outfile> [options]
+    -q  Don't display progress bar.
+    -f  Overwrite existing output file.
+    -t <tmats_file>  Insert an existing TMATS record at the beginning of the \
+output file.
+    """
 
     if os.path.exists(args['<outfile>']) and not args['-f']:
         print('Output file exists. Use -f to overwrite.')
-        return
+        raise SystemExit
 
     Parser(args).parse_and_write()

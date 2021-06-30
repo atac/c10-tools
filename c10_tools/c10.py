@@ -10,6 +10,7 @@ from c10_tools.allbus import main as allbus
 from c10_tools.capture import main as capture
 from c10_tools.copy import main as copy
 from c10_tools.dump import main as dump
+from c10_tools.from_pcap import main as frompcap
 from c10_tools.stat import main as stat
 from c10_tools.version import version
 try:
@@ -44,9 +45,10 @@ class CLI:
         '-h, --help  ' + help.__doc__.split('\n')[0]]
     COMMANDS = {
         'allbus': allbus,
-        'copy': copy,
         'capture': capture,
+        'copy': copy,
         'dump': dump,
+        'frompcap': frompcap,
         'help': help,
         'stat': stat,
     }
