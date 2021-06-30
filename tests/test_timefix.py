@@ -2,16 +2,19 @@
 from tempfile import NamedTemporaryFile
 
 import pytest
-import docopt
 
-from c10_tools.c10_timefix import main
-
-
-def test_noargs():
-    with pytest.raises(docopt.DocoptExit):
-        main([])
+from c10_tools.timefix import main
 
 
-def test_default():
-    path = NamedTemporaryFile().name
-    main([pytest.SAMPLE, path])
+@pytest.fixture
+def args():
+    return {
+        '<input_file>': pytest.SAMPLE,
+        '<output_file>': NamedTemporaryFile().name,
+        '--quiet': True,
+        '--force': True,
+    }
+
+
+def test_default(args):
+    main(args)

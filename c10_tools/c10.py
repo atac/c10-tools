@@ -12,6 +12,7 @@ from c10_tools.copy import main as copy
 from c10_tools.dump import main as dump
 from c10_tools.from_pcap import main as frompcap
 from c10_tools.stat import main as stat
+from c10_tools.timefix import main as timefix
 from c10_tools.version import version
 try:
     import matplotlib
@@ -51,6 +52,7 @@ class CLI:
         'frompcap': frompcap,
         'help': help,
         'stat': stat,
+        'timefix': timefix,
     }
     if streamcheck:
         COMMANDS['streamcheck'] = streamcheck
