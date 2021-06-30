@@ -103,7 +103,7 @@ setup(
         'dask[bag,delayed,distributed,dataframe]>=2.23',
         'docopt>=0.6.2',
         'dpkt>=1.9.3',
-        'pychapter10>=1.1.3',
+        'pychapter10>=1.1.9',
         'tqdm>=4.48.2',
         's3fs>=0.5.2',
         'termcolor>=1.1.0',
