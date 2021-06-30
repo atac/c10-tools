@@ -10,6 +10,7 @@ from c10_tools.from_pcap import main
 def args():
     return {
         '<infile>': pytest.PCAP,
+        '<outfile>': NamedTemporaryFile().name,
         '-f': True,
         '-t': None,
         '-q': False,
@@ -18,21 +19,16 @@ def args():
 
 def test_checks_overwrite(args):
     args['-f'] = False
-    with NamedTemporaryFile() as out, pytest.raises(SystemExit):
-        args['<outfile>'] = out.name
+    with NamedTemporaryFile() as f, pytest.raises(SystemExit):
+        args['<outfile>'] = f.name
         main(args)
 
 
 def test_default(args):
-    with NamedTemporaryFile() as out:
-        args['<outfile>'] = out.name
-        main(args)
+    main(args)
 
         
 def test_tmats(args):
     args['-t'] = pytest.TMATS
-    with NamedTemporaryFile() as out:
-        args['<outfile>'] = out.name
-        main(args)
-        out.seek(0)
-        assert out.read(24) == b'%\xeb\x00\x00\xd0\x18\x00\x00\xb7\x18\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\xac\x1d'
+    main(args)
+    assert open(args['<outfile>'], 'rb').read(24) == b'%\xeb\x00\x00\xd0\x18\x00\x00\xb7\x18\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\xac\x1d'
