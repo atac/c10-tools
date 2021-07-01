@@ -14,6 +14,7 @@ from c10_tools.from_pcap import main as frompcap
 from c10_tools.stat import main as stat
 from c10_tools.timefix import main as timefix
 from c10_tools.version import version
+from c10_tools.reindex import main as reindex
 try:
     import matplotlib
     from c10_tools.streamcheck import main as streamcheck
@@ -52,6 +53,7 @@ class CLI:
         'frompcap': frompcap,
         'help': help,
         'stat': stat,
+        'reindex': reindex,
         'timefix': timefix,
     }
     if streamcheck:

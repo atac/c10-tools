@@ -82,7 +82,7 @@ setup(
             'c10-headers=c10_tools.c10_headers:main',
             'c10-from-pcap=c10_tools.capture:wrapper',
             'c10-grep=c10_tools.c10_grep:main',
-            'c10-reindex=c10_tools.c10_reindex:main',
+            'c10-reindex=c10_tools.reindex:wrapper',
             'c10-stat=c10_tools.stat:wrapper',
             'c10-timefix=c10_tools.timefix:wrapper',
             'c10-validator=c10_tools.c10_validator:main',
