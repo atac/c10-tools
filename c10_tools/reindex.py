@@ -30,17 +30,25 @@ class Parser:
         offset = self.out.tell()
         packet = ComputerF3(
             index_type=1,
+            data_type=0x3,
             seq=self.get_seq(),
             count=len(self.messages),
             file_size_present=1,
-            rtc=self.messages[-1].ipts,
+            rtc=self.messages[-1][1].rtc,
             file_size=offset,
         )
-        packet._messages = self.messages
+        for o, p in self.messages:
+            m = packet.Message(
+                channel_id=p.channel_id,
+                data_type=p.data_type,
+                ipts=p.rtc,
+                offset=o
+            )
+            packet.append(m)
         self.out.write(bytes(packet))
         self.messages = []
-
-        self.nodes.append(ComputerF3.Message(ipts=packet.rtc, offset=offset))
+        
+        self.nodes.append((offset, packet))
 
     def write_root(self):
         """Generate a root index packet."""
@@ -49,12 +57,14 @@ class Parser:
         packet = ComputerF3(
             seq=self.get_seq(),
             count=len(self.nodes),
+            data_type=0x3,
             file_size_present=1,
-            rtc=self.nodes[-1].ipts,
+            rtc=self.nodes[-1][1].rtc,
             file_size=offset,
             root_offset=self.last_root if self.last_root else offset,
         )
-        packet._messages = self.nodes
+        for o, node in self.nodes:
+            packet.append(packet.Message(ipts=node.rtc, offset=o))
         self.out.write(bytes(packet))
         self.nodes = []
         self.last_root = offset
@@ -76,12 +86,9 @@ class Parser:
                 if self.args['--strip']:
                     continue
 
-                self.messages.append(ComputerF3.Message(
-                    channel_id=packet.channel_id,
-                    data_type=packet.data_type,
-                    ipts=packet.rtc,
-                    offset=self.out.tell() - packet.packet_length
-                ))
+                self.messages.append((
+                    self.out.tell() - packet.packet_length,
+                    packet))
 
                 # Projected index node packet size.
                 size = 36 + (20 * len(self.messages))
@@ -98,8 +105,7 @@ class Parser:
             # Final indices.
             if self.messages:
                 self.write_node()
-            if self.nodes:
-                self.write_root()
+            self.write_root()
 
         if self.args['--strip']:
             print('Stripped existing indices.')
