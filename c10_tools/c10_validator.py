@@ -14,6 +14,7 @@ import struct
 
 from chapter10 import C10
 from docopt import docopt
+from termcolor import colored
 
 from c10_tools.common import FileProgress, fmt_number
 
@@ -78,6 +79,7 @@ class Parser:
 
 
 def main():
+    print(colored('This will be deprecated in favor of c10 inspect', 'red'))
     Parser(sys.argv[1:]).main()
 
 

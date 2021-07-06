@@ -18,7 +18,7 @@ from c10_tools.common import find_c10, FileProgress, C10, fmt_table, walk_packet
 
 
 def events(args=sys.argv[1:]):
-    print(colored('This will be deprecated in favor of c10 stat --verbose'))
+    print(colored('This will be deprecated in favor of c10 stat --verbose', 'red'))
     args = docopt('usage: c10-events <input_file>', args)
 
     last_time = None

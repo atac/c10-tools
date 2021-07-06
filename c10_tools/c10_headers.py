@@ -1,15 +1,17 @@
-#!/usr/bin/env python
 
 """usage: c10_headers <file>... [options]"""
 
 import sys
 
 from docopt import docopt
+from termcolor import colored
 
 from c10_tools.common import walk_packets, FileProgress, C10
 
 
 def main(args=sys.argv[1:]):
+    
+    print(colored('This will be deprecated in favor of c10 inspect', 'red'))
 
     # Get commandline args.
     args = docopt(__doc__, args)
@@ -34,7 +36,3 @@ def main(args=sys.argv[1:]):
             for k in keys:
                 print(k.replace('_', ' ').title(), getattr(packet, k))
             print()
-
-
-if __name__ == '__main__':
-    main()
