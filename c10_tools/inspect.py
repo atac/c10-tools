@@ -10,7 +10,6 @@ from .common import fmt_number, FileProgress
 
 
 class Inspect:
-    # TODO: file offset
     KEYS = {
         'Channel': 'channel_id',
         'Type': 'data_type',
@@ -27,20 +26,26 @@ class Inspect:
         ('Size', 7),
         ('Time', 27),
         ('Valid', 5),
+        ('Offset', 15),
     ))
     
     def __init__(self, args):
         self.args = args
-        self.writer = None
-        # Use CSV if stdout is redirected.
-        if os.fstat(0) != os.fstat(1):
-            self.writer = csv.writer(sys.stdout, lineterminator='')
         self.cols = self.COLUMNS
         
+        # Use CSV if stdout is redirected
+        self.writer = None
+        if os.fstat(0) != os.fstat(1):
+            self.writer = csv.writer(sys.stdout, lineterminator='')
+        
     def get_size(self):
+        """Get total byte size for all files."""
+        
         return sum(os.stat(f).st_size for f in self.args['<file>'])
         
     def write_header(self):
+        """Write out header row for CSV or ASCII."""
+        
         if self.writer:
             self.writer.writerow(self.cols.keys())
             return ''
@@ -51,13 +56,17 @@ class Inspect:
             line = '-' * (len(s) + 4)
             return f'{line}\n| {s} |\n{line}'
         
-    def write_row(self, packet):
+    def write_row(self, packet, offset):
+        """Pull values from a packet and write output row."""
+        
         row = []
         for col, width in self.cols.items():
             if col == 'Time':
                 row.append(str(packet.get_time()))
             elif col == 'Valid':
                 row.append(packet.validate(True) and 'Yes' or 'No')
+            elif col == 'Offset':
+                row.append(fmt_number(offset).rjust(width))
             elif col in self.KEYS:
                 val = getattr(packet, self.KEYS[col])
                 if not self.writer:
@@ -78,16 +87,19 @@ class Inspect:
 
     # TODO: ensure that corrupted files can still be searched for valid packets
     def main(self):
-        header = self.write_header()
-        yield header
         with FileProgress(total=self.get_size()) as progress:
-            if self.args['-q']:
+            if self.args['--quiet'] or not self.writer:
                 progress.close()
-                
+
+            header = self.write_header()
+            yield header
+
             for f in self.args['<file>']:
+                offset = 0
                 for packet in C10(f):
                     progress.update(packet.packet_length)
-                    yield self.write_row(packet)
+                    yield self.write_row(packet, offset)
+                    offset += packet.packet_length
         if header:
             yield header.split('\n', 1)[0]
 
