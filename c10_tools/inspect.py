@@ -1,6 +1,5 @@
 
 from collections import OrderedDict
-import traceback
 import asyncio
 import csv
 import os
@@ -9,7 +8,7 @@ import sys
 from chapter10 import C10
 from termcolor import colored
 
-from .common import fmt_number, FileProgress
+from .common import fmt_number, FileProgress, walk_packets
 
 
 class Inspect:
@@ -90,14 +89,11 @@ class Inspect:
     
     async def get_packet(self, f):
         try:
-            packet = next(C10(f))
+            packet = next(walk_packets(C10(f), self.args))
             assert len(bytes(packet)) == packet.packet_length
         except StopIteration:
             raise StopAsyncIteration
         return packet
-    
-    async def next_packet(self, f):
-        return await asyncio.wait_for(self.get_packet(f), timeout=.1)
     
     def find_sync(self, f):
         """Seek forward in a file to the next sync pattern (eb25)."""
@@ -124,7 +120,8 @@ class Inspect:
                 with open(f, 'rb') as f:
                     while True:
                         try:
-                            packet = asyncio.run(self.next_packet(f))
+                            packet = asyncio.run(asyncio.wait_for(
+                                self.get_packet(f), timeout=.1))
                             yield self.write_row(packet, offset)
                             progress.update(packet.packet_length)
                             offset += packet.packet_length
@@ -132,7 +129,10 @@ class Inspect:
                             if offset >= os.stat(f.name).st_size:
                                 break
                             else:
-                                sync = self.find_sync(f)
+                                try:
+                                    sync = self.find_sync(f)
+                                except EOFError:
+                                    break
                                 progress.update(sync - offset)
                                 offset = sync
                         except Exception as err:
@@ -148,6 +148,12 @@ class Inspect:
 def main(args):
     """Report on packets found in a file.
     inspect <file>... [options]
+    -c CHANNEL..., --channel CHANNEL...  Specify channels to include (comma \
+separated).
+    -e CHANNEL..., --exclude CHANNEL...  Specify channels to ignore (comma \
+separated).
+    -t TYPE, --type TYPE  The types of data to copy (comma separated, may be \
+decimal or hex eg: 0x40)
     """
     
     yield from Inspect(args).main()

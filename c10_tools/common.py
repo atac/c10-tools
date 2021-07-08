@@ -1,6 +1,7 @@
 
 from datetime import timedelta, datetime
 import os
+import struct
 
 from tqdm import tqdm
 
@@ -116,14 +117,13 @@ def walk_packets(c10, args={}):
 
     # Filter packets (except the TMATS packet that should be at 0).
     for i, packet in enumerate(c10):
-        if i > 0:
-            channel = str(packet.channel_id)
-            if channels and channel not in channels:
-                continue
-            elif channel in exclude:
-                continue
-            elif types and packet.data_type not in types:
-                continue
+        channel = str(packet.channel_id)
+        if channels and channel not in channels:
+            continue
+        elif channel in exclude:
+            continue
+        elif types and packet.data_type not in types:
+            continue
 
         yield packet
 
