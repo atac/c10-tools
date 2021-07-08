@@ -1,10 +1,13 @@
 
 from collections import OrderedDict
+import traceback
+import asyncio
 import csv
 import os
 import sys
 
 from chapter10 import C10
+from termcolor import colored
 
 from .common import fmt_number, FileProgress
 
@@ -84,8 +87,30 @@ class Inspect:
                 s += f' {col:<{widths[i]}} |'
 
         return s
+    
+    async def get_packet(self, f):
+        try:
+            packet = next(C10(f))
+            assert len(bytes(packet)) == packet.packet_length
+        except StopIteration:
+            raise StopAsyncIteration
+        return packet
+    
+    async def next_packet(self, f):
+        return await asyncio.wait_for(self.get_packet(f), timeout=.1)
+    
+    def find_sync(self, f):
+        """Seek forward in a file to the next sync pattern (eb25)."""
+        
+        while True:
+            offset = f.tell()
+            buffer = f.read(100000)
+            if not buffer:
+                raise EOFError
+            if b'\x25\xeb' in buffer:
+                f.seek(offset+buffer.find(b'\x25\xeb'))
+                return f.tell()
 
-    # TODO: ensure that corrupted files can still be searched for valid packets
     def main(self):
         with FileProgress(total=self.get_size()) as progress:
             if self.args['--quiet'] or not self.writer:
@@ -96,12 +121,29 @@ class Inspect:
 
             for f in self.args['<file>']:
                 offset = 0
-                for packet in C10(f):
-                    progress.update(packet.packet_length)
-                    yield self.write_row(packet, offset)
-                    offset += packet.packet_length
+                with open(f, 'rb') as f:
+                    while True:
+                        try:
+                            packet = asyncio.run(self.next_packet(f))
+                            yield self.write_row(packet, offset)
+                            progress.update(packet.packet_length)
+                            offset += packet.packet_length
+                        except StopAsyncIteration:
+                            if offset >= os.stat(f.name).st_size:
+                                break
+                            else:
+                                sync = self.find_sync(f)
+                                progress.update(sync - offset)
+                                offset = sync
+                        except Exception as err:
+                            yield colored(f'{err} at {fmt_number(offset)}', 'red')
+                            sync = self.find_sync(f)
+                            progress.update(sync - offset)
+                            offset = sync
+
         if header:
             yield header.split('\n', 1)[0]
+
 
 def main(args):
     """Report on packets found in a file.
