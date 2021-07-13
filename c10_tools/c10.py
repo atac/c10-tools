@@ -159,3 +159,7 @@ class CLI:
                 print(line)
         elif result:
             print(result)
+            
+
+if __name__ == '__main__':
+    CLI.main()
