@@ -1,3 +1,6 @@
+"""These tools will be removed in the 1.0 release.
+For now they are available with a warning.
+"""
 
 from time import mktime
 import os
@@ -6,8 +9,6 @@ import sys
 import csv
 
 from docopt import docopt
-from dask.delayed import delayed
-import dask.bag as db
 from dpkt.ethernet import Ethernet
 from dpkt.ip import IP
 from dpkt.pcap import Writer
@@ -218,7 +219,6 @@ def errcount(args=sys.argv[1:]):
     Options:
         -q            Quiet output (no progress bar)
         -o <logfile>  Output to CSV file with channel, sequence, and rtc
-        -x            Run with multiprocessing (using dask)
     """
 
     print(colored('This will be deprecated in favor of c10 stat --verbose'))
