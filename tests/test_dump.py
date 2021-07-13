@@ -25,6 +25,10 @@ def stdout():
         @staticmethod
         def isatty():
             return True
+        
+        @staticmethod
+        def flush():
+            pass
 
     return tmp
 

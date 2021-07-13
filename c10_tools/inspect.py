@@ -64,16 +64,29 @@ class Inspect:
         row = []
         for col, width in self.cols.items():
             if col == 'Time':
-                row.append(str(packet.get_time()))
+                if packet.data_type == 1:
+                    val = 'N/A'
+                else:
+                    if packet.data_type == 0x11:
+                        self.date_format = packet.date_format
+
+                    # Julian day or month/year
+                    fmt = '%j %H:%M:%S.%f'
+                    if self.date_format:
+                        fmt = '%Y-%m-%d %H:%M:%S.%f'
+
+                    val = packet.get_time().strftime(fmt)
             elif col == 'Valid':
-                row.append(packet.validate(True) and 'Yes' or 'No')
+                val = packet.validate(True) and 'Yes' or 'No'
             elif col == 'Offset':
-                row.append(fmt_number(offset).rjust(width))
+                val = offset
             elif col in self.KEYS:
                 val = getattr(packet, self.KEYS[col])
-                if not self.writer:
-                    val = fmt_number(val).rjust(width)
-                row.append(val)
+
+            if not self.writer and isinstance(val, (float, int)):
+                val = fmt_number(val).rjust(width)
+
+            row.append(val)
 
         s = ''
         if self.writer:
@@ -87,10 +100,15 @@ class Inspect:
 
         return s
     
-    async def get_packet(self, f):
+    async def get_packet(self, c10):
+        """Read and return the next packet from a file or raise
+        StopAsyncIteration.
+        """
+        
         try:
-            packet = next(walk_packets(C10(f), self.args))
-            assert len(bytes(packet)) == packet.packet_length
+            packet = next(c10)
+            assert packet.packet_length == len(bytes(packet)), \
+                'Packet length incorrect'
         except StopIteration:
             raise StopAsyncIteration
         return packet
@@ -104,8 +122,45 @@ class Inspect:
             if not buffer:
                 raise EOFError
             if b'\x25\xeb' in buffer:
-                f.seek(offset+buffer.find(b'\x25\xeb'))
+                f.seek(offset + buffer.find(b'\x25\xeb'))
                 return f.tell()
+            
+    def parse_file(self, f, progress):
+        """Walk a file and read header information."""
+
+        offset = 0
+        c10 = walk_packets(C10(f), self.args)
+        while True:
+            
+            # Try to read a packet.
+            try:
+                packet = asyncio.run(
+                    asyncio.wait_for(self.get_packet(c10), timeout=.1))
+                yield self.write_row(packet, offset)
+                progress.update(packet.packet_length)
+                offset += packet.packet_length
+                
+            # Report error and retry at the next sync pattern.
+            except Exception as err:
+                
+                # Exit if we've read the whole file.
+                if offset >= os.stat(f.name).st_size:
+                    break
+
+                if not isinstance(err, StopAsyncIteration):
+                    msg = f'{err} at {fmt_number(offset)}'
+                    if self.writer is None:
+                        yield colored(msg, 'red')
+                    else:
+                        yield f'"{msg}"'
+
+                try:
+                    f.seek(offset + 1, 1)
+                    sync = self.find_sync(f)
+                except EOFError:
+                    break
+                progress.update(sync - offset)
+                offset = sync
 
     def main(self):
         with FileProgress(total=self.get_size()) as progress:
@@ -116,33 +171,12 @@ class Inspect:
             yield header
 
             for f in self.args['<file>']:
-                offset = 0
                 with open(f, 'rb') as f:
-                    while True:
-                        try:
-                            packet = asyncio.run(asyncio.wait_for(
-                                self.get_packet(f), timeout=.1))
-                            yield self.write_row(packet, offset)
-                            progress.update(packet.packet_length)
-                            offset += packet.packet_length
-                        except StopAsyncIteration:
-                            if offset >= os.stat(f.name).st_size:
-                                break
-                            else:
-                                try:
-                                    sync = self.find_sync(f)
-                                except EOFError:
-                                    break
-                                progress.update(sync - offset)
-                                offset = sync
-                        except Exception as err:
-                            yield colored(f'{err} at {fmt_number(offset)}', 'red')
-                            sync = self.find_sync(f)
-                            progress.update(sync - offset)
-                            offset = sync
+                    yield from self.parse_file(f, progress)
 
-        if header:
-            yield header.split('\n', 1)[0]
+            # Closing line if we're in ASCII mode.
+            if header:
+                yield header.split('\n', 1)[0]
 
 
 def main(args):

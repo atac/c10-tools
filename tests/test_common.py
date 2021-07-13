@@ -11,7 +11,12 @@ def test_find_c10():
     dirname = os.path.dirname(__file__)
     result = common.find_c10([dirname])
     assert set(result) == set([
-        pytest.ERR, pytest.SAMPLE, pytest.EVENTS, pytest.ETHERNET])
+        pytest.ERR,
+        pytest.SAMPLE,
+        pytest.EVENTS,
+        pytest.ETHERNET,
+        pytest.BAD,
+    ])
 
 
 def test_fmt_table():
@@ -51,4 +56,4 @@ def test_walk_packets_exclude_channel(c10):
 
 def test_walk_packets_include_type(c10):
     result = common.walk_packets(c10(packets), {'--type': '2'})
-    assert list(result) == packets[:2]
+    assert list(result) == [packets[1]]

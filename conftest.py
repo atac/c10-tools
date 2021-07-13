@@ -2,13 +2,7 @@
 from unittest.mock import patch
 import os
 
-try:
-    from i106 import C10
-except ImportError:
-    from chapter10 import C10
-
-if os.environ.get('LIBRARY', None) == 'c10':
-    from chapter10 import C10
+from chapter10 import C10
 
 import pytest
 
@@ -20,6 +14,7 @@ def pytest_configure():
     pytest.EVENTS = os.path.join(TESTDIR, 'event.c10')
     pytest.ETHERNET = os.path.join(TESTDIR, 'ethernet.c10')
     pytest.ERR = os.path.join(TESTDIR, 'err.c10')
+    pytest.BAD = os.path.join(TESTDIR, 'bad.c10')
     pytest.PCAP = os.path.join(TESTDIR, 'test.pcap')
     pytest.TMATS = os.path.join(TESTDIR, 'test.tmt')
 
