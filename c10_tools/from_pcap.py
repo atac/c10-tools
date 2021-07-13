@@ -137,7 +137,7 @@ Options:
 output file.
     """
 
-    print(colored('This will be deprecated in favor of c10 stat', 'red'))
+    print(colored('This will be deprecated in favor of c10 frompcap', 'red'))
     args = docopt(wrapper.__doc__)
     main(args)
 
