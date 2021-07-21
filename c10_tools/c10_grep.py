@@ -1,20 +1,20 @@
 
 """usage: c10-grep <value> <path>... [options]
 
-Search Chapter 10 files/directories for "<value>" based on user input.
-Use "*" for value to see all data at that address.
+Find occurrences of a given value in Chapter 10 data.
+Can search multiple files or directories simultaneously.
+Use "*" for value to see all data at that offset.
 
 Options:
     -c CHANNEL, --channel CHANNEL  Channel ID
     --cmd CMDWORD                  1553 Command word
-    -w WORD, --word-offset WORD    Word offset within message [default: 0]
+    -o OFFSET, --offset OFFSET     Byte offset within message [default: 0]
     -m MASK, --mask=MASK           Value mask
-    -o OUTFILE, --output OUTFILE   Print results to file
-    -f, --force                    Overwrite existing output file
 """
 
 import os
 import sys
+import struct
 
 from docopt import docopt
 from tqdm import tqdm
@@ -22,60 +22,49 @@ from tqdm import tqdm
 from c10_tools.common import get_time, FileProgress, find_c10, C10
 
 
+def word(b):
+    """Combine two bytes into a 16-bit word."""
+
+    return struct.unpack('=H', struct.pack('=BB', b[0], b[1]))[0]
+
+
 def search(path, args, i=None):
     """Search file "path" based on parameters from "args"."""
 
-    outfile = sys.stdout
-    if args.get('--output'):
-        outfile = open(args.get('--output'), 'a')
+    print(path)
 
-    outfile.write(path + '\n')
+    for packet in C10(path):
 
-    last_time = None
-    with FileProgress(
-            filename=path,
-            desc='    ' + os.path.basename(path),
-            ascii=False,
-            position=i) as progress:
+        # Match channel
+        if args.get('--channel') and args.get('--channel') != packet.channel_id:
+            continue
 
-        if outfile == sys.stdout:
-            progress.close()
+        # Iterate over messages
+        for msg in packet:
+            # 1553
+            if packet.data_type == 0x19:
 
-        for packet in C10(path):
+                # Match command word
+                cmd = word(msg.data[:2])
+                if args.get('--cmd') and args.get('--cmd') != cmd:
+                    continue
 
-            progress.update(packet.packet_length)
+                offset = args.get('--offset')
+                try:
+                    value = word(msg.data[offset:offset+2])
+                except IndexError:
+                    continue
 
-            if packet.data_type == 0x11:
-                last_time = packet
+            else:
+                value = msg.data[args.get('--offset')]
 
-            # Match channel
-            if args.get('--channel', None) != packet.channel_id:
-                continue
+            if args.get('--mask') is not None:
+                value &= args.get('--mask')
 
-            # Iterate over messages if applicable
-            for msg in packet:
-                if hasattr(msg, 'data'):
-                    msg = msg.data
-                if packet.data_type == 0x19:
-                    cmd = msg[0]
-
-                    # Match command word
-                    if args.get('--cmd') and args.get('--cmd') != cmd:
-                        continue
-
-                    value = msg[args.get('--word-offset')]
-
-                    if args.get('--mask') is not None:
-                        value &= args.get('--mask')
-
-                    if args.get('<value>') == '*':
-                        print(hex(value))
-                    elif value == args.get('<value>'):
-                        outfile.write((' ' * 4) + str(get_time(
-                            msg.rtc, last_time)) + '\n')
-
-    if outfile != sys.stdout:
-        outfile.close()
+            if args.get('<value>') == '*':
+                print(hex(value))
+            elif value == args.get('<value>'):
+                print(f'    {packet.get_time()}\n')
 
 
 def main(args=sys.argv[1:]):
@@ -83,25 +72,19 @@ def main(args=sys.argv[1:]):
     args = docopt(__doc__, args)
 
     # Validate int/hex inputs.
-    for opt in ('--channel', '--word-offset', '--cmd', '<value>', '--mask'):
-        if args.get(opt):
-            if opt == '<value>' and args[opt] == '*':
-                continue
-            try:
-                if args[opt].lower().startswith('0x'):
-                    args[opt] = int(args[opt], 16)
-                else:
-                    args[opt] = int(args[opt])
-            except ValueError:
-                print('Invalid value "%s" for %s' % (args[opt], opt))
-                raise SystemExit
-
-    if args.get('--output') and os.path.exists(args.get('--output')):
-        if args.get('--force'):
-            with open(args.get('--output'), 'w') as f:
-                f.write('')
-        else:
-            print('Output file exists, use -f to overwrite.')
+    for key in ('--channel', '--offset', '--cmd', '<value>', '--mask'):
+        value = args.get(key)
+        if not value:
+            continue
+        if key == '<value>' and value == '*':
+            continue
+        try:
+            if args[key].lower().startswith('0x'):
+                args[key] = int(args[key], 16)
+            else:
+                args[key] = int(args[key])
+        except ValueError:
+            print('Invalid value "%s" for %s' % (args[key], key))
             raise SystemExit
 
     # Describe the search parameters.
@@ -110,13 +93,13 @@ def main(args=sys.argv[1:]):
         value_repr = hex(value_repr)
     print('Searching for %s' % value_repr, end='')
     if args.get('--channel'):
-        print('in channel #%s' % args.get('--channel'), end='')
+        print(' in channel #%s' % args.get('--channel'), end='')
     if args.get('--cmd'):
-        print('with command word %s' % hex(args.get('--cmd')), end='')
-    if args.get('--word-offset'):
-        print('at word %s' % args.get('--word-offset'), end='')
+        print(' with command word %s' % hex(args.get('--cmd')), end='')
+    if args.get('--offset'):
+        print(' at word %s' % args.get('--offset'), end='')
     if args.get('--mask'):
-        print('with mask %s' % hex(args.get('--mask')), end='')
+        print(' with mask %s' % hex(args.get('--mask')), end='')
 
     files = list(find_c10(args.get('<path>')))
 
@@ -127,7 +110,7 @@ def main(args=sys.argv[1:]):
         unit='files',
         dynamic_ncols=True,
         leave=False)
-    if not args.get('--output'):
+    if os.fstat(0) == os.fstat(1):
         files.close()
     for f in files:
         search(f, args)
