@@ -99,7 +99,7 @@ def fmt_size(size):
     return '{} {}'.format(round(size, 2), unit)
 
 
-def walk_packets(c10, args={}):
+def walk_packets(c10, args={}, include_time=True):
     """Walk a chapter 10 file based on sys.argv (type, channel, etc.)."""
 
     # Apply defaults.
@@ -115,8 +115,11 @@ def walk_packets(c10, args={}):
     channels = [c.strip() for c in args['--channel'].split(',') if c.strip()]
     exclude = [e.strip() for e in args['--exclude'].split(',') if e.strip()]
 
-    # Filter packets (except the TMATS packet that should be at 0).
+    # Filter packets (except time).
     for i, packet in enumerate(c10):
+        if include_time and packet.data_type == 0x11:
+            yield packet
+
         channel = str(packet.channel_id)
         if channels and channel not in channels:
             continue

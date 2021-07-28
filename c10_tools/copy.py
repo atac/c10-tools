@@ -102,7 +102,7 @@ decimal or hex eg: 0x40)
 
         # Iterate over packets based on args.
         offset = 0
-        for packet in walk_packets(C10(args['<src>']), args):
+        for packet in walk_packets(C10(args['<src>']), args, include_time=False):
             progress.update(packet.packet_length)
 
             if not start_time and packet.data_type == 0x11:

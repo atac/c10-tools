@@ -79,7 +79,7 @@ class Stat:
         # Walk through packets and track counts.
         with FileProgress(total=size) as progress, suppress(KeyboardInterrupt):
             try:
-                for packet in walk_packets(C10(f)):
+                for packet in walk_packets(C10(f), self.args):
                     if not self.start_time and packet.data_type == 0x11:
                         self.start_time = packet
                     key = (packet.channel_id, packet.data_type)
@@ -89,15 +89,18 @@ class Stat:
                                               'type': packet.data_type,
                                               'id': packet.channel_id,
                                               '1553_errors': [0, 0, 0],
+                                              '1553_commands': set(),
                                               'events': {}}
                     else:
                         self.channels[key]['packets'] += 1
                         self.channels[key]['size'] += packet.packet_length
 
                     if self.args['--verbose']:
-                        # Track 1553 error counts
+                        # Track 1553 error counts and command words
                         if packet.data_type == 0x19:
                             for msg in packet:
+                                self.channels[key]['1553_commands'].add(
+                                    f'{msg.data[0]:0x}'.zfill(2) + f'{msg.data[1]:0x}'.zfill(2))
                                 for i, err in enumerate(('le', 'se', 'we')):
                                     err = getattr(msg, err)
                                     self.channels[key]['1553_errors'][i] += err
@@ -144,6 +147,9 @@ class Stat:
 
             if self.args['--verbose']:
                 if channel['type'] == 0x19:
+                    table.append((f'  Command words ({len(channel["1553_commands"])}):',))
+                    for command in sorted(channel['1553_commands']):
+                        table.append((f'    {command}',))
                     total = sum(channel['1553_errors'])
                     if total:
                         error_str = '  Err: ' + f'{total:>11,}'

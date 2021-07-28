@@ -30,37 +30,37 @@ class Inspect:
         ('Valid', 5),
         ('Offset', 15),
     ))
-    
+
     def __init__(self, args):
         self.args = args
         self.cols = self.COLUMNS
-        
+
         # Use CSV if stdout is redirected
         self.writer = None
         if os.fstat(0) != os.fstat(1):
             self.writer = csv.writer(sys.stdout, lineterminator='')
-        
+
     def get_size(self):
         """Get total byte size for all files."""
-        
+
         return sum(os.stat(f).st_size for f in self.args['<file>'])
-        
+
     def write_header(self):
         """Write out header row for CSV or ASCII."""
-        
+
         if self.writer:
             self.writer.writerow(self.cols.keys())
             return ''
-            
+
         else:
             s = ' | '.join([f'{key:<{width}}'
                             for key, width in self.cols.items()])
             line = '-' * (len(s) + 4)
             return f'{line}\n| {s} |\n{line}'
-        
+
     def write_row(self, packet, offset):
         """Pull values from a packet and write output row."""
-        
+
         row = []
         for col, width in self.cols.items():
             if col == 'Time':
@@ -91,7 +91,7 @@ class Inspect:
         s = ''
         if self.writer:
             self.writer.writerow(row)
-            
+
         else:
             widths = list(self.cols.values())
             s = '|'
@@ -99,12 +99,12 @@ class Inspect:
                 s += f' {col:<{widths[i]}} |'
 
         return s
-    
+
     async def get_packet(self, c10):
         """Read and return the next packet from a file or raise
         StopAsyncIteration.
         """
-        
+
         try:
             packet = next(c10)
             assert packet.packet_length == len(bytes(packet)), \
@@ -112,10 +112,10 @@ class Inspect:
         except StopIteration:
             raise StopAsyncIteration
         return packet
-    
+
     def find_sync(self, f):
         """Seek forward in a file to the next sync pattern (eb25)."""
-        
+
         while True:
             offset = f.tell()
             buffer = f.read(100000)
@@ -124,14 +124,14 @@ class Inspect:
             if b'\x25\xeb' in buffer:
                 f.seek(offset + buffer.find(b'\x25\xeb'))
                 return f.tell()
-            
+
     def parse_file(self, f, progress):
         """Walk a file and read header information."""
 
         offset = 0
-        c10 = walk_packets(C10(f), self.args)
+        c10 = walk_packets(C10(f), self.args, include_time=False)
         while True:
-            
+
             # Try to read a packet.
             try:
                 packet = asyncio.run(
@@ -139,10 +139,10 @@ class Inspect:
                 yield self.write_row(packet, offset)
                 progress.update(packet.packet_length)
                 offset += packet.packet_length
-                
+
             # Report error and retry at the next sync pattern.
             except Exception as err:
-                
+
                 # Exit if we've read the whole file.
                 if offset >= os.stat(f.name).st_size:
                     break
@@ -189,5 +189,5 @@ separated).
     -t TYPE, --type TYPE  The types of data to copy (comma separated, may be \
 decimal or hex eg: 0x40)
     """
-    
+
     yield from Inspect(args).main()
