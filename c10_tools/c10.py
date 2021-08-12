@@ -11,6 +11,7 @@ from c10_tools.capture import main as capture
 from c10_tools.copy import main as copy
 from c10_tools.dump import main as dump
 from c10_tools.from_pcap import main as frompcap
+from c10_tools.grep import main as grep
 from c10_tools.inspect import main as inspect
 from c10_tools.reindex import main as reindex
 from c10_tools.stat import main as stat
@@ -51,6 +52,7 @@ class CLI:
         'capture': capture,
         'copy': copy,
         'dump': dump,
+        'grep': grep,
         'frompcap': frompcap,
         'help': help,
         'inspect': inspect,
@@ -76,7 +78,7 @@ class CLI:
             s, description = s.split('\n\n', 1)
             description = '\n'.join(
                 line[4:] for line in description.splitlines())
-            
+
         # Separate out usage and options.
         usage, options = '', cls.GLOBAL_OPTIONS
         for i, line in enumerate(s.splitlines()):
@@ -87,13 +89,13 @@ class CLI:
                 options.append(line)
             elif line:
                 usage += '\n    {} {}'.format(basename(sys.argv[0]), line)
-            
+
         return ('\n\n'.join((
             usage,
             cls.format_options(options),
             description,
         ))).strip()
-    
+
     @classmethod
     def general_usage(cls):
         """Top-level usage shown with 'help' command."""
@@ -112,7 +114,7 @@ class CLI:
             commands,
             cls.format_options(cls.GLOBAL_OPTIONS),
         ))).strip()
-    
+
     @classmethod
     def format_options(cls, options):
         """Takes a list of strings and returns a formatted string suitable for
@@ -159,7 +161,7 @@ class CLI:
                 print(line)
         elif result:
             print(result)
-            
+
 
 if __name__ == '__main__':
     CLI.main()

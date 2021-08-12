@@ -1,25 +1,11 @@
 
-"""usage: c10-grep <value> <path>... [options]
-
-Find occurrences of a given value in Chapter 10 data.
-Can search multiple files or directories simultaneously.
-Use "*" for value to see all data at that offset.
-
-Options:
-    -c CHANNEL, --channel CHANNEL  Channel ID
-    --cmd CMDWORD                  1553 Command word
-    -o OFFSET, --offset OFFSET     Byte offset within message [default: 0]
-    -m MASK, --mask=MASK           Value mask
-"""
-
+from contextlib import suppress
 import os
-import sys
 import struct
 
-from docopt import docopt
 from tqdm import tqdm
 
-from c10_tools.common import get_time, FileProgress, find_c10, C10
+from c10_tools.common import find_c10, C10, walk_packets
 
 
 def word(b):
@@ -28,16 +14,12 @@ def word(b):
     return struct.unpack('=H', struct.pack('=BB', b[0], b[1]))[0]
 
 
-def search(path, args, i=None):
+def search(path, args):
     """Search file "path" based on parameters from "args"."""
 
-    print(path)
-
-    for packet in C10(path):
-
-        # Match channel
-        if args.get('--channel') and args.get('--channel') != packet.channel_id:
-            continue
+    print(f'\n  {path}')
+    c10 = C10(path)
+    for packet in walk_packets(c10, args):
 
         # Iterate over messages
         for msg in packet:
@@ -49,30 +31,45 @@ def search(path, args, i=None):
                 if args.get('--cmd') and args.get('--cmd') != cmd:
                     continue
 
-                offset = args.get('--offset')
-                try:
-                    value = word(msg.data[offset:offset+2])
-                except IndexError:
-                    continue
-
-            else:
-                value = msg.data[args.get('--offset')]
+            offset = args.get('--offset')
+            value = msg.data[offset:offset + args.get('--length')]
+            value = int.from_bytes(value, 'little')
 
             if args.get('--mask') is not None:
                 value &= args.get('--mask')
 
-            if args.get('<value>') == '*':
-                print(hex(value))
-            elif value == args.get('<value>'):
-                print(f'    {packet.get_time()}\n')
+            # Output findings
+            if args.get('<value>') == '*' or value == args.get('<value>'):
+
+                # Find message time and format
+                t = ''
+                with suppress(AttributeError):
+                    t = msg.get_time()
+                if hasattr(c10, 'last_time') and not c10.last_time.date_format:
+                    t = t.strftime('%j %H:%M:%S.%f')
+
+                # TODO: give file offset
+                s = f'    {t}'
+                if args.get('<value>') == '*':
+                    s += f'{hex(value)}'
+                print(s)
 
 
-def main(args=sys.argv[1:]):
 
-    args = docopt(__doc__, args)
+def main(args):
+    """Search for a given value in Chapter 10 files.
+    grep <value> <path>... [options]
+    -c CHANNEL, --channel CHANNEL  Channel ID[s]
+    -t TYPE, --type TYPE  Data type
+    -e EXCLUDE, --exclude EXCLUDE  Channel[s] to ignore
+    --cmd CMDWORD  1553 Command word
+    -l LENGTH, --length LENGTH  Byte length [default: 1]
+    -o OFFSET, --offset OFFSET  Byte offset within message [default: 0]
+    -m MASK, --mask=MASK  Value mask
+    """
 
     # Validate int/hex inputs.
-    for key in ('--channel', '--offset', '--cmd', '<value>', '--mask'):
+    for key in ('--offset', '--cmd', '<value>', '--mask', '--length'):
         value = args.get(key)
         if not value:
             continue
@@ -81,6 +78,8 @@ def main(args=sys.argv[1:]):
         try:
             if args[key].lower().startswith('0x'):
                 args[key] = int(args[key], 16)
+            elif args[key].lower().startswith('0b'):
+                args[key] = int(args[key], 2)
             else:
                 args[key] = int(args[key])
         except ValueError:
@@ -97,7 +96,7 @@ def main(args=sys.argv[1:]):
     if args.get('--cmd'):
         print(' with command word %s' % hex(args.get('--cmd')), end='')
     if args.get('--offset'):
-        print(' at word %s' % args.get('--offset'), end='')
+        print(' at offset %s' % args.get('--offset'), end='')
     if args.get('--mask'):
         print(' with mask %s' % hex(args.get('--mask')), end='')
 
