@@ -2,8 +2,6 @@
 import os
 
 from chapter10.computer import ComputerF3
-from docopt import docopt
-from termcolor import colored
 
 from c10_tools.common import FileProgress, C10
 
@@ -18,15 +16,15 @@ class Parser:
         self.messages = []
         self.nodes = []
         self.last_root = None
-        
+
     def get_seq(self):
         value = self.seq
         self.seq = (self.seq + 1) & 0xff
         return value
-        
+
     def write_node(self):
         """Write an index node packet."""
-        
+
         offset = self.out.tell()
         packet = ComputerF3(
             index_type=1,
@@ -47,7 +45,7 @@ class Parser:
             packet.append(m)
         self.out.write(bytes(packet))
         self.messages = []
-        
+
         self.nodes.append((offset, packet))
 
     def write_root(self):
@@ -110,18 +108,6 @@ class Parser:
         if self.args['--strip']:
             print('Stripped existing indices.')
 
-
-def wrapper():
-    """usage: c10-reindex <src> <dst> [options]
-
-    Options:
-        -s, --strip  Strip existing index packets and exit.
-        -f, --force  Overwrite existing files.
-    """
-
-    print(colored('This will be deprecated in favor of c10 reindex', 'red'))
-    main(docopt(wrapper.__doc__))
-    
 
 def main(args):
     """Remove or recreate index packets for a file.

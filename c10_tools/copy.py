@@ -1,29 +1,8 @@
-#!/usr/bin/env python
 
 from datetime import datetime, timedelta
 import os
-import sys
-
-from termcolor import colored
-from docopt import docopt
 
 from c10_tools.common import walk_packets, FileProgress, C10
-
-
-def wrapper(argv=sys.argv[1:]):
-    print(colored('This will be deprecated in favor of c10 copy', 'red'))
-    args = docopt('''usage: c10_copy <src> <dst> [options]
-
-Options:
-    -c CHANNEL..., --channel CHANNEL...  Specify channels to include (comma \
-separated).
-    -e CHANNEL..., --exclude CHANNEL...  Specify channels to ignore (comma \
-separated).
-    -t TYPE, --type TYPE                 The types of data to copy (comma \
-separated, may be decimal or hex eg: 0x40)
-    -f --force                           Overwrite existing files.''', argv)
-
-    return main(args)
 
 
 def parse_offset(s):

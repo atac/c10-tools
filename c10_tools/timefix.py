@@ -2,21 +2,7 @@
 from datetime import timedelta
 import os
 
-from docopt import docopt
-from termcolor import colored
-
 from c10_tools.common import FileProgress, C10
-
-
-def wrapper():
-    """usage: c10-timefix <input_file> <output_file>
-    Ensure that time packets are at 1-second intervals.
-    """
-
-    print(colored('This will be deprecated in favor of c10 timefix', 'red'))
-    args = docopt(wrapper.__doc__)
-    for line in main(args):
-        print(line)
 
 
 def valid(timestamp, previous):

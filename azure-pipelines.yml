@@ -2,8 +2,8 @@ trigger:
 - master
 
 variables:
-  major: 0
-  minor: 3
+  major: 1
+  minor: 0
 
 name: $(major).$(minor)$(Rev:.r)
 
@@ -109,11 +109,11 @@ jobs:
   - task: ArchiveFiles@2
     displayName: 'Zip full package'
     inputs:
-      rootFolderOrFile: '$(Build.SourcesDirectory)' 
+      rootFolderOrFile: '$(Build.SourcesDirectory)'
       includeRootFolder: false
       archiveType: 'zip'
-      archiveFile: 'c10-tools-$(Build.BuildNumber)-full.zip' 
-      replaceExistingArchive: true 
+      archiveFile: 'c10-tools-$(Build.BuildNumber)-full.zip'
+      replaceExistingArchive: true
 
   - task: PublishBuildArtifacts@1
     inputs:
@@ -149,13 +149,13 @@ jobs:
   - task: ArchiveFiles@2
     displayName: 'Zip binaries'
     inputs:
-      rootFolderOrFile: 'dist' 
+      rootFolderOrFile: 'dist'
       includeRootFolder: false
       archiveType: 'zip'
-      archiveFile: 'c10-tools-$(Build.BuildNumber)-$(platform).zip' 
-      replaceExistingArchive: true 
+      archiveFile: 'c10-tools-$(Build.BuildNumber)-$(platform).zip'
+      replaceExistingArchive: true
 
   - task: PublishBuildArtifacts@1
     inputs:
-      pathToPublish: 'c10-tools-$(Build.BuildNumber)-$(platform).zip' 
+      pathToPublish: 'c10-tools-$(Build.BuildNumber)-$(platform).zip'
       artifactName: native-binaries

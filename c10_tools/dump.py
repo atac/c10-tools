@@ -1,37 +1,14 @@
-#!/usr/bin/env python
 
 from array import array
 import struct
 import sys
 
-from docopt import docopt
 from dpkt.ethernet import Ethernet
 from dpkt.ip import IP
 from dpkt.pcap import Writer
 from dpkt.udp import UDP
-from termcolor import colored
 
 from c10_tools.common import FileProgress, C10, get_time
-
-
-def wrapper():
-    print(colored('This will be deprecated in favor of c10 dump', 'red'))
-    args = docopt('''usage:
-    c10-dump <file> <channel> [-c COUNT] [-b BYTEOFFSET] [options]
-    c10-dump <file> <channel> --bin [options]
-    c10-dump <file> <channel> -p [options]
-
-Dump hex (default), binary data, or PCAP from a Chapter 10 channel.
-
-Options:
-    -c COUNT, --count COUNT  Number of bytes to show.
-    -b BYTEOFFSET, --byteoffset BYTEOFFSET  Offset into message.
-    --bin, --binary  Output in raw binary format (useful for exporting video).
-    -p, --pcap  Output in PCAP format (ethernet only).
-''')
-
-    for line in main(args):
-        print(line)
 
 
 def main(args):

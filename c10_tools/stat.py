@@ -1,10 +1,8 @@
-#!/usr/bin/env python
 
 from contextlib import suppress
 from urllib.parse import urlparse
 import os
 
-from docopt import docopt
 from termcolor import colored
 import s3fs
 
@@ -30,18 +28,6 @@ TYPES = (
     'TSPI/CTS Data',
     'Controller Area Network Bus',
 )
-
-
-# Temporary wrapper to allow for c10-stat invocation
-def wrapper():
-    print(colored('This will be deprecated in favor of c10 stat', 'red'))
-    args = docopt('''
-Usage:
-    c10-stat <file> [<file>...] [options]
-''')
-
-    for line in main(args):
-        print(line)
 
 
 class Stat:
