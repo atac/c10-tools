@@ -29,8 +29,10 @@ def search(path, args):
             pos += len(bytes(msg))
 
             # 1553: match command word if requested
-            if packet.data_type == 0x19 and args.get('--cmd'):
-                if args.get('--cmd') != word(msg.data[:2]):
+            if args.get('--cmd'):
+                if packet.data_type != 0x19:
+                    continue
+                elif args.get('--cmd') != word(msg.data[:2]):
                     continue
 
             # Get our value to match against and convert to int.
