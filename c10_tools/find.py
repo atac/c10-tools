@@ -21,16 +21,19 @@ def search(path, args):
     c10 = C10(path)
     for packet in walk_packets(c10, args):
 
+        # Assumes no secondary header.
+        pos = 28
+
         # Iterate over messages
         for msg in packet:
-            # 1553
-            if packet.data_type == 0x19:
+            pos += len(bytes(msg))
 
-                # Match command word
-                cmd = word(msg.data[:2])
-                if args.get('--cmd') and args.get('--cmd') != cmd:
+            # 1553: match command word if requested
+            if packet.data_type == 0x19 and args.get('--cmd'):
+                if args.get('--cmd') != word(msg.data[:2]):
                     continue
 
+            # Get our value to match against and convert to int.
             offset = args.get('--offset')
             value = msg.data[offset:offset + args.get('--length')]
             value = int.from_bytes(value, 'little')
@@ -38,27 +41,29 @@ def search(path, args):
             if args.get('--mask') is not None:
                 value &= args.get('--mask')
 
-            # Output findings
+            # Output matches
             if args.get('<value>') == '*' or value == args.get('<value>'):
 
                 # Find message time and format
                 t = ''
                 with suppress(AttributeError):
                     t = msg.get_time()
-                if hasattr(c10, 'last_time') and not c10.last_time.date_format:
+
+                # Julian-day format
+                if t and hasattr(c10, 'last_time') and not c10.last_time.date_format:
                     t = t.strftime('%j %H:%M:%S.%f')
 
-                # TODO: give file offset
-                s = f'    {t}'
-                if args.get('<value>') == '*':
-                    s += f'{hex(value)}'
-                print(s)
+                # Offset to start of message.
+                offset = c10.file.tell() - packet.packet_length
+                offset += pos - len(bytes(msg))
 
+                hex_value = f'{value:02x}'.zfill(args['--length'] * 2)
+                print(f'    {hex_value}  {t} at {offset}')
 
 
 def main(args):
     """Search for a given value in Chapter 10 files.
-    grep <value> <path>... [options]
+    find <value> <path>... [options]
     -c CHANNEL, --channel CHANNEL  Channel ID[s]
     -t TYPE, --type TYPE  Data type
     -e EXCLUDE, --exclude EXCLUDE  Channel[s] to ignore

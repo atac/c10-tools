@@ -10,8 +10,8 @@ from c10_tools.allbus import main as allbus
 from c10_tools.capture import main as capture
 from c10_tools.copy import main as copy
 from c10_tools.dump import main as dump
+from c10_tools.find import main as find
 from c10_tools.from_pcap import main as frompcap
-from c10_tools.grep import main as grep
 from c10_tools.inspect import main as inspect
 from c10_tools.reindex import main as reindex
 from c10_tools.stat import main as stat
@@ -52,7 +52,7 @@ class CLI:
         'capture': capture,
         'copy': copy,
         'dump': dump,
-        'grep': grep,
+        'find': find,
         'frompcap': frompcap,
         'help': help,
         'inspect': inspect,
