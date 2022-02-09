@@ -1,0 +1,62 @@
+[project]
+name = "c10-tools"
+version = "1.1.0"
+readme = 'README.md'
+description = "Various tools for managing IRIG 106 Chapter 10/11 data"
+authors = [
+    {name = "Micah Ferrill", email = "ferrillm@avtest.com"},
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Topic :: Software Development :: Libraries",
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    'docopt>=0.6.2',
+    'dpkt>=1.9.7',
+    'pychapter10>=1.1.15',
+    'tqdm>=4.48.2',
+    's3fs>=0.5.2',
+    'termcolor>=1.1.0',
+    'matplotlib>=3.3.4',
+
+]
+requires-python = ">=3.7"
+license = {text = "BSD3"}
+
+[scripts]
+c10 = 'c10_tools.c10:CLI.main'
+
+[project.urls]
+homepage = "https://github.com/atac/c10-tools"
+repository = "https://github.com/atac/c10-tools"
+
+[project.optional-dependencies]
+ci = [
+    "pytest-azurepipelines==0.8.0",
+    "pytest-cov~=2.10.1",
+    "pytest~=6.0.1"
+]
+
+[tool]
+[tool.pdm]
+[[tool.pdm.source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[build-system]
+requires = ["pdm-pep517"]
+build-backend = "pdm.pep517.api"
+
+[tool.pytest.ini_options]
+junit_family = 'legacy'
+testpaths = [
+    "tests",
+]

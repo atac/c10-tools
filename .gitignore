@@ -16,3 +16,5 @@ dask-worker-space
 src
 test-output.xml
 .vscode*
+__pypackages__
+.pdm.toml

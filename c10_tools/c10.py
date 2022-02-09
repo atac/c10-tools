@@ -16,13 +16,14 @@ from c10_tools.inspect import main as inspect
 from c10_tools.reindex import main as reindex
 from c10_tools.stat import main as stat
 from c10_tools.timefix import main as timefix
-from c10_tools.version import version
 try:
     import matplotlib
     from c10_tools.streamcheck import main as streamcheck
 except ImportError:
     streamcheck = None
 
+
+VERSION = '1.1.0'
 
 def help(args):
     """Show general usage or help for a command.
@@ -152,7 +153,7 @@ class CLI:
             usage = cls.build_usage(func.__doc__)
 
         # Parse with docopt (also handles version and help requests).
-        args = docopt(usage, args, False, version)
+        args = docopt(usage, args, False, VERSION)
 
         # Execute command and print any response.
         result = func(args)
