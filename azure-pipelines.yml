@@ -79,14 +79,13 @@ jobs:
 # Create dist files for PyPI release
 - job: Build
   dependsOn: 'Test'
+  pool:
+    vmImage: 'ubuntu-latest'
   steps:
   - task: UsePythonVersion@0
     inputs:
       versionSpec: "3.8"
       architecture: 'x64'
-
-  pool:
-    vmImage: 'ubuntu-latest'
 
   - script: python -m pip install -U pip pdm
     displayName: 'Install pdm'
@@ -105,14 +104,13 @@ jobs:
 # Bundle "full" zip that includes dependencies for offline installation.
 - job: Package
   dependsOn: 'Test'
+  pool:
+    vmImage: 'ubuntu-latest'
   steps:
   - task: UsePythonVersion@0
     inputs:
       versionSpec: "3.8"
       architecture: 'x64'
-
-  pool:
-    vmImage: 'ubuntu-latest'
 
   - script: "python -m pip download . -d dependencies --no-binary :all:"
     displayName: 'Download dependencies'
