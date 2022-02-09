@@ -61,7 +61,7 @@ jobs:
   - script: pdm install -d -G :all
     displayName: 'Install dependencies'
 
-  - script: "pytest tests --junitxml=junit-$(python.version).xml --cov c10_tools --cov-report xml --cov-report html --cov-append"
+  - script: "pdm run pytest --junitxml=junit-$(python.version).xml --cov c10_tools --cov-report xml --cov-report html --cov-append"
     displayName: 'Run Tests'
 
   - task: PublishTestResults@2
