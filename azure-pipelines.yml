@@ -85,6 +85,9 @@ jobs:
       versionSpec: "3.8"
       architecture: 'x64'
 
+  pool:
+    vmImage: 'ubuntu-latest'
+
   - script: python -m pip install -U pip pdm
     displayName: 'Install pdm'
 
@@ -107,6 +110,9 @@ jobs:
     inputs:
       versionSpec: "3.8"
       architecture: 'x64'
+
+  pool:
+    vmImage: 'ubuntu-latest'
 
   - script: "python -m pip download . -d dependencies --no-binary :all:"
     displayName: 'Download dependencies'
