@@ -7,7 +7,7 @@
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/c10-tools)
 [![Docker Cloud Automated build](https://img.shields.io/docker/cloud/automated/mcferrill/c10-tools)](https://hub.docker.com/repository/docker/mcferrill/c10-tools/builds)
 
-Commandline toolkit for inspecting and troubleshooting IRIG 106 Chapter 10/11 data with 
+Commandline toolkit for inspecting and troubleshooting IRIG 106 Chapter 10/11 data with
 [pychapter10](https://github.com/atac/pychapter10).
 
 
@@ -25,11 +25,9 @@ Get specific usage for each command with
 c10 help <command>
 ```
 
-See issue #8 for details on new command layout for 1.0
-
 ## Installation
 
-Install the latest version with pip:
+Install the latest version with pip (or [pipx](https://pypa.github.io/pipx/)):
 
 ```
 pip install c10-tools
@@ -38,27 +36,19 @@ pip install c10-tools
 To install offline from the "full" zip, install the included dependencies and the library with:
 
 ```
-pip install dependencies/* .
+pip install dependencies/* . --no-index --no-deps
 ```
 
-## Running Tests
+## Running Locally
 
-To run the included tests install dependencies with pip (also included in full zip, see above):
+To use locally install [pdm](https://pdm.fming.dev/) and install dependencies with:
 
 ```
-pip install -r requirements.txt
+pdm install
 ```
 
-Then run:
+Then to run the test suite run:
 
 ```
 pytest
-```
-
-## Building Native Binaries
-
-If the dependencies are installed you can compile a native executable with:
-
-```
-python setup.py build_scripts
 ```
