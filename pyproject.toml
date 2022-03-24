@@ -1,6 +1,6 @@
 [project]
 name = "c10-tools"
-version = "1.1.0"
+version = "1.1.1"
 readme = 'README.md'
 description = "Various tools for managing IRIG 106 Chapter 10/11 data"
 authors = [
@@ -31,7 +31,7 @@ dependencies = [
 requires-python = ">=3.7"
 license = {text = "BSD3"}
 
-[scripts]
+[project.scripts]
 c10 = 'c10_tools.c10:CLI.main'
 
 [project.urls]

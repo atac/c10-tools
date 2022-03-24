@@ -23,7 +23,7 @@ except ImportError:
     streamcheck = None
 
 
-VERSION = '1.1.0'
+VERSION = '1.1.1'
 
 def help(args):
     """Show general usage or help for a command.
