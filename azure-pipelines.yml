@@ -118,11 +118,8 @@ jobs:
   - script: pdm install -d -G :all
     displayName: 'Install dependencies'
 
-  - script: "python -m pip download . -d dependencies --no-binary :all:"
+  - script: "python -m pip download -d dependencies ."
     displayName: 'Download dependencies'
-
-  - script: "python -m pip download cbitstruct -d dependencies --no-binary :all:"
-    displayName: 'Download cbitstruct'
 
   - task: ArchiveFiles@2
     displayName: 'Zip full package'
