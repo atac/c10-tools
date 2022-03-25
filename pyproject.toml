@@ -26,7 +26,7 @@ dependencies = [
     's3fs>=0.5.2',
     'termcolor>=1.1.0',
     'matplotlib>=3.3.4',
-
+    "cbitstruct>=1.0.7",
 ]
 requires-python = ">=3.7"
 license = {text = "BSD3"}
