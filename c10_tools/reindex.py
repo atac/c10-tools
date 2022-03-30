@@ -103,7 +103,8 @@ class Parser:
             # Final indices.
             if self.messages:
                 self.write_node()
-            self.write_root()
+            if not self.args['--strip']:
+                self.write_root()
 
         if self.args['--strip']:
             print('Stripped existing indices.')
