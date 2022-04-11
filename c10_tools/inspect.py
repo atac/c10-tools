@@ -72,7 +72,7 @@ class Inspect:
 
                     # Julian day or month/year
                     fmt = '%j %H:%M:%S.%f'
-                    if self.date_format:
+                    if getattr(self, "date_format", True):
                         fmt = '%Y-%m-%d %H:%M:%S.%f'
 
                     val = packet.get_time().strftime(fmt)

@@ -67,3 +67,19 @@ def test_error_ascii(args):
 |      14 |   64 |      196 |  15,636 | 343 16:47:12.254729         | Yes   |          24,182 |
 |      18 |   64 |      195 |  15,636 | 343 16:47:12.255114         | Yes   |          39,818 |'''.format(
     colored('Packet length incorrect at 6,716', 'red'))
+
+
+def test_inspect_filtering(args):
+    type_counts = [
+        (1, 2),
+        (17, 2),
+        (25, 13),
+        (48, 7),
+        (56, 19),
+        (64, 58),
+    ]
+    args['<file>'] = [pytest.SAMPLE]
+    for typ, expected in type_counts:
+        args['--type'] = str(typ)
+        result = list(main(args))
+        assert len(result) == expected
