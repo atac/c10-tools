@@ -27,12 +27,13 @@ dependencies = [
     'termcolor>=1.1.0',
     'matplotlib>=3.3.4',
     "cbitstruct>=1.0.7",
+    "click>=8.1.2",
 ]
 requires-python = ">=3.7"
 license = {text = "BSD3"}
 
 [project.scripts]
-c10 = 'c10_tools.c10:CLI.main'
+c10 = 'c10_tools.c10:cli'
 
 [project.urls]
 homepage = "https://github.com/atac/c10-tools"

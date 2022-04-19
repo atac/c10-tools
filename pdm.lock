@@ -105,6 +105,16 @@ requires_python = ">=3.5.0"
 summary = "The Real First Universal Charset Detector. Open, modern and actively maintained alternative to Chardet."
 
 [[package]]
+name = "click"
+version = "8.1.2"
+requires_python = ">=3.7"
+summary = "Composable command line interface toolkit"
+dependencies = [
+    "colorama; platform_system == \"Windows\"",
+    "importlib-metadata; python_version < \"3.8\"",
+]
+
+[[package]]
 name = "colorama"
 version = "0.4.4"
 requires_python = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
@@ -379,7 +389,7 @@ summary = "Backport of pathlib-compatible object wrapper for zip files"
 
 [metadata]
 lock_version = "3.1"
-content_hash = "sha256:44591e398bd781d54eddeac4b73a15414409b9cf4e34848d38abcf895ced60c0"
+content_hash = "sha256:ed6776eb9f80fa59ee6d8e85c655170fa0eb76a6823d8167481a921f719189e5"
 
 [metadata.files]
 "aiobotocore 2.2.0" = [
@@ -517,6 +527,10 @@ content_hash = "sha256:44591e398bd781d54eddeac4b73a15414409b9cf4e34848d38abcf895
 "charset-normalizer 2.0.12" = [
     {file = "charset_normalizer-2.0.12-py3-none-any.whl", hash = "sha256:6881edbebdb17b39b4eaaa821b438bf6eddffb4468cf344f09f89def34a8b1df"},
     {file = "charset-normalizer-2.0.12.tar.gz", hash = "sha256:2857e29ff0d34db842cd7ca3230549d1a697f96ee6d3fb071cfa6c7393832597"},
+]
+"click 8.1.2" = [
+    {file = "click-8.1.2-py3-none-any.whl", hash = "sha256:24e1a4a9ec5bf6299411369b208c1df2188d9eb8d916302fe6bf03faed227f1e"},
+    {file = "click-8.1.2.tar.gz", hash = "sha256:479707fe14d9ec9a0757618b7a100a0ae4c4e236fac5b7f80ca68028141a1a72"},
 ]
 "colorama 0.4.4" = [
     {file = "colorama-0.4.4-py2.py3-none-any.whl", hash = "sha256:9f47eda37229f68eee03b24b9748937c7dc3868f906e8ba69fbcbdd3bc5dc3e2"},

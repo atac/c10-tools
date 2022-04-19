@@ -2,6 +2,7 @@
 import os
 
 from chapter10.computer import ComputerF3
+import click
 
 from c10_tools.common import FileProgress, C10
 
@@ -10,9 +11,11 @@ class Parser:
     # Sequence number for channel 0
     seq = 0
 
-    def __init__(self, args):
-        self.args = args
-        self.out = open(self.args['<dst>'], 'wb')
+    def __init__(self, src, dst, strip, force):
+        self.src = src
+        self.strip = strip
+        self.force = force
+        self.out = open(dst, 'wb')
         self.messages = []
         self.nodes = []
         self.last_root = None
@@ -68,9 +71,9 @@ class Parser:
         self.last_root = offset
 
     def main(self):
-        with FileProgress(self.args['<src>'], disable=self.args['--quiet']) \
-                as progress:
-            for packet in C10(self.args['<src>']):
+        # @TODO: implement global --verbose, --quiet
+        with FileProgress(self.src) as progress:
+            for packet in C10(self.src):
                 progress.update(packet.packet_length)
 
                 # Skip old index packets.
@@ -81,7 +84,7 @@ class Parser:
                 self.out.write(bytes(packet))
 
                 # Just stripping existing indices so move along.
-                if self.args['--strip']:
+                if self.strip:
                     continue
 
                 self.messages.append((
@@ -103,22 +106,23 @@ class Parser:
             # Final indices.
             if self.messages:
                 self.write_node()
-            if not self.args['--strip']:
+            if not self.strip:
                 self.write_root()
 
-        if self.args['--strip']:
+        if self.strip:
             print('Stripped existing indices.')
 
 
-def main(args):
-    """Remove or recreate index packets for a file.
-    reindex <src> <dst> [options]
-    -s, --strip  Strip existing index packets and exit.
-    -f, --force  Overwrite existing files.
-    """
+@click.command()
+@click.option('-s', '--strip', is_flag=True, help='Strip existing index packets and exit')
+@click.option('-f', '--force', is_flag=True, help='Overwrite existing dst file if present')
+@click.argument('src')
+@click.argument('dst')
+def reindex(src, dst, strip=False, force=False):
+    """Remove or recreate index packets for a file."""
 
-    if os.path.exists(args['<dst>']) and not args['--force']:
+    if os.path.exists(dst) and not force:
         print('Destination file already exists. Use -f to overwrite.')
         raise SystemExit
 
-    Parser(args).main()
+    Parser(src, dst, strip, force).main()
