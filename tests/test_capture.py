@@ -3,33 +3,27 @@ from tempfile import NamedTemporaryFile
 import os
 
 import pytest
+from click.testing import CliRunner
 
-from c10_tools.capture import main
-
-
-@pytest.fixture
-def args():
-    return {'<infile>': pytest.PCAP,
-            '<outfile>': NamedTemporaryFile('wb').name,
-            '-f': True,
-            '-q': True,
-            '-t': pytest.TMATS}
+from c10_tools.capture import capture
 
 
-def test_overwrite(args):
-    main(args)
-    assert os.stat(args['<outfile>']).st_size == 7904
+def test_overwrite():
+    path = NamedTemporaryFile('wb').name
+    CliRunner().invoke(capture, [pytest.PCAP, path, '-f', '-t', pytest.TMATS])
+    assert os.stat(path).st_size == 7904
 
 
-def test_checks_exists(args):
-    args['-f'] = False
-    with open(args['<outfile>'], 'w+b'), pytest.raises(SystemExit):
-        main(args)
+def test_checks_exists():
+    path = NamedTemporaryFile('wb').name
+    with open(path, 'w+b'):
+        result = CliRunner().invoke(capture, [pytest.PCAP, path])
+    assert 'file exists' in result.stdout
 
 
-def test_tmats(args):
-    args['-t'] = pytest.TMATS
-    main(args)
+def test_tmats():
+    path = NamedTemporaryFile('wb').name
+    CliRunner().invoke(capture, [pytest.PCAP, path, '-f', '-t', pytest.TMATS])
     expected = open(pytest.TMATS, 'rb').read().replace(b'\r\n', b'\n')
-    with open(args['<outfile>'], 'rb') as f:
-        assert f.read(6351)[28:] == expected 
+    with open(path, 'rb') as f:
+        assert f.read(6351)[28:] == expected

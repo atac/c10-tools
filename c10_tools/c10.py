@@ -8,7 +8,7 @@ from termcolor import colored
 import click
 
 from c10_tools.allbus import allbus
-from c10_tools.capture import main as capture
+from c10_tools.capture import capture
 from c10_tools.copy import main as copy
 from c10_tools.dump import main as dump
 from c10_tools.find import main as find
@@ -31,6 +31,7 @@ def cli():
     pass
 
 cli.add_command(allbus)
+cli.add_command(capture)
 cli.add_command(reindex)
 
 

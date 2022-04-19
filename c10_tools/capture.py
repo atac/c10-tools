@@ -1,10 +1,10 @@
 
-from array import array
 from contextlib import suppress
 import os
 
 from chapter10 import C10
 from chapter10.computer import ComputerF1
+import click
 import dpkt
 
 from c10_tools.common import FileProgress, fmt_number
@@ -15,8 +15,11 @@ class NetworkCapture:
 
     BUF_SIZE = 100000
 
-    def __init__(self, args=[]):
-        self.args = args
+    def __init__(self, infile, outfile, force, tmats):
+        self.infile = infile
+        self.outfile = outfile
+        self.force = force
+        self.tmats = tmats
         self.buf = b''
         self.tmats_present = False
 
@@ -70,8 +73,9 @@ class NetworkCapture:
 
         with open(infile, 'rb') as f, FileProgress(infile) as progress:
 
-            if self.args['-q']:
-                progress.close()
+            # @TODO: implement global verbosity settings
+            # if self.args['-q']:
+            #     progress.close()
 
             for packet in dpkt.pcap.Reader(f):
                 ip = dpkt.ethernet.Ethernet(packet[1]).data
@@ -89,11 +93,11 @@ class NetworkCapture:
     def main(self):
         """Parse a pcap file into chapter 10 format."""
 
-        with open(self.args['<outfile>'], 'wb') as out:
+        with open(self.outfile, 'wb') as out:
 
             # Write TMATS if needed.
-            if self.args['-t']:
-                with open(self.args['-t'], 'r') as tmats:
+            if self.tmats:
+                with open(self.tmats, 'r') as tmats:
                     tmats_body = tmats.read()
                 tmats = ComputerF1(data_type=1, data=tmats_body)
                 out.write(bytes(tmats))
@@ -101,25 +105,24 @@ class NetworkCapture:
 
             # Parse data.
             network_packets, c10_packets = self.parse_pcap(
-                self.args['<infile>'], out)
+                self.infile, out)
 
-            if not self.args['-q']:
-                print('Parsed %s Chapter 10 packets from %s network packets'
-                      % (fmt_number(c10_packets), fmt_number(network_packets)))
+            # if not self.args['-q']:
+            print('Parsed %s Chapter 10 packets from %s network packets'
+                  % (fmt_number(c10_packets), fmt_number(network_packets)))
 
 
-def main(args):
-    """Capture chapter 10 data from a pcap file.
-    capture -p <infile> <outfile> [options]
-    -q  Don't display progress bar.
-    -f  Overwrite existing output file.
-    -t <tmats_file>  Insert an existing TMATS record at the beginning of the\
-output file.
-    """
+@click.command
+@click.argument('infile')
+@click.argument('outfile')
+@click.option('-f', '--force', default=False, is_flag=True, help='Overwrite existing output file.')
+@click.option('-t', '--tmats', help='Specify an existing TMATS file to insert at the beginning of the output file')
+def capture(infile, outfile, force=False, tmats=None):
+    """Capture chapter 10 data from a pcap file."""
 
-    if os.path.exists(args['<outfile>']) and not args['-f']:
+    if os.path.exists(outfile) and not force:
         print('Output file exists. Use -f to overwrite.')
         raise SystemExit
 
-    parser = NetworkCapture(args)
+    parser = NetworkCapture(infile, outfile, force, tmats)
     parser.main()
