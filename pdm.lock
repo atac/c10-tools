@@ -79,7 +79,7 @@ summary = "Simple construction, analysis and modification of binary data."
 
 [[package]]
 name = "bitstruct"
-version = "8.13.0"
+version = "8.11.0"
 summary = "This module performs conversions between Python values and C bit field structs represented as Python byte strings."
 
 [[package]]
@@ -246,12 +246,12 @@ summary = "library with cross-python path, ini-parsing, io, code, log facilities
 
 [[package]]
 name = "pychapter10"
-version = "1.1.15"
+version = "1.1.17"
 requires_python = ">=3.6"
 summary = "A parser library for the IRIG 106 Chapter 10 data format."
 dependencies = [
     "bitstring>=3.1.7",
-    "bitstruct>=8.11.0",
+    "bitstruct==8.11.0",
 ]
 
 [[package]]
@@ -488,8 +488,8 @@ content_hash = "sha256:44591e398bd781d54eddeac4b73a15414409b9cf4e34848d38abcf895
     {file = "bitstring-3.1.9-py3-none-any.whl", hash = "sha256:0de167daa6a00c9386255a7cac931b45e6e24e0ad7ea64f1f92a64ac23ad4578"},
     {file = "bitstring-3.1.9.tar.gz", hash = "sha256:a5848a3f63111785224dca8bb4c0a75b62ecdef56a042c8d6be74b16f7e860e7"},
 ]
-"bitstruct 8.13.0" = [
-    {file = "bitstruct-8.13.0.tar.gz", hash = "sha256:7b87d9e41ff552a8cae06ea2368c3772b6f3102bdab4b65e793be7590d69f03b"},
+"bitstruct 8.11.0" = [
+    {file = "bitstruct-8.11.0.tar.gz", hash = "sha256:2b13f2c3e76b49e8cd854f7a1da590bb73ecbc6cbfacc2d479eacf2b88282d5d"},
 ]
 "botocore 1.24.21" = [
     {file = "botocore-1.24.21-py3-none-any.whl", hash = "sha256:92daca8775e738a9db9b465d533019285f09d541e903233261299fd87c2f842c"},
@@ -886,9 +886,8 @@ content_hash = "sha256:44591e398bd781d54eddeac4b73a15414409b9cf4e34848d38abcf895
     {file = "py-1.11.0-py2.py3-none-any.whl", hash = "sha256:607c53218732647dff4acdfcd50cb62615cedf612e72d1724fb1a0cc6405b378"},
     {file = "py-1.11.0.tar.gz", hash = "sha256:51c75c4126074b472f746a24399ad32f6053d1b34b68d2fa41e558e6f4a98719"},
 ]
-"pychapter10 1.1.15" = [
-    {file = "pychapter10-1.1.15-py3-none-any.whl", hash = "sha256:8b7d79ff989a986818dc8ee9d79815b412fd4710c841fc9431671d013f1c3c08"},
-    {file = "pychapter10-1.1.15.tar.gz", hash = "sha256:76faabe65967278f54be11890915ba07c25ceeef27e862e110900eac125138c1"},
+"pychapter10 1.1.17" = [
+    {file = "pychapter10-1.1.17-py3-none-any.whl", hash = "sha256:cb78eb827f9a68dccde9a09cd407da90efa85e8179d6d3cbeab49c9ed311cf4d"},
 ]
 "pyparsing 3.0.8" = [
     {file = "pyparsing-3.0.8-py3-none-any.whl", hash = "sha256:ef7b523f6356f763771559412c0d7134753f037822dad1b16945b7b846f7ad06"},
