@@ -11,7 +11,9 @@ class Parser:
     # Sequence number for channel 0
     seq = 0
 
-    def __init__(self, src, dst, strip, force):
+    def __init__(self, src, dst, strip, force, verbose=False, quiet=False):
+        self.verbose = verbose
+        self.quiet = quiet
         self.src = src
         self.strip = strip
         self.force = force
@@ -71,10 +73,10 @@ class Parser:
         self.last_root = offset
 
     def main(self):
-        # @TODO: implement global --verbose, --quiet
         with FileProgress(self.src) as progress:
             for packet in C10(self.src):
-                progress.update(packet.packet_length)
+                if not self.quiet:
+                    progress.update(packet.packet_length)
 
                 # Skip old index packets.
                 if packet.data_type == 0x03:
@@ -118,11 +120,16 @@ class Parser:
 @click.option('-f', '--force', is_flag=True, help='Overwrite existing dst file if present')
 @click.argument('src')
 @click.argument('dst')
-def reindex(src, dst, strip=False, force=False):
+@click.pass_context
+def reindex(ctx, src, dst, strip=False, force=False):
     """Remove or recreate index packets for a file."""
+
+    ctx.ensure_object(dict)
 
     if os.path.exists(dst) and not force:
         print('Destination file already exists. Use -f to overwrite.')
         raise SystemExit
 
-    Parser(src, dst, strip, force).main()
+    Parser(src, dst, strip, force,
+           verbose=ctx.obj.get('verbose'),
+           quiet=ctx.obj.get('quiet')).main()
