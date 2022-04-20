@@ -15,11 +15,8 @@ class NetworkCapture:
 
     BUF_SIZE = 100000
 
-    def __init__(self, infile, outfile, force, tmats):
-        self.infile = infile
-        self.outfile = outfile
-        self.force = force
-        self.tmats = tmats
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
         self.buf = b''
         self.tmats_present = False
 
@@ -73,9 +70,8 @@ class NetworkCapture:
 
         with open(infile, 'rb') as f, FileProgress(infile) as progress:
 
-            # @TODO: implement global verbosity settings
-            # if self.args['-q']:
-            #     progress.close()
+            if self.quiet:
+                progress.close()
 
             for packet in dpkt.pcap.Reader(f):
                 ip = dpkt.ethernet.Ethernet(packet[1]).data
@@ -117,12 +113,19 @@ class NetworkCapture:
 @click.argument('outfile')
 @click.option('-f', '--force', default=False, is_flag=True, help='Overwrite existing output file.')
 @click.option('-t', '--tmats', help='Specify an existing TMATS file to insert at the beginning of the output file')
-def capture(infile, outfile, force=False, tmats=None):
+@click.pass_context
+def capture(ctx, infile, outfile, force=False, tmats=None):
     """Capture chapter 10 data from a pcap file."""
 
+    ctx.ensure_object(dict)
     if os.path.exists(outfile) and not force:
         print('Output file exists. Use -f to overwrite.')
         raise SystemExit
 
-    parser = NetworkCapture(infile, outfile, force, tmats)
+    parser = NetworkCapture(infile=infile,
+                            outfile=outfile,
+                            force=force,
+                            tmats=tmats,
+                            verbose=ctx.obj.get('verbose'),
+                            quiet=ctx.obj.get('quiet'))
     parser.main()

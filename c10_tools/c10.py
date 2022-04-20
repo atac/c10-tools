@@ -27,8 +27,13 @@ except ImportError:
 VERSION = '1.1.4'
 
 @click.group
-def cli():
-    pass
+@click.pass_context
+@click.option('-v', '--verbose', is_flag=True, help='Verbose output')
+@click.option('-q', '--quiet', is_flag=True, help='Minimal output')
+def cli(ctx, verbose=False, quiet=False):
+    ctx.ensure_object(dict)
+    ctx['verbose'] = verbose
+    ctx['quiet'] = quiet
 
 cli.add_command(allbus)
 cli.add_command(capture)
