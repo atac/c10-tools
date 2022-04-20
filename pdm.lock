@@ -246,7 +246,7 @@ summary = "library with cross-python path, ini-parsing, io, code, log facilities
 
 [[package]]
 name = "pychapter10"
-version = "1.1.17"
+version = "1.1.18"
 requires_python = ">=3.6"
 summary = "A parser library for the IRIG 106 Chapter 10 data format."
 dependencies = [
@@ -886,8 +886,8 @@ content_hash = "sha256:44591e398bd781d54eddeac4b73a15414409b9cf4e34848d38abcf895
     {file = "py-1.11.0-py2.py3-none-any.whl", hash = "sha256:607c53218732647dff4acdfcd50cb62615cedf612e72d1724fb1a0cc6405b378"},
     {file = "py-1.11.0.tar.gz", hash = "sha256:51c75c4126074b472f746a24399ad32f6053d1b34b68d2fa41e558e6f4a98719"},
 ]
-"pychapter10 1.1.17" = [
-    {file = "pychapter10-1.1.17-py3-none-any.whl", hash = "sha256:cb78eb827f9a68dccde9a09cd407da90efa85e8179d6d3cbeab49c9ed311cf4d"},
+"pychapter10 1.1.18" = [
+    {file = "pychapter10-1.1.18-py3-none-any.whl", hash = "sha256:0ec8e727087d2b1be8b31b0aaef0741c7b1ac18d13e4cd3d31c7d070fa4b1b10"},
 ]
 "pyparsing 3.0.8" = [
     {file = "pyparsing-3.0.8-py3-none-any.whl", hash = "sha256:ef7b523f6356f763771559412c0d7134753f037822dad1b16945b7b846f7ad06"},
