@@ -24,7 +24,7 @@ except ImportError:
     streamcheck = None
 
 
-VERSION = '1.1.3'
+VERSION = '1.1.4'
 
 @click.group
 def cli():
