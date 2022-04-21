@@ -1,24 +1,12 @@
 
+from click.testing import CliRunner
 import pytest
 
-from c10_tools.find import main
+from c10_tools.find import find
 
 
-@pytest.fixture
-def args():
-    return {
-        '<value>': '0x00',
-        '<path>': (pytest.SAMPLE,),
-        '--channel': None,
-        '--offset': '2',
-        '--mask': None,
-        '--length': '1',
-    }
-
-
-def test_find_simple(args, capsys):
-    main(args)
-    result = capsys.readouterr().out
+def test_find_simple():
+    result = CliRunner().invoke(find, ['0x00', '--offset', '2', pytest.SAMPLE])
     assert '''00   at 606820
     00   at 606836
     00   at 606844
@@ -28,16 +16,13 @@ def test_find_simple(args, capsys):
     00   at 607052
     00   at 607060
     00   at 607084
-    00   at 607124''' in result
+    00   at 607124''' in result.stdout
 
 
-def test_find_channel(args, capsys):
-    args['--channel'] = '2'
-    main(args)
-    result = capsys.readouterr().out
-    assert result == '''Searching for 0x0 in channel #2 at offset 2 in 1 files...
-
-  {}
+def test_find_channel():
+    result = CliRunner().invoke(find, ['0x00', '--offset', '2', '--channel', '2', pytest.SAMPLE])
+    assert result.stdout.startswith('Searching for 0x0 in channel #2 at offset 2 in 1 files...')
+    assert result.stdout.strip().endswith(f'''
     00  343 16:47:12.358870 at 136800
     00  343 16:47:12.360210 at 136958
     00  343 16:47:12.389436 at 137192
@@ -59,15 +44,12 @@ def test_find_channel(args, capsys):
     00  343 16:47:12.609067 at 901108
     00  343 16:47:12.610408 at 901266
 
-finished\n'''.format(pytest.SAMPLE)
+finished''')
 
 
-def test_find_command(args, capsys):
-    args['<value>'] = '*'
-    args['--cmd'] = '0x109e'
-    main(args)
-    result = capsys.readouterr().out
-    assert result == '''Searching for * with command word 0x109e at offset 2 in 1 files...
+def test_find_command():
+    result = CliRunner().invoke(find, ['*', '--cmd', '0x109e', '--offset', '2', pytest.SAMPLE])
+    assert result.stdout == '''Searching for * with command word 0x109e at offset 2 in 1 files...
 
   {}
     fa  343 16:47:12.359556 at 136880
@@ -76,13 +58,9 @@ def test_find_command(args, capsys):
 
 finished\n'''.format(pytest.SAMPLE)
 
-def test_find_mask(args, capsys):
-    args['--mask'] = '0x0f'
-    args['<value>'] = '0xf'
-    args['--channel'] = '2'
-    main(args)
-    result = capsys.readouterr().out
-    assert result == '''Searching for 0xf in channel #2 at offset 2 with mask 0xf in 1 files...
+def test_find_mask():
+    result = CliRunner().invoke(find, ['0xf', '--mask', '0x0f', '--channel', '2', '--offset', '2', pytest.SAMPLE])
+    assert result.stdout == '''Searching for 0xf in channel #2 at offset 2 with mask 15 in 1 files...
 
   {}
     0f  343 16:47:12.375828 at 137114
@@ -91,14 +69,12 @@ def test_find_mask(args, capsys):
 finished\n'''.format(pytest.SAMPLE)
 
 
-def test_find_all(args, capsys):
-    args['<value>'] = '*'
-    main(args)
-    result = capsys.readouterr().out
+def test_find_all():
+    result = CliRunner().invoke(find, ['*', '--offset', '2', pytest.SAMPLE])
     assert '''5e  343 16:47:12.650318 at 1025246
     5e  343 16:47:12.653069 at 1025436
     5e  343 16:47:12.653521 at 1025538
     5e  343 16:47:12.654233 at 1025614
     16   at 1025912
     17   at 1026100
-    18   at 1026288''' in result
+    18   at 1026288''' in result.stdout
