@@ -4,18 +4,16 @@ import os
 import struct
 
 from tqdm import tqdm
-
-# Allow for explicit parser selection, or else use pychapter10 by default.
 from chapter10 import C10
-if os.environ.get('LIBRARY', 'c10') == 'i106':
-    try:
-        from i106 import C10
-    except ImportError:
-        print('Could not import libirig106-python, reverting to pychapter10')
 
 
 # Format a number nicely with commas for thousands, etc.
 fmt_number = '{0:,}'.format
+
+
+def as_hex(bytes):
+    from array import array
+    return ' '.join(hex(b)[2:].zfill(2) for b in array('B', bytes))
 
 
 def swap_word(word):
