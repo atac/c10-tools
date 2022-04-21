@@ -1,8 +1,6 @@
 
 from tempfile import NamedTemporaryFile
 from datetime import timedelta
-from unittest.mock import patch
-from io import BytesIO
 import os
 
 from click.testing import CliRunner
@@ -10,25 +8,6 @@ import pytest
 
 from c10_tools.copy import copy
 from c10_tools.common import C10
-
-
-@pytest.fixture
-def args():
-    return {'<src>': pytest.ETHERNET,
-            '<dst>': NamedTemporaryFile().name,
-            '--force': True}
-
-
-ETHERNET = open(pytest.ETHERNET, 'rb').read()
-SAMPLE = open(pytest.SAMPLE, 'rb').read()
-
-
-def fake_open(path, mode):
-    if path == pytest.ETHERNET:
-        return BytesIO(ETHERNET)
-    if path == pytest.SAMPLE:
-        return BytesIO(SAMPLE)
-    return open(path, mode)
 
 
 def test_overwrite():
