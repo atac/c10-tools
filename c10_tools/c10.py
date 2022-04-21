@@ -10,7 +10,7 @@ import click
 from c10_tools.allbus import allbus
 from c10_tools.capture import capture
 from c10_tools.copy import copy
-from c10_tools.dump import main as dump
+from c10_tools.dump import dump
 from c10_tools.find import main as find
 from c10_tools.from_pcap import main as frompcap
 from c10_tools.inspect import main as inspect
@@ -38,6 +38,7 @@ def cli(ctx, verbose=False, quiet=False):
 cli.add_command(allbus)
 cli.add_command(capture)
 cli.add_command(copy)
+cli.add_command(dump)
 cli.add_command(reindex)
 
 
