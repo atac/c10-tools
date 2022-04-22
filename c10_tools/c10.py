@@ -19,7 +19,7 @@ from c10_tools.stat import stat
 from c10_tools.timefix import timefix
 try:
     import matplotlib
-    from c10_tools.streamcheck import main as streamcheck
+    from c10_tools.streamcheck import streamcheck
 except ImportError:
     streamcheck = None
 
@@ -41,10 +41,12 @@ cli.add_command(copy)
 cli.add_command(dump)
 cli.add_command(find)
 cli.add_command(frompcap)
-cli.add_command(timefix)
 cli.add_command(inspect)
 cli.add_command(reindex)
 cli.add_command(stat)
+cli.add_command(timefix)
+if streamcheck:
+    cli.add_command(streamcheck)
 
 
 def help(args):

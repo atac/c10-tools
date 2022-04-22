@@ -2,6 +2,7 @@
 import socket
 
 import matplotlib.pyplot as plt
+import click
 
 from c10_tools.common import C10
 
@@ -36,16 +37,18 @@ class Parser:
                 self.buf = self.buf[sync + 2:]
 
 
-def main(args):
-    """Plot data density of a channel in a Chapter 10 stream. Requires matplotlib.
-    streamcheck <dsthost> <dstport> <channel>
-    """
+@click.command
+@click.argument('dsthost')
+@click.argument('dstport', type=int)
+@click.argument('channel')
+@click.pass_context
+def streamcheck(ctx, dsthost, dstport, channel):
+    """Plot data density of a channel in a Chapter 10 stream. Requires matplotlib."""
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.bind((args['<dsthost>'], int(args['<dstport>'])))
+    sock.bind((dsthost, dstport))
 
     parser = Parser()
-    channel = int(args['<channel>'])
     last_rtc = 0
 
     maxlength = 100
