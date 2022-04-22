@@ -31,10 +31,9 @@ class NetworkBroadcast:
 
 def main(args):
     """Broadcast chapter 10 file over the network.
-    broadcast -p <infile> <source-address> <destination-address> [options]
-    -protocol-flag {UDP or TCP} - default TCP
-    -s  IPv4 style source address and port number e.g. 127.0.0.1:10202
-    -d  IPv4 style destination adddress
+    broadcast -p <infile> -s <source-address> -d <destination-address> [options]
+    -s  {UDP or TCP} - default setting is UDP
+    -r  broadcast on repeat (loop).
     -q  Don't display progress bar.
     -t <tmats_file>  Insert an existing TMATS record at the beginning of the\
 broadcast.
