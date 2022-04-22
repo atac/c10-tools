@@ -19,7 +19,6 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    'docopt>=0.6.2',
     'dpkt>=1.9.7',
     'pychapter10>=1.1.15',
     'tqdm>=4.48.2',
@@ -27,8 +26,7 @@ dependencies = [
     'termcolor>=1.1.0',
     'matplotlib>=3.3.4',
     "cbitstruct>=1.0.7",
-    "click>=8.1.2",
-]
+    "click>=8.1.2"]
 requires-python = ">=3.7"
 license = {text = "BSD3"}
 

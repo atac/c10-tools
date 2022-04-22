@@ -133,11 +133,6 @@ requires_python = ">=3.6"
 summary = "Composable style cycles"
 
 [[package]]
-name = "docopt"
-version = "0.6.2"
-summary = "Pythonic argument parser, that will make you smile"
-
-[[package]]
 name = "dpkt"
 version = "1.9.7.2"
 summary = "fast, simple packet creation / parsing, with definitions for the basic TCP/IP protocols"
@@ -389,7 +384,7 @@ summary = "Backport of pathlib-compatible object wrapper for zip files"
 
 [metadata]
 lock_version = "3.1"
-content_hash = "sha256:ed6776eb9f80fa59ee6d8e85c655170fa0eb76a6823d8167481a921f719189e5"
+content_hash = "sha256:2510d2ca479c085311b5c8b498d6b7432e161f5009d4d4f46a68abe733289c1f"
 
 [metadata.files]
 "aiobotocore 2.2.0" = [
@@ -582,9 +577,6 @@ content_hash = "sha256:ed6776eb9f80fa59ee6d8e85c655170fa0eb76a6823d8167481a921f7
 "cycler 0.11.0" = [
     {file = "cycler-0.11.0-py3-none-any.whl", hash = "sha256:3a27e95f763a428a739d2add979fa7494c912a32c17c4c38c4d5f082cad165a3"},
     {file = "cycler-0.11.0.tar.gz", hash = "sha256:9c87405839a19696e837b3b818fed3f5f69f16f1eec1a1ad77e043dcea9c772f"},
-]
-"docopt 0.6.2" = [
-    {file = "docopt-0.6.2.tar.gz", hash = "sha256:49b3a825280bd66b3aa83585ef59c4a8c82f2c8a522dbe754a8bc8d08c85c491"},
 ]
 "dpkt 1.9.7.2" = [
     {file = "dpkt-1.9.7.2-py3-none-any.whl", hash = "sha256:d7e9ae552d0c44f339b7ca4db728c7202c32cc718cef12dbb8703539b840bb78"},
