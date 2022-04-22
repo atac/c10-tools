@@ -7,17 +7,6 @@ import pytest
 from c10_tools.from_pcap import frompcap
 
 
-@pytest.fixture
-def args():
-    return {
-        '<infile>': pytest.PCAP,
-        '<outfile>': NamedTemporaryFile().name,
-        '-f': True,
-        '-t': None,
-        '-q': False,
-    }
-
-
 def test_checks_overwrite():
     with NamedTemporaryFile() as f:
         result = CliRunner().invoke(frompcap, [pytest.PCAP, f.name])
