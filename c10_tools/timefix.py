@@ -2,6 +2,8 @@
 from datetime import timedelta
 import os
 
+import click
+
 from c10_tools.common import FileProgress, C10
 
 
@@ -17,20 +19,23 @@ def valid(timestamp, previous):
     return diff == timedelta(seconds=1)
 
 
-def main(args):
-    """Ensure that time packets are at 1-second intervals.
-    timefix <input_file> <output_file> [options]
-    -f, --force  Overwrite existing files.
-    """
+@click.command
+@click.argument('infile')
+@click.argument('outfile')
+@click.option('-f', '--force', is_flag=True, help='Overwrite existing files.')
+@click.pass_context
+def timefix(ctx, infile, outfile, force=False):
+    """Ensure that time packets are at 1-second intervals."""
 
-    if os.path.exists(args['<output_file>']) and not args['--force']:
+    ctx.ensure_object(dict)
+
+    if os.path.exists(outfile) and not force:
         print('Output file exists. Use -f to overwrite.')
         raise SystemExit
 
     last_time = None
-    with FileProgress(args['<input_file>'], disable=args['--quiet']) as progress, \
-            open(args['<output_file>'], 'wb') as out_f:
-        for packet in C10(args['<input_file>']):
+    with FileProgress(infile, disable=ctx.obj.get('quiet')) as progress, open(outfile, 'wb') as out_f:
+        for packet in C10(infile):
             progress.update(packet.packet_length)
 
             if packet.data_type == 0x11:

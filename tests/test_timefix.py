@@ -1,20 +1,13 @@
 
 from tempfile import NamedTemporaryFile
 
+from click.testing import CliRunner
 import pytest
 
-from c10_tools.timefix import main
+from c10_tools.timefix import timefix
 
 
-@pytest.fixture
-def args():
-    return {
-        '<input_file>': pytest.SAMPLE,
-        '<output_file>': NamedTemporaryFile().name,
-        '--quiet': True,
-        '--force': True,
-    }
-
-
-def test_default(args):
-    main(args)
+def test_default():
+    path = NamedTemporaryFile().name
+    CliRunner().invoke(timefix, [pytest.SAMPLE, path], obj={'quiet': True})
+    assert open(pytest.SAMPLE, 'rb').read() == open(path, 'rb').read()

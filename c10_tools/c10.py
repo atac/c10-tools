@@ -16,7 +16,7 @@ from c10_tools.from_pcap import frompcap
 from c10_tools.inspect import inspect
 from c10_tools.reindex import reindex
 from c10_tools.stat import stat
-from c10_tools.timefix import main as timefix
+from c10_tools.timefix import timefix
 try:
     import matplotlib
     from c10_tools.streamcheck import main as streamcheck
@@ -41,6 +41,7 @@ cli.add_command(copy)
 cli.add_command(dump)
 cli.add_command(find)
 cli.add_command(frompcap)
+cli.add_command(timefix)
 cli.add_command(inspect)
 cli.add_command(reindex)
 cli.add_command(stat)
