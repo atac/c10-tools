@@ -1,12 +1,12 @@
 
 import os
 
+from click.testing import CliRunner
 import pytest
 
-from c10_tools import stat as c10_stat
+from c10_tools.stat import stat
 
-expected = '''
----------------------------------------------------------------------------
+expected = '''---------------------------------------------------------------------------
 | Channel ID | Data Type                            | Packets | Size      |
 ---------------------------------------------------------------------------
 | Channel  0 | 0x01 - Computer Generated (format 1) |       1 |   6.52 kb |
@@ -34,31 +34,23 @@ expected = '''
 Summary for {}:
     Channels:                21     Start time:             343 16:47:12
     Packets:                 96     End time:               343 16:47:12
-    Size:            1017.14 kb     Duration:             0:00:00.472549
-'''.format(os.path.abspath(pytest.SAMPLE)).strip()
+    Size:            1017.14 kb     Duration:             0:00:00.472549'''.format(os.path.abspath(pytest.SAMPLE))
 
 
-def test_single(fake_progress):
-    result = '\n'.join(
-        list(c10_stat.main({'<file>': [pytest.SAMPLE],
-                            '--verbose': False}))).strip()
-    assert result == expected
+def test_single():
+    result = CliRunner().invoke(stat, [pytest.SAMPLE], obj={'quiet': True})
+    assert result.stdout.strip() == expected
 
 
-def test_multiple(fake_progress):
-    result = '\n'.join(list(c10_stat.main(
-        {'<file>': [pytest.SAMPLE, pytest.SAMPLE, pytest.SAMPLE],
-         '--verbose': False})))
-    assert result.strip() == '\n\n'.join([expected, expected, expected])
+def test_multiple():
+    result = CliRunner().invoke(stat, [pytest.SAMPLE, pytest.SAMPLE, pytest.SAMPLE],
+                                obj={'quiet': True})
+    assert result.stdout.strip() == '\n\n'.join([expected, expected, expected])
 
 
-def test_verbose_1553(fake_progress):
-    result = '\n'.join(list(c10_stat.main(
-        {'<file>': [pytest.ERR],
-         '--verbose': True,
-         '--channel': '2',
-         })))
-    assert result == '''
+def test_verbose_1553():
+    result = CliRunner().invoke(stat, [pytest.ERR, '-c', '2'], obj={'verbose': True})
+    assert result.stdout == '''
 --------------------------------------------------------------------
 | Channel ID | Data Type                      | Packets | Size     |
 --------------------------------------------------------------------
@@ -111,14 +103,13 @@ Summary for {}:
     Channels:                 2     Start time:             132 20:05:00
     Packets:                 27     End time:               132 20:05:01
     Size:              76.73 kb     Duration:             0:00:01.391045
+
 '''.format(os.path.abspath(pytest.ERR)).lstrip()
 
 
-def test_verbose_event(fake_progress):
-    result = '\n'.join(list(c10_stat.main(
-        {'<file>': [pytest.EVENTS],
-         '--verbose': True})))
-    assert result == '''
+def test_verbose_event():
+    result = CliRunner().invoke(stat, [pytest.EVENTS], obj={'verbose': True})
+    assert result.stdout == '''
 ------------------------------------------------------------------------
 | Channel ID | Data Type                            | Packets | Size   |
 ------------------------------------------------------------------------
@@ -136,4 +127,5 @@ Summary for {}:
     Channels:                 1     Start time:                        0
     Packets:                  7     End time:                          0
     Size:                308  b     Duration:                          0
+
 '''.format(os.path.abspath(pytest.EVENTS)).lstrip()

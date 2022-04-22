@@ -4,6 +4,7 @@ from urllib.parse import urlparse
 import os
 
 from termcolor import colored
+import click
 import s3fs
 
 from c10_tools.common import C10, FileProgress, fmt_number, fmt_size, \
@@ -31,9 +32,13 @@ TYPES = (
 
 
 class Stat:
-    def __init__(self, filename, args):
+    def __init__(self, filename, channel, exclude, type, verbose, quiet):
         self.filename = filename
-        self.args = args
+        self.channel = channel
+        self.exclude = exclude
+        self.type = type
+        self.verbose = verbose
+        self.quiet = quiet
         self.channels, self.start_time = {}, 0
 
     def parse(self):
@@ -41,7 +46,7 @@ class Stat:
             self.scan_file()
         except:
             return
-        yield from self.file_summary()
+        self.file_summary()
 
     def scan_file(self):
         """Skim the headers of a file and count packets and data size per channel.
@@ -63,9 +68,14 @@ class Stat:
             size = os.stat(self.filename).st_size
 
         # Walk through packets and track counts.
-        with FileProgress(total=size) as progress, suppress(KeyboardInterrupt):
+        with FileProgress(total=size, disable=self.quiet) as progress, suppress(KeyboardInterrupt):
             try:
-                for packet in walk_packets(C10(f), self.args):
+                args = {
+                    '--channel': self.channel,
+                    '--type': self.type,
+                    '--exclude': self.exclude
+                }
+                for packet in walk_packets(C10(f), args):
                     if not self.start_time and packet.data_type == 0x11:
                         self.start_time = packet
                     key = (packet.channel_id, packet.data_type)
@@ -81,7 +91,7 @@ class Stat:
                         self.channels[key]['packets'] += 1
                         self.channels[key]['size'] += packet.packet_length
 
-                    if self.args['--verbose']:
+                    if self.verbose:
                         # Track 1553 error counts and command words
                         if packet.data_type == 0x19:
                             for msg in packet:
@@ -131,7 +141,7 @@ class Stat:
                 fmt_number(channel['packets']),
                 fmt_size(channel['size'])))
 
-            if self.args['--verbose']:
+            if self.verbose:
                 if channel['type'] == 0x19:
                     table.append((f'  Command words ({len(channel["1553_commands"])}):',))
                     for command in sorted(channel['1553_commands']):
@@ -151,7 +161,7 @@ class Stat:
             packets += channel['packets']
             size += channel['size']
 
-        yield fmt_table(table)
+        print(fmt_table(table))
 
         # Print file summary.
         duration = 0
@@ -164,23 +174,24 @@ class Stat:
             start_time = self.start_time.time.strftime(fmt)
             end_time = self.end_time.strftime(fmt)
 
-        yield f'''Summary for {self.filename}:
+        print(f'''Summary for {self.filename}:
     Channels: {len(self.channels):>17}     Start time:{start_time:>25}
     Packets: {fmt_number(packets):>18}     End time:{end_time:>27}
-    Size: {fmt_size(size):>21}     Duration:{duration:>27}\n'''
+    Size: {fmt_size(size):>21}     Duration:{duration:>27}\n''')
 
 
-def main(args):
-    """Inspect one or more Chapter 10 files and get channel info.
-    stat <file> [<file>...] [options]
-    -c CHANNEL..., --channel CHANNEL...  Specify channels to include (comma \
-separated).
-    -e CHANNEL..., --exclude CHANNEL...  Specify channels to ignore (comma \
-separated).
-    -t TYPE, --type TYPE  The types of data to copy (comma separated, may be \
-decimal or hex eg: 0x40)
-    """
+@click.command
+@click.argument('file', nargs=-1)
+@click.option('-c', '--channel', type=str, help='Specify channels (comma-separated) to include')
+@click.option('-e', '--exclude', type=str, help='Specify channels (comma-separated) to exclude')
+@click.option('-t', '--type', type=str, help='Specify datatypes (comma-separated) to include')
+@click.pass_context
+def stat(ctx, file, channel, exclude, type):
+    """Inspect one or more Chapter 10 files and get channel info."""
 
-    for filename in args['<file>']:
-        stats = Stat(filename, args)
-        yield from stats.parse()
+    ctx.ensure_object(dict)
+
+    for filename in file:
+        stats = Stat(filename, channel, exclude, type,
+                     verbose=ctx.obj.get('verbose'), quiet=ctx.obj.get('quiet'))
+        stats.parse()
