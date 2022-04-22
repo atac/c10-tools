@@ -12,7 +12,7 @@ from c10_tools.capture import capture
 from c10_tools.copy import copy
 from c10_tools.dump import dump
 from c10_tools.find import find
-from c10_tools.from_pcap import main as frompcap
+from c10_tools.from_pcap import frompcap
 from c10_tools.inspect import main as inspect
 from c10_tools.reindex import reindex
 from c10_tools.stat import main as stat
@@ -40,6 +40,7 @@ cli.add_command(capture)
 cli.add_command(copy)
 cli.add_command(dump)
 cli.add_command(find)
+cli.add_command(frompcap)
 cli.add_command(reindex)
 
 

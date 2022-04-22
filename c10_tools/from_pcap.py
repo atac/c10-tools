@@ -8,6 +8,7 @@ from chapter10.time import TimeF1
 from dpkt import pcap
 from dpkt.ethernet import Ethernet
 from dpkt.udp import UDP
+import click
 
 from c10_tools.common import FileProgress, fmt_number
 
@@ -18,8 +19,8 @@ class Parser:
     last_time = 0
     MAX_BODY_SIZE = 400000
 
-    def __init__(self, args=[]):
-        self.args = args
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
 
     def make_rtc(self, timestamp):
         """Take a timestamp and give an incrementing 10Mhz equivalent time."""
@@ -27,8 +28,8 @@ class Parser:
         if not self.start_timestamp:
             self.start_timestamp = timestamp
             return 0
-        else:
-            offset = timestamp - self.start_timestamp
+
+        offset = timestamp - self.start_timestamp
 
         # Convert seconds to 10Mhz clock and mask to 6 bytes
         return int(offset * 10_000_000) & 0xffffffffffff
@@ -36,7 +37,7 @@ class Parser:
     def write_tmats(self):
         """Generate a TMATS packet from a source file."""
 
-        with open(self.args['-t'], 'r') as tmats:
+        with open(self.tmats, 'r') as tmats:
             tmats_body = tmats.read()
         tmats = ComputerF1(data_type=1, data=tmats_body)
         self.out.write(bytes(tmats))
@@ -88,16 +89,14 @@ class Parser:
     def parse_and_write(self):
         """Parse a pcap file into chapter 10 format."""
 
-        self.out = open(self.args['<outfile>'], 'wb')
+        self.out = open(self.outfile, 'wb')
 
-        if self.args['-t']:
+        if self.tmats:
             self.write_tmats()
 
-        filename = self.args['<infile>']
-        quiet = self.args['-q']
-        with FileProgress(filename, disable=quiet) as progress:
+        with FileProgress(self.infile, disable=self.quiet) as progress:
 
-            f = open(filename, 'rb')
+            f = open(self.infile, 'rb')
             length, messages = 0, []
             for timestamp, ethernet in pcap.Reader(f):
                 ip = Ethernet(ethernet).data
@@ -117,24 +116,32 @@ class Parser:
         if messages:
             self.write_data(messages)
 
-        if not self.args['-q']:
+        if not self.quiet:
             print('Created %s Chapter 10 packets from %s network packets'
                     % (fmt_number(self.c10_packets),
                        fmt_number(self.network_packets)))
 
 
 # @TODO: make channel # and datatype options
-def main(args):
-    """Wrap network data in a pcap file as Chapter 10 Message format.
-    frompcap <infile> <outfile> [options]
-    -q  Don't display progress bar.
-    -f  Overwrite existing output file.
-    -t <tmats_file>  Insert an existing TMATS record at the beginning of the \
-output file.
-    """
+@click.command
+@click.argument('infile')
+@click.argument('outfile')
+@click.option('-f', '--force', is_flag=True, help='Overwrite existing files')
+@click.option('-t', '--tmats', help='Insert an existing TMATS record at the beginning off the output file')
+@click.pass_context
+def frompcap(ctx, infile, outfile, force=False, tmats=None):
+    """Wrap network data in a pcap file as Chapter 10 Message format."""
 
-    if os.path.exists(args['<outfile>']) and not args['-f']:
+    ctx.ensure_object(dict)
+
+    if os.path.exists(outfile) and not force:
         print('Output file exists. Use -f to overwrite.')
         raise SystemExit
 
-    Parser(args).parse_and_write()
+    p = Parser(infile=infile,
+               outfile=outfile,
+               force=force,
+               tmats=tmats,
+               verbose=ctx.obj.get('verbose'),
+               quiet=ctx.obj.get('quiet'))
+    p.parse_and_write()
