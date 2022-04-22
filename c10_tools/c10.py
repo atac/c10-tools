@@ -13,7 +13,7 @@ from c10_tools.copy import copy
 from c10_tools.dump import dump
 from c10_tools.find import find
 from c10_tools.from_pcap import frompcap
-from c10_tools.inspect import main as inspect
+from c10_tools.inspect import inspect
 from c10_tools.reindex import reindex
 from c10_tools.stat import main as stat
 from c10_tools.timefix import main as timefix
@@ -41,6 +41,7 @@ cli.add_command(copy)
 cli.add_command(dump)
 cli.add_command(find)
 cli.add_command(frompcap)
+cli.add_command(inspect)
 cli.add_command(reindex)
 
 

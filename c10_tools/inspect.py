@@ -7,6 +7,7 @@ import sys
 
 from chapter10 import C10
 from termcolor import colored
+import click
 
 from .common import fmt_number, FileProgress, walk_packets
 
@@ -19,8 +20,8 @@ class Inspect:
         'Size': 'packet_length',
     }
 
-    # TODO: selectable columns
     # Pairs of (name, width)
+    # TODO: selectable columns
     COLUMNS = OrderedDict((
         ('Channel', 7),
         ('Type', 4),
@@ -31,19 +32,14 @@ class Inspect:
         ('Offset', 15),
     ))
 
-    def __init__(self, args):
-        self.args = args
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
         self.cols = self.COLUMNS
-
-        # Use CSV if stdout is redirected
-        self.writer = None
-        if os.fstat(0) != os.fstat(1):
-            self.writer = csv.writer(sys.stdout, lineterminator='')
 
     def get_size(self):
         """Get total byte size for all files."""
 
-        return sum(os.stat(f).st_size for f in self.args['<file>'])
+        return sum(os.stat(f).st_size for f in self.infile)
 
     def write_header(self):
         """Write out header row for CSV or ASCII."""
@@ -129,14 +125,19 @@ class Inspect:
         """Walk a file and read header information."""
 
         offset = 0
-        c10 = walk_packets(C10(f), self.args, include_time=False)
+        args = {
+            '--channel': self.channel,
+            '--exclude': self.exclude,
+            '--type': self.type,
+        }
+        c10 = walk_packets(C10(f), args, include_time=False)
         while True:
 
             # Try to read a packet.
             try:
                 packet = asyncio.run(
                     asyncio.wait_for(self.get_packet(c10), timeout=.1))
-                yield self.write_row(packet, offset)
+                progress.write(self.write_row(packet, offset))
                 progress.update(packet.packet_length)
                 offset += packet.packet_length
 
@@ -150,9 +151,9 @@ class Inspect:
                 if not isinstance(err, StopAsyncIteration):
                     msg = f'{err} at {fmt_number(offset)}'
                     if self.writer is None:
-                        yield colored(msg, 'red')
+                        progress.write(colored(msg, 'red'))
                     else:
-                        yield f'"{msg}"'
+                        progress.write(f'"{msg}"')
 
                 try:
                     f.seek(offset + 1, 1)
@@ -163,31 +164,45 @@ class Inspect:
                 offset = sync
 
     def main(self):
-        with FileProgress(total=self.get_size()) as progress:
-            if self.args['--quiet'] or not self.writer:
-                progress.close()
 
-            header = self.write_header()
-            yield header
+        # Use CSV if stdout is redirected
+        self.writer = None
+        if sys.stdout == sys.stderr:
+            pass
+        elif not sys.stdout.isatty():
+            self.writer = csv.writer(sys.stdout, lineterminator='')
 
-            for f in self.args['<file>']:
-                with open(f, 'rb') as f:
-                    yield from self.parse_file(f, progress)
+        progress = FileProgress(total=self.get_size(),
+                                disable=self.quiet or self.writer)
 
-            # Closing line if we're in ASCII mode.
-            if header:
-                yield header.split('\n', 1)[0]
+        header = self.write_header()
+        progress.write(header)
+
+        for f in self.infile:
+            with open(f, 'rb') as f:
+                self.parse_file(f, progress)
+
+        # Closing line if we're in ASCII mode.
+        if header:
+            progress.write(header.split('\n', 1)[0])
 
 
-def main(args):
-    """Report on packets found in a file.
-    inspect <file>... [options]
-    -c CHANNEL..., --channel CHANNEL...  Specify channels to include (comma \
-separated).
-    -e CHANNEL..., --exclude CHANNEL...  Specify channels to ignore (comma \
-separated).
-    -t TYPE, --type TYPE  The types of data to copy (comma separated, may be \
-decimal or hex eg: 0x40)
-    """
+@click.command
+@click.argument('infile', nargs=-1)
+@click.option('-c', '--channel', type=str, help='Specify channels (comma-separated) to include')
+@click.option('-e', '--exclude', type=str, help='Specify channels (comma-separated) to exclude')
+@click.option('-t', '--type', type=str, help='Specify datatypes (comma-separated) to include')
+@click.pass_context
+def inspect(ctx, infile, channel, exclude, type):
+    """Report on packets found in a file."""
 
-    yield from Inspect(args).main()
+    ctx.ensure_object(dict)
+
+    Inspect(
+        infile=infile,
+        channel=channel,
+        exclude=exclude,
+        type=type,
+        verbose=ctx.obj.get('verbose'),
+        quiet=ctx.obj.get('quiet'),
+    ).main()
