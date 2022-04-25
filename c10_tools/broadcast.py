@@ -6,34 +6,41 @@ from chapter10 import C10
 import dpkt
 from numpy import broadcast
 
+from bitstruct import pack
+
 from c10_tools.common import FileProgress
 
 
 class UDPTransferHeaderFormat3:
-    """IRIG 106, Chapter 10, Section 10.3.9.1.5 Format 3, UDP Transfer Header\n
-    Little Endian byte ordering"""
+    """IRIG 106, Chapter 10, Section 10.3.9.1.5 Format 3, UDP Transfer Header"""
+
     def __int__(self, datagram_seq_number : int, src_id :int,
                     off_to_packet_start: int, src_id_len :int = 2):
         # TODO - check to see if logic should be added to dynamically calculate
         #        the src_id_len depending on what is demanded by src_id, or if
         #        number should be static across all headers for a single broadcast
-        self.offset_to_packet_start =   # 16 bits
-        self.reserved = 0               # 16 bits
-        self.src_id_len= src_id_len     # 4 bit field
-        self.format = 3                 # 4 bit field
-        self.src_id = src_id            # feild length of src_id_len*4  (4-bit nibbles)
+        self.offset_to_packet_start =  off_to_packet_start  # 16 bits
+        self.reserved = 0                                   # 8 bits
+        self.src_id_len= src_id_len                         # 4 bit field
+        self.format = 3                                     # 4 bit field
+        self.src_id = src_id                                # feild length of src_id_len*4  (4-bit nibbles)
         self.datagram_sequence_number = datagram_seq_number # field length = 32 - (src_id_len*4)
 
+    def get_header_bytes(self) -> bytearray:
+        """Returns the information stored in UDP Transfer Header as an 8 bytes field.
 
-    def get_header_bytes() -> bytearray:
-        """Returns the information stored in the Format 3
-        UDP Transfer Header as an 8 bytes field.\n
-        Little Endian byte ordering is used. """
-        header = bytearray()
-
-
-
-
+        Little Endian byte ordering is used.
+        """
+        header      = bytearray(self.offset_to_packet_start.to_bytes(2,'little'))
+        header.append(self.reserved.to_bytes(1,'little'))
+        # build bytes from two nibbles
+        bit_field   = pack('u4u4', self.src_id_len, self.format)
+        header.append(bit_field)
+        # build bytes from variable number of nibbles per field
+        bit_field   = pack('u{}u{}'.format(self.src_id_len*4, 32-self.src_id_len*4),
+                            self.src_id, self.datagram_sequence_number)
+        header.append(bit_field)
+        return header
 
 
 class NetworkBroadcast:
@@ -60,8 +67,6 @@ class NetworkBroadcast:
         # Using TCP/IP, Chapter 11 packets are transmitted in the
         # exact same format (byte for byte) as they would be written
         # to local storage media.
-
-
         pass
 
     def broadcast_TCP(self):
