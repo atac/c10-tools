@@ -18,29 +18,30 @@ format                    = 3     # 4 bit field
 source_id                 = 5     # feild length of src_id_len*4  (4-bit nibbles)
 datagram_sequence_number  = 0     # field length = 32 - (src_id_len*4)
 
-test_bytes = pack(  'u16u8u4u4u8u24',
-                    offset_to_packet_start,
-                    reserved,
-                    source_id_length,
-                    format,
-                    source_id,
-                    datagram_sequence_number
-                    )
+@pytest.fixture
+def test_bytes():
+    return pack('u16u8u4u4u8u24',
+                offset_to_packet_start,
+                reserved,
+                source_id_length,
+                format,
+                source_id,
+                datagram_sequence_number
+                )
 
-expected_from_bytes = (0,0,2,3,5,0)
+@pytest.fixture
+def expected_from_bytes():
+    return (0,0,2,3,5,0)
 
 ########################################################
 #                     begin tests                      #
 ########################################################
 
-def test_test_bytes():
+def test_test_bytes(expected_from_bytes, test_bytes):
     assert expected_from_bytes == unpack('u16u8u4u4u8u24',test_bytes)
 
 
 def test_get_header_bytes(test_bytes):
-    header = UDPTransferHeaderFormat3(  datagram_sequence_number,
-                                        source_id,
-                                        offset_to_packet_start,
-                                        source_id_length)
+    header = UDPTransferHeaderFormat3(0, 5, 0, 2)
     assert test_bytes == header.get_header_bytes()
 
