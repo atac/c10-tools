@@ -12,8 +12,13 @@ from c10_tools.common import FileProgress
 
 
 class UDPTransferHeaderFormat3:
-    """IRIG 106, Chapter 10, Section 10.3.9.1.5 Format 3, UDP Transfer Header"""
+    """IRIG 106, Chapter 10, Section 10.3.9.1.5 Format 3, UDP Transfer Header
 
+    args = (datagram_seq_number : int,
+            src_id :int,
+            off_to_packet_start: int,
+            src_id_len :int = 2)
+    """
     def __int__(self, datagram_seq_number : int, src_id :int,
                     off_to_packet_start: int, src_id_len :int = 2):
 
