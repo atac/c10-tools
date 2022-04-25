@@ -12,15 +12,9 @@ from c10_tools.common import FileProgress
 
 
 class UDPTransferHeaderFormat3:
-    """IRIG 106, Chapter 10, Section 10.3.9.1.5 Format 3, UDP Transfer Header
-
-    args = (datagram_seq_number : int,
-            src_id :int,
-            off_to_packet_start: int,
-            src_id_len :int = 2)
-    """
-    def __int__(self, datagram_seq_number : int, src_id :int,
-                    off_to_packet_start: int, src_id_len :int = 2):
+    """IRIG 106, Chapter 10, Section 10.3.9.1.5 Format 3, UDP Transfer Header"""
+    def __init__(self, datagram_seq_number: int, src_id : int,
+                    off_to_packet_start : int, src_id_len=2):
 
         self.offset_to_packet_start =  off_to_packet_start  # 16 bits
         self.reserved = 0                                   # 8 bits
@@ -34,19 +28,14 @@ class UDPTransferHeaderFormat3:
         """Returns the information stored in UDP Transfer Header as an 8 bytes field.\n
         Little Endian byte ordering is used.
         """
-        header      = bytearray(self.offset_to_packet_start.to_bytes(2,'little'))
-        header.append(self.reserved.to_bytes(1,'little'))
-
-        # build bytes from two nibbles
-        bit_field   = pack('u4u4', self.src_id_len, self.format)
-        header.append(bit_field)
-
-        # build bytes from variable number of nibbles per field
-        bit_field   = pack('u{}u{}'.format(self.src_id_len*4, 32-self.src_id_len*4),
-                            self.src_id, self.datagram_sequence_number)
-        header.append(bit_field)
-
-        return header
+        return pack('u16u8u4u4u{}u{}'.format(self.src_id_len*4, 32-self.src_id_len*4),
+                    self.offset_to_packet_start,
+                    self.reserved,
+                    self.src_id_len,
+                    self.format,
+                    self.src_id,
+                    self.datagram_sequence_number
+                    )
 
 
 class NetworkBroadcast:
