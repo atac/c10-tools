@@ -16,9 +16,7 @@ class UDPTransferHeaderFormat3:
 
     def __int__(self, datagram_seq_number : int, src_id :int,
                     off_to_packet_start: int, src_id_len :int = 2):
-        # TODO - check to see if logic should be added to dynamically calculate
-        #        the src_id_len depending on what is demanded by src_id, or if
-        #        number should be static across all headers for a single broadcast
+
         self.offset_to_packet_start =  off_to_packet_start  # 16 bits
         self.reserved = 0                                   # 8 bits
         self.src_id_len= src_id_len                         # 4 bit field
