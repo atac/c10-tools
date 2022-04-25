@@ -9,9 +9,37 @@ from numpy import broadcast
 from c10_tools.common import FileProgress
 
 
+class UDPTransferHeaderFormat3:
+    """IRIG 106, Chapter 10, Section 10.3.9.1.5 Format 3, UDP Transfer Header\n
+    Little Endian byte ordering"""
+    def __int__(self, datagram_seq_number : int, src_id :int,
+                    off_to_packet_start: int, src_id_len :int = 2):
+        # TODO - check to see if logic should be added to dynamically calculate
+        #        the src_id_len depending on what is demanded by src_id, or if
+        #        number should be static across all headers for a single broadcast
+        self.offset_to_packet_start =   # 16 bits
+        self.reserved = 0               # 16 bits
+        self.src_id_len= src_id_len     # 4 bit field
+        self.format = 3                 # 4 bit field
+        self.src_id = src_id            # feild length of src_id_len*4  (4-bit nibbles)
+        self.datagram_sequence_number = datagram_seq_number # field length = 32 - (src_id_len*4)
+
+
+    def get_header_bytes() -> bytearray:
+        """Returns the information stored in the Format 3
+        UDP Transfer Header as an 8 bytes field.\n
+        Little Endian byte ordering is used. """
+        header = bytearray()
+
+
+
+
+
+
 class NetworkBroadcast:
     """Broadcast chapter 10 file from input file"""
     BUFF_SIZE = 1024  # UDP payload size = 65507
+    RECORDER_TCP_PORT_DEFUALT = 10620
 
     def __init__(self, args=[]):
         self.args = args
@@ -21,14 +49,25 @@ class NetworkBroadcast:
         self.dest_port = args['-d'].split(':')[1]
 
     def chunck_ch10(self):
-        """Provides chunks of ch10 file to be transmitted"""
-        # first implement chunck based on buffer size,
-        # can implement chunk based on packet(s) size
-        # relative to buffer later
+        """Provides chunks of ch10 file to be transmitted."""
+        # If UDP, use Format 3 header from IRIG 106, Chapter 10,
+        # Section 10.9.3
+
+
+        # If TCP, no header according to IRIG 106, Chapter 10,
+        # Section 10.9.3.2
+
+        # Using TCP/IP, Chapter 11 packets are transmitted in the
+        # exact same format (byte for byte) as they would be written
+        # to local storage media.
+
+
         pass
 
     def broadcast_TCP(self):
-        """Transmit file chunks using TCP"""
+        """Transmit file chunks using TCP, following IRIG106, Chapter 10,
+        section 10.3.9.2"""
+
         pass
 
     def broadcast_UDP(self):
@@ -44,7 +83,6 @@ class NetworkBroadcast:
     def main(self):
         """Transmit or broadcast a chapter10 file over network."""
 
-        # ask user to varify that file is safe to transmit (input: safe = continue)
         safe = input("Type 'safe' to verify input file is safe to broadcast: ")
         if safe.strip().strip("'").lower() == "safe":
             print("Input file not verified to be safe for broadcast.")
