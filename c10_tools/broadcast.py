@@ -26,20 +26,23 @@ class UDPTransferHeaderFormat3:
         self.src_id = src_id                                # feild length of src_id_len*4  (4-bit nibbles)
         self.datagram_sequence_number = datagram_seq_number # field length = 32 - (src_id_len*4)
 
-    def get_header_bytes(self) -> bytearray:
-        """Returns the information stored in UDP Transfer Header as an 8 bytes field.
 
+    def get_header_bytes(self) -> bytearray:
+        """Returns the information stored in UDP Transfer Header as an 8 bytes field.\n
         Little Endian byte ordering is used.
         """
         header      = bytearray(self.offset_to_packet_start.to_bytes(2,'little'))
         header.append(self.reserved.to_bytes(1,'little'))
+
         # build bytes from two nibbles
         bit_field   = pack('u4u4', self.src_id_len, self.format)
         header.append(bit_field)
+
         # build bytes from variable number of nibbles per field
         bit_field   = pack('u{}u{}'.format(self.src_id_len*4, 32-self.src_id_len*4),
                             self.src_id, self.datagram_sequence_number)
         header.append(bit_field)
+
         return header
 
 
