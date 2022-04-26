@@ -1,6 +1,10 @@
 
+from asyncio.windows_utils import BUFSIZE
+from heapq import heapify
 import socket
 import os
+import string
+from attr import validate
 
 from chapter10 import C10
 import dpkt
@@ -8,7 +12,7 @@ from numpy import broadcast
 
 from bitstruct import pack
 
-from c10_tools.common import FileProgress
+from c10_tools.common import FileProgress, walk_packets, C10
 
 
 class UDPTransferHeaderFormat3:
@@ -37,10 +41,63 @@ class UDPTransferHeaderFormat3:
                     self.datagram_sequence_number
                     )
 
+class ChunkCh10File:
+    """Turns input of ch10 file into byte array of packet data"""
+
+    BUFF_SIZE = 1024  # UDP payload size = 65507 bytes
+                      # UDPTransferHeaderFormat3 size = 8 bytes
+
+    def __init__(self, ch10_path : str) -> None:
+        self.ch10_path = ch10_path
+        self.validate_path();
+
+    def validate_path(self):
+        """Checks for input file in system. Exits program if file not found. """
+        # Don't overwrite unless explicitly required.
+        if os.path.exists(self.ch10_path):
+            print('Chapter 10 file not found. Check input path.')
+            raise SystemExit
+
+    def yield_UDP_payload(self, src_id=0, src_id_len=2,):
+        """Return UDP packet payload, including UDPTransferHeader"""
+        for packet in walk_packets(C10(self.ch10_path)):
+            packet_bytes = bytes(packet)
+            i, datagram_seq_num = 0, 0
+
+            max_seq_num = (32-(4*src_id_len))**2 - 1
+
+            if (len(packet_bytes)>self.BUFF_SIZE):
+                while i < len(packet_bytes):
+                    payload = UDPTransferHeaderFormat3(datagram_seq_num,
+                                                        src_id,
+                                                        0,
+                                                        src_id_len)
+                    yield bytearray(payload).append(packet_bytes[i:i+self.BUFF_SIZE])
+                    i+=self.BUFF_SIZE
+                    datagram_seq_num+=1
+
+                    # if bitfield wraps from all 1s to 0 at this iteration
+                    if datagram_seq_num > max_seq_num:
+                        datagram_seq_num = 0
+
+                payload = UDPTransferHeaderFormat3(datagram_seq_num,
+                                                    src_id,
+                                                    0,
+                                                    src_id_len)
+                yield bytearray(payload).append(packet_bytes[i-self.BUFF_SIZE:])
+
+            else:
+                # if packet size fits within bounds of buffer size
+                payload = UDPTransferHeaderFormat3(datagram_seq_num,
+                                                    src_id,
+                                                    0,
+                                                    src_id_len)
+                yield bytearray(payload).append(packet_bytes[i:i+self.BUFF_SIZE])
+
+
 
 class NetworkBroadcast:
     """Broadcast chapter 10 file from input file"""
-    BUFF_SIZE = 1024  # UDP payload size = 65507
     RECORDER_TCP_PORT_DEFUALT = 10620
 
     def __init__(self, args=[]):
@@ -70,7 +127,7 @@ class NetworkBroadcast:
 
         pass
 
-    def broadcast_UDP(self):
+    def broadcast_UDP(self,chunck):
         """Transmit file chuncks using UDP"""
         UDPServerSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 
