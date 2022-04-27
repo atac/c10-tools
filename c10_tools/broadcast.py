@@ -53,7 +53,6 @@ class ChunkCh10File:
 
     def validate_path(self):
         """Checks for input file in system. Exits program if file not found. """
-        # Don't overwrite unless explicitly required.
         if os.path.exists(self.ch10_path):
             print('Chapter 10 file not found. Check input path.')
             raise SystemExit
@@ -67,7 +66,7 @@ class ChunkCh10File:
             max_seq_num = (32-(4*src_id_len))**2 - 1
 
             if (len(packet_bytes)>self.BUFF_SIZE):
-                while i < len(packet_bytes):
+                while (i + self.BUFF_SIZE) < len(packet_bytes):
                     payload = UDPTransferHeaderFormat3(datagram_seq_num,
                                                         src_id,
                                                         0,
@@ -84,7 +83,7 @@ class ChunkCh10File:
                                                     src_id,
                                                     0,
                                                     src_id_len)
-                yield bytearray(payload).append(packet_bytes[i-self.BUFF_SIZE:])
+                yield bytearray(payload).append(packet_bytes[i:])
 
             else:
                 # if packet size fits within bounds of buffer size
@@ -94,6 +93,19 @@ class ChunkCh10File:
                                                     src_id_len)
                 yield bytearray(payload).append(packet_bytes[i:i+self.BUFF_SIZE])
 
+    def yield_TCP_payload(self):
+        for packet in walk_packets(C10(self.ch10_path)):
+            packet_bytes = bytes(packet)
+            if (len(packet_bytes)>self.BUFF_SIZE):
+                i = 0
+                while (i + self.BUFF_SIZE) < len(packet_bytes):
+                    yield bytearray(packet_bytes[i:i+self.BUFF_SIZE])
+                    i+=self.BUFF_SIZE
+
+                yield bytearray(packet_bytes[i:])
+
+            else:
+                yield bytearray(bytes(packet_bytes))
 
 
 class NetworkBroadcast:
