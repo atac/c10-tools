@@ -37,7 +37,7 @@ class Parser:
                 self.buf = self.buf[sync + 2:]
 
 
-@click.command
+@click.command()
 @click.argument('dsthost')
 @click.argument('dstport', type=int)
 @click.argument('channel')

@@ -187,7 +187,7 @@ class Inspect:
             progress.write(header.split('\n', 1)[0])
 
 
-@click.command
+@click.command()
 @click.argument('infile', nargs=-1)
 @click.option('-c', '--channel', type=str, help='Specify channels (comma-separated) to include')
 @click.option('-e', '--exclude', type=str, help='Specify channels (comma-separated) to exclude')

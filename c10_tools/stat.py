@@ -180,7 +180,7 @@ class Stat:
     Size: {fmt_size(size):>21}     Duration:{duration:>27}\n''')
 
 
-@click.command
+@click.command()
 @click.argument('file', nargs=-1)
 @click.option('-c', '--channel', type=str, help='Specify channels (comma-separated) to include')
 @click.option('-e', '--exclude', type=str, help='Specify channels (comma-separated) to exclude')

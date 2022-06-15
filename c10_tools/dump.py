@@ -13,7 +13,7 @@ import click
 from c10_tools.common import FileProgress, C10, get_time
 
 
-@click.command
+@click.command()
 @click.argument('infile')
 @click.argument('channel', type=int)
 @click.option('-c', '--count', type=int, default=1000, help='Maximum number of bytes to show in hexdump mode')

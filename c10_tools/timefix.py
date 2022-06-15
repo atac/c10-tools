@@ -19,7 +19,7 @@ def valid(timestamp, previous):
     return diff == timedelta(seconds=1)
 
 
-@click.command
+@click.command()
 @click.argument('infile')
 @click.argument('outfile')
 @click.option('-f', '--force', is_flag=True, help='Overwrite existing files.')

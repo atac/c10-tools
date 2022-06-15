@@ -20,7 +20,7 @@ except ImportError:
 
 VERSION = '1.1.4'
 
-@click.group
+@click.group()
 @click.option('-v', '--verbose', is_flag=True, help='Verbose output')
 @click.option('-q', '--quiet', is_flag=True, help='Minimal output')
 @click.pass_context

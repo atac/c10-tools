@@ -84,7 +84,7 @@ def parseint(s: str) -> int:
         return int(s)
 
 
-@click.command
+@click.command()
 @click.argument('value')
 @click.argument('path', nargs=-1)
 @click.option('-c', '--channel', type=str, help='Specify channels (comma-separated) to include')

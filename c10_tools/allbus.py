@@ -7,7 +7,7 @@ import click
 from c10_tools.common import FileProgress, C10
 
 
-@click.command
+@click.command()
 @click.option('-b', is_flag=True, help='use the b bus instead of the default a')
 @click.option('-f', '--force', is_flag=True, help='overwrite existing dst file if present')
 @click.argument('src')

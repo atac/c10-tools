@@ -108,7 +108,7 @@ class NetworkCapture:
                   % (fmt_number(c10_packets), fmt_number(network_packets)))
 
 
-@click.command
+@click.command()
 @click.argument('infile')
 @click.argument('outfile')
 @click.option('-f', '--force', default=False, is_flag=True, help='Overwrite existing output file.')

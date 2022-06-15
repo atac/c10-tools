@@ -34,7 +34,7 @@ def parse_offset(s):
                          microseconds=dt.microsecond)
 
 
-@click.command
+@click.command()
 @click.option('-c', '--channel', type=str, help='Specify channels (comma-separated) to include')
 @click.option('-e', '--exclude', type=str, help='Specify channels (comma-separated) to exclude')
 @click.option('-t', '--type', type=str, help='Specify datatypes (comma-separated) to include')
